@@ -1,6 +1,7 @@
 name: webserver
 description: High performance expressjs like webserver for dart.
 version: 0.0.1
+repository: https://github.com/rknell/dart_webserver
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -9,7 +10,7 @@ dependencies:
   http_server: ^1.0.0
   uri: ^1.0.0
   mime_type: ^1.0.0
-  enum_to_string:
+  enum_to_string: ^2.0.1
 
 dev_dependencies:
   pedantic: ^1.9.0
