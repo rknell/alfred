@@ -1,8 +1,6 @@
 ### Webserver
 
-Webserver - Merriam webster thesaurus says its another word for express.
-
-Quick, performant, and minimal wrapper around native dart libraries to create an expressjs like api.
+Quick, performant, and minimal wrapper around the awesome native dart libraries to create an expressjs like api.
 
 Quickstart:
 ```dart
