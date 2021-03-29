@@ -1,4 +1,4 @@
-### Alfred
+# Alfred
 
 A performant, express like server framework with a few bonuses that make life even easier.
 
@@ -267,5 +267,19 @@ main() async {
 function missingHandler(req, res){
     res.statusCode = 404;
     return {"message": "not found"};
+}
+```
+## Static Files
+
+This one is super easy - just pass in a public path and a dart Directory object and Alfred does
+the rest.
+
+```dart
+main() async {
+  app = Alfred();
+
+  app.static("/public", Directory("test/files"));
+
+  await app.listen(port);
 }
 ```

@@ -26,7 +26,7 @@ Future<void> main() async {
   app.get("/redirect",
       (req, res) => res.redirect(Uri.parse("https://www.google.com")));
 
-  app.serveStatic("/files", Directory("test/files"));
+  app.static("/files", Directory("test/files"));
 
   final server = await app.listen();
 

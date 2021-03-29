@@ -249,7 +249,7 @@ void main() {
   });
 
   test("it serves static files", () async {
-    app.serveStatic("/files", Directory("test/files"));
+    app.static("/files", Directory("test/files"));
 
     final response =
         await http.get(Uri.parse("http://localhost:$port/files/dummy.pdf"));

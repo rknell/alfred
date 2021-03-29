@@ -22,7 +22,7 @@ class Alfred {
   /// routes by calling the [get,post,put,delete] methods.
   final routes = <HttpRoute>[];
 
-  final staticFiles = <String, HttpRoute>{};
+  final _staticFiles = <String, HttpRoute>{};
 
   /// HttpServer instance from the dart:io library
   ///
@@ -100,8 +100,8 @@ class Alfred {
 
   /// Serve some static files on a route
   ///
-  void serveStatic(String path, Directory directory) {
-    staticFiles[path] = HttpRoute(path, (req, res) async {
+  void static(String path, Directory directory) {
+    _staticFiles[path] = HttpRoute(path, (req, res) async {
       final filePath = directory.path + req.uri.path.replaceFirst(path, "");
       final file = File(filePath);
       final exists = await file.exists();
@@ -146,7 +146,7 @@ class Alfred {
                 RouteMethod.values, request.method) ??
             RouteMethod.get);
 
-    final staticRoutes = staticFiles.values
+    final staticRoutes = _staticFiles.values
         .where((element) => request.uri.path.startsWith(element.route))
         .toList();
 
