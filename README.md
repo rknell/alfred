@@ -2,7 +2,7 @@
 
 A performant, express like server framework with a few bonuses that make life even easier.
 
-[![Build Status](https://travis-ci.org/rknell/dart_queue.svg?branch=master)](https://travis-ci.org/rknell/alfred)
+[![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
 Quickstart:
 ```dart
