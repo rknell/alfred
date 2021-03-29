@@ -11,7 +11,7 @@ void main() {
   late int port;
 
   setUp(() async {
-    port = Random().nextInt(65535 - 1024);
+    port = Random().nextInt(65535 - 1024) + 1024;
     app = Alfred();
     await app.listen(port);
   });
