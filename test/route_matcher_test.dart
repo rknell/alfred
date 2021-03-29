@@ -1,6 +1,6 @@
+import 'package:alfred/alfred.dart';
+import 'package:alfred/src/route_matcher.dart';
 import 'package:test/test.dart';
-import 'package:webserver/src/route_matcher.dart';
-import 'package:webserver/webserver.dart';
 
 void main() {
   test("it should match routes correctly", () {
@@ -102,5 +102,40 @@ void main() {
             .map((e) => e.route)
             .toList(),
         ["/imageSource"]);
+  });
+
+  test("it handles a dodgy getParams request", () {
+    bool hitError = false;
+
+    try {
+      RouteMatcher.getParams("/id/:id/abc", "/id/10");
+    } on NotMatchingRouteException catch (_) {
+      hitError = true;
+    }
+    expect(hitError, true);
+  });
+
+  test("it should ignore a trailing slash", () {
+    final testRoutes = [
+      HttpRoute("/b/", (req, res) async {}, RouteMethod.get),
+    ];
+
+    expect(
+        RouteMatcher.match("/b?qs=true", testRoutes, RouteMethod.get)
+            .map((e) => e.route)
+            .toList(),
+        ["/b/"]);
+  });
+
+  test("it should ignore a trailing slash in reverse", () {
+    final testRoutes = [
+      HttpRoute("/b", (req, res) async {}, RouteMethod.get),
+    ];
+
+    expect(
+        RouteMatcher.match("/b/?qs=true", testRoutes, RouteMethod.get)
+            .map((e) => e.route)
+            .toList(),
+        ["/b"]);
   });
 }

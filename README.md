@@ -1,11 +1,13 @@
-### Webserver
+### Alfred
 
-Quick, performant, and minimal wrapper around the awesome native dart libraries to create an expressjs like api.
+A performant, express like server framework with a few bonuses that make life even easier.
+
+[![Build Status](https://travis-ci.org/rknell/dart_queue.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
 Quickstart:
 ```dart
 main(){
-  final app = Webserver();
+  final app = Alfred();
   
   app.get("/example", (req, res) => "Hello world");
 
@@ -19,7 +21,7 @@ main(){
 
 TlDr:  
     - A minimum of dependencies, 
-    - A minimum of code, and sticking close to dart core libraries
+    - A minimum of code (145 lines at last check), and sticking close to dart core libraries
     - Ease of use
     - Predictable, well established semantics
 
@@ -40,7 +42,7 @@ Then Null safety hit and I realised that betting big on these huge libraries was
 I now have a number of projects I need to migrate off the platform, for something that should be pretty
 simple.
 
-Hence Webserver was born. Its (at the day of this writing) a couple of hundred lines of code. It should
+Hence Alfred was born. Its (at the day of this writing) a couple of hundred lines of code. It should
 be trivial for the community to maintain if it comes to that - but also easy for myself to maintain
 and run the project.
 
@@ -50,7 +52,7 @@ if you have ever used expressjs before you should be right at home
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
 
   app.get("/route1", (req, res)=> "Text response");
 
@@ -68,7 +70,7 @@ It should do pretty much what you expect. Handling bodies though do need an "awa
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
 
   app.post("/post-route", (req, res) async {
     final body = jsonDecode(await req.body); //JSON body
@@ -95,7 +97,7 @@ If you want to return HTML, just set the content type to HTML like this:
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
 
   app.get("/html", (req, res){
       res.headers.contentType = ContentType.html;
@@ -118,7 +120,7 @@ See `res.setDownload` below.
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
 
   app.get("/image/download", (req, res) {
     res.setDownload(filename: "image.jpg");
@@ -166,7 +168,7 @@ So for example:
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
   app.all("/example/:id/:name", (req, res) {
     req.params["id"] != null == true;
     req.params["name"] != null == true;
@@ -183,7 +185,7 @@ Right now you can specify a middleware for all routes by declaring:
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
   app.all("*", (req, res) {
     // Perform action
   });
@@ -197,7 +199,7 @@ You can also add middleware to a route like so:
 
 ```dart
 main() async {
-  final app = Webserver();
+  final app = Alfred();
   app.all("/example/:id/:name", (req, res) {
     req.params["id"] != null == true;
     req.params["name"] != null == true;
@@ -230,7 +232,7 @@ you can do this from any route:
 
 ```dart
 route(req, res)=>
-  throw WebserverException(400, {"message": "invalid request"});
+  throw AlfredException(400, {"message": "invalid request"});
 ```
 
 If any of the routes bubble an unhandled error, it will catch it and throw a 500 error.
@@ -240,7 +242,7 @@ instantiate the app. For example:
 
 ```dart
 main() async {
-  app = Webserver(on500: errorHandler);
+  app = Alfred(on500: errorHandler);
   await app.listen(port);
   app.get("/throwserror", (req, res) => throw Exception("generic exception")); 
 }
@@ -258,7 +260,7 @@ behaviour, but if you want to override it, simply handle it in the app declarati
 
 ```dart
 main() async {
-  app = Webserver(on404: missingHandler);
+  app = Alfred(on404: missingHandler);
   await app.listen(port);
 }
 

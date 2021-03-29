@@ -3,32 +3,60 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:alfred/src/route_matcher.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:http_server/http_server.dart';
 import 'package:mime_type/mime_type.dart';
-import 'package:webserver/src/route_matcher.dart';
 
 enum RouteMethod { get, post, put, delete, all }
 enum RequestMethod { get, post, put, delete }
 
-class Webserver {
+/// Server application class
+///
+/// This is the core of the server application. Generally you would create one
+/// for each app.
+class Alfred {
+  /// List of routes
+  ///
+  /// Generally you don't want to manipulate this array directly, instead add
+  /// routes by calling the [get,post,put,delete] methods.
   final routes = <HttpRoute>[];
+
+  final staticFiles = <String, HttpRoute>{};
+
+  /// HttpServer instance from the dart:io library
+  ///
+  /// If there is anything the app can't do, you can do it through here.
   HttpServer? server;
 
-  FutureOr Function(HttpRequest req, HttpResponse res)? on404;
-  FutureOr Function(HttpRequest req, HttpResponse res)? on500;
+  /// Log requests immediately as they come in
+  ///
+  bool logRequests;
 
-  Webserver({this.on404, this.on500});
+  /// Optional handler for when a route is not found
+  ///
+  FutureOr Function(HttpRequest req, HttpResponse res)? onNotFound;
 
+  /// Optional handler for when the server throws an unhandled error
+  ///
+  FutureOr Function(HttpRequest req, HttpResponse res)? onInternalError;
+
+  Alfred({this.onNotFound, this.onInternalError, this.logRequests = true});
+
+  /// Create a get route
+  ///
   HttpRoute get(String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
           const []}) {
-    final route = HttpRoute(path, callback, RouteMethod.get);
+    final route =
+        HttpRoute(path, callback, RouteMethod.get, middleware: middleware);
     routes.add(route);
     return route;
   }
 
+  /// Create a post route
+  ///
   HttpRoute post(String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
@@ -38,6 +66,7 @@ class Webserver {
     return route;
   }
 
+  /// Create a put route
   HttpRoute put(String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
@@ -47,6 +76,8 @@ class Webserver {
     return route;
   }
 
+  /// Create a delete route
+  ///
   HttpRoute delete(String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
@@ -56,6 +87,8 @@ class Webserver {
     return route;
   }
 
+  /// Create a route that listens on all methods
+  ///
   HttpRoute all(String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
@@ -65,20 +98,43 @@ class Webserver {
     return route;
   }
 
+  /// Serve some static files on a route
+  ///
+  void serveStatic(String path, Directory directory) {
+    staticFiles[path] = HttpRoute(path, (req, res) async {
+      final filePath = directory.path + req.uri.path.replaceFirst(path, "");
+      final file = File(filePath);
+      final exists = await file.exists();
+      if (!exists) {
+        throw AlfredException(404, {"message": "file not found"});
+      }
+      res.setContentTypeFromFile(file);
+      await res.addStream(file.openRead());
+      await res.close();
+    }, RouteMethod.get);
+  }
+
+  /// Call this function to fire off the server
+  ///
   Future<HttpServer> listen(
       [int port = 3000, dynamic bindIp = "0.0.0.0"]) async {
     final _server = await HttpServer.bind(bindIp, port);
 
     _server.listen((HttpRequest request) {
-      unawaited(incomingRequest(request));
+      unawaited(_incomingRequest(request));
     });
 
     return server = _server;
   }
 
-  Future incomingRequest(HttpRequest request) async {
+  /// Handles and routes an incoming request
+  ///
+  Future _incomingRequest(HttpRequest request) async {
     bool isDone = false;
-    print("${request.method} - ${request.uri.toString()}");
+    if (logRequests) {
+      print("${request.method} - ${request.uri.toString()}");
+    }
+
     unawaited(request.response.done.then((value) {
       isDone = true;
     }));
@@ -90,63 +146,72 @@ class Webserver {
                 RouteMethod.values, request.method) ??
             RouteMethod.get);
 
-    if (effectiveRoutes.isEmpty) {
-      if (on404 != null) {
-        final result = await on404!(request, request.response);
-        if (result != null && !isDone) {
-          await _handleRoute(result, request);
+    final staticRoutes = staticFiles.values
+        .where((element) => request.uri.path.startsWith(element.route))
+        .toList();
+
+    try {
+      if (effectiveRoutes.isEmpty) {
+        if (staticRoutes.isNotEmpty) {
+          await staticRoutes.first.callback(request, request.response);
+        } else if (onNotFound != null) {
+          final result = await onNotFound!(request, request.response);
+          if (result != null && !isDone) {
+            await _handleResponse(result, request);
+          }
+          await request.response.close();
+        } else {
+          request.response.statusCode = 404;
+          request.response.write("404 not found");
+          await request.response.close();
         }
-        await request.response.close();
       } else {
-        request.response.statusCode = 404;
-        request.response.write("404 not found");
-        await request.response.close();
-      }
-    } else {
-      try {
         for (var route in effectiveRoutes) {
           /// Loop through any middleware
           for (var middleware in route.middleware) {
             if (isDone) {
               break;
             }
-            await _handleRoute(
+            await _handleResponse(
                 await middleware(request, request.response), request);
           }
           if (isDone) {
             break;
           }
-          await _handleRoute(
+          await _handleResponse(
               await route.callback(request, request.response), request);
         }
         if (!isDone) {
-          if (request.response.contentLength == 0) {
-            print("Warning: Returning a response with no content");
+          if (request.response.contentLength == -1) {
+            print(
+                "Warning: Returning a response with no content. ${effectiveRoutes.map((e) => e.route).join(", ")}");
           }
           await request.response.close();
         }
-      } on WebserverException catch (e) {
-        request.response.statusCode = e.statusCode;
-        await _handleRoute(e.response, request);
-      } catch (e, s) {
-        print(e);
-        print(s);
-        if (on500 != null) {
-          final result = await on500!(request, request.response);
-          if (result != null && !isDone) {
-            await _handleRoute(result, request);
-          }
-          await request.response.close();
-        } else {
-          request.response.statusCode = 500;
-          request.response.write(e);
-          await request.response.close();
+      }
+    } on AlfredException catch (e) {
+      request.response.statusCode = e.statusCode;
+      await _handleResponse(e.response, request);
+    } catch (e, s) {
+      print(e);
+      print(s);
+      if (onInternalError != null) {
+        final result = await onInternalError!(request, request.response);
+        if (result != null && !isDone) {
+          await _handleResponse(result, request);
         }
+        await request.response.close();
+      } else {
+        request.response.statusCode = 500;
+        request.response.write(e);
+        await request.response.close();
       }
     }
   }
 
-  Future<void> _handleRoute(dynamic result, HttpRequest request) async {
+  /// Handle an automated response
+  ///
+  Future<void> _handleResponse(dynamic result, HttpRequest request) async {
     if (result != null) {
       if (result is Uint8List || result is List<int>) {
         if (request.response.headers.contentType == null ||
@@ -174,6 +239,8 @@ class Webserver {
     }
   }
 
+  /// Close the server
+  ///
   Future close({bool force = true}) async {
     if (server != null) {
       await server!.close(force: force);
@@ -182,16 +249,25 @@ class Webserver {
 }
 
 extension RequestHelpers on HttpRequest {
-  Future<Object?> get body => HttpBodyHandler.processRequest(this);
+  /// Parse the body automatically and return the result
+  ///
+  Future<Object?> get body async =>
+      (await HttpBodyHandler.processRequest(this)).body;
 
+  /// Get the content type
+  ///
   ContentType? get contentType => headers.contentType;
 }
 
 extension ResponseHelpers on HttpResponse {
+  /// Set the appropriate headers to download the file
+  ///
   void setDownload({required String filename}) {
     headers.add("Content-Disposition", "attachment; filename=$filename");
   }
 
+  /// Set the content type from the extension ie. 'pdf'
+  ///
   void setContentTypeFromExtension(String extension) {
     final mime = mimeFromExtension(extension);
     if (mime != null) {
@@ -200,6 +276,8 @@ extension ResponseHelpers on HttpResponse {
     }
   }
 
+  /// Set the content type given a file
+  ///
   void setContentTypeFromFile(File file) {
     if (headers.contentType == null ||
         headers.contentType!.mimeType == "text/plain") {
@@ -209,19 +287,28 @@ extension ResponseHelpers on HttpResponse {
     }
   }
 
+  /// Helper method for those used to res.json()
+  ///
   Future json(Object? json) async {
     headers.contentType = ContentType.json;
     write(jsonEncode(json));
     await close();
   }
 
-  //Just for expressjs users
-  void send(Object? data) => write(data);
+  /// Helper method to just send data;
+  Future send(Object? data) async {
+    write(data);
+    await close();
+  }
 }
 
 extension FileHelpers on File {
+  /// Get the mimeType as a string
+  ///
   String? get mimeType => mime(path);
 
+  /// Get the contentType header from the current
+  ///
   ContentType? get contentType {
     final mimeType = this.mimeType;
     if (mimeType != null) {
@@ -231,11 +318,19 @@ extension FileHelpers on File {
   }
 }
 
+/// Used to prevent lint warnings about unawaited futures;
 void unawaited(Future future) {}
 
-class WebserverException implements Exception {
+/// Throw these exceptions to bubble up an error from sub functions and have them
+/// handled automatically for the client
+class AlfredException implements Exception {
+  /// The response to send to the client
+  ///
   final Object? response;
+
+  /// The statusCode to send to the client
+  ///
   final int statusCode;
 
-  WebserverException(this.statusCode, this.response);
+  AlfredException(this.statusCode, this.response);
 }

@@ -1,5 +1,5 @@
-name: webserver
-description: High performance expressjs like webserver for dart.
+name: alfred
+description: A performant, expressjs like server framework with a few bonuses that make life even easier.
 version: 0.0.1
 repository: https://github.com/rknell/dart_webserver
 

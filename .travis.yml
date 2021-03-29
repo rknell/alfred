@@ -1,0 +1,8 @@
+language: dart
+before_script: dartfmt -n lib/src
+dart:
+  - stable
+dart_task:
+  - test: --platform vm
+  - dartanalyzer: --fatal-warnings lib test example
+  - dartfmt: true

@@ -1,7 +1,7 @@
-import 'package:webserver/webserver.dart';
+import 'package:alfred/alfred.dart';
 
 void main() {
-  final app = Webserver();
+  final app = Alfred();
 
   app.listen();
 

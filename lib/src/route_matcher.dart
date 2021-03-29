@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../webserver.dart';
+import '../alfred.dart';
 
 class RouteMatcher {
   static List<HttpRoute> match(
       String input, List<HttpRoute> options, RouteMethod method) {
-    final inputParts = input.split("?")[0].split("/");
+    final inputParts = List<String>.from(Uri.parse(input).pathSegments);
+
+    if (inputParts.last == "") {
+      inputParts.removeLast();
+    }
 
     var output = <HttpRoute>[];
 
@@ -17,9 +21,14 @@ class RouteMatcher {
 
       if (item.route == "*") {
         output.add(item);
+        continue;
       }
 
-      final itemParts = item.route.split("/");
+      final itemParts = List<String>.from(Uri.parse(item.route).pathSegments);
+
+      if (itemParts.last == "") {
+        itemParts.removeLast();
+      }
 
       if (itemParts.length != inputParts.length) {
         continue;
