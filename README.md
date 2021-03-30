@@ -158,13 +158,13 @@ main() async {
 The other two systems that inspired this project to be kicked off - Aqueduct and Mongo - both had
 some sort of database integration built in.
 
-You do not need this.
+**You do not need this.**
 
 Access the dart drivers for the database system you want directly, they all use them behind the scenes:
 
-Mongo - https://pub.dev/packages/mongo_dart
-Postgres - https://pub.dev/packages/postgres
-SQLLite -  https://pub.dev/packages/sqflite (careful about this one its mac only, just for example)
+- Mongo - https://pub.dev/packages/mongo_dart
+- Postgres - https://pub.dev/packages/postgres
+- SQLLite -  https://pub.dev/packages/sqflite (careful about this one its mac only, just for example)
 
 You will be fine. I have used them this way and they work just fine.
 
@@ -173,8 +173,8 @@ You will be fine. I have used them this way and they work just fine.
 While there are bunch of helpers built in - you have direct access to the low level apis available
 from the dart:io package. All helpers are just extension methods to:
 
-HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
-HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
+- HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
+- HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
 
 So you can compose and write any content you can imagine there. The only tangible benefit this library
 provides over the core library is the routing and route param extraction.
@@ -252,7 +252,7 @@ So if you return an object from the middleware, you are preventing future middle
 
 If you return null it will yield to the next middleware or route.
 
-*** returning null is the equivalent of 'next' ***
+** returning null is the equivalent of 'next' **
 
 ## Error handling
 
