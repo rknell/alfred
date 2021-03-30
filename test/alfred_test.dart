@@ -261,4 +261,11 @@ void main() {
     expect(responseNotFound.statusCode, 404);
     expect(responseNotFound.body, '{"message":"file not found"}');
   });
+
+  test("it routes correctly for a / url", () async {
+    app.get("/", (req, res) => "working");
+    final response = await http.get(Uri.parse("http://localhost:$port/"));
+
+    expect(response.body, "working");
+  });
 }

@@ -8,7 +8,7 @@ class RouteMatcher {
       String input, List<HttpRoute> options, RouteMethod method) {
     final inputParts = List<String>.from(Uri.parse(input).pathSegments);
 
-    if (inputParts.last == "") {
+    if (inputParts.isNotEmpty && inputParts.last == "") {
       inputParts.removeLast();
     }
 
@@ -26,7 +26,7 @@ class RouteMatcher {
 
       final itemParts = List<String>.from(Uri.parse(item.route).pathSegments);
 
-      if (itemParts.last == "") {
+      if (itemParts.isNotEmpty && itemParts.last == "") {
         itemParts.removeLast();
       }
 
