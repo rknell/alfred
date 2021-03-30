@@ -57,7 +57,7 @@ class RouteMatcher {
     final inputParts = input.split("/")..remove("");
 
     if (inputParts.length != routeParts.length) {
-      throw NotMatchingRouteException();
+      throw NotFoundException();
     }
 
     final output = <String, String>{};
@@ -88,4 +88,4 @@ class HttpRoute {
       {this.middleware = const []});
 }
 
-class NotMatchingRouteException implements Exception {}
+class NotFoundException implements Exception {}

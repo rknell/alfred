@@ -268,4 +268,11 @@ void main() {
 
     expect(response.body, "working");
   });
+
+  test("it handles params", () async {
+    app.get("/test/:id", (req, res) => req.params["id"]);
+    final response =
+        await http.get(Uri.parse("http://localhost:$port/test/15"));
+    expect(response.body, "15");
+  });
 }

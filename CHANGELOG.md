@@ -1,3 +1,7 @@
+## 0.0.3
+
+- Fixing route params
+
 ## 0.0.2+1
 
 - Another big README.md update, fixing lots of examples

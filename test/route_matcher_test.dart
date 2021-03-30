@@ -109,7 +109,7 @@ void main() {
 
     try {
       RouteMatcher.getParams("/id/:id/abc", "/id/10");
-    } on NotMatchingRouteException catch (_) {
+    } on NotFoundException catch (_) {
       hitError = true;
     }
     expect(hitError, true);

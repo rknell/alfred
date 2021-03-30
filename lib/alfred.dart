@@ -167,6 +167,8 @@ class Alfred {
         }
       } else {
         for (var route in effectiveRoutes) {
+          request.response.headers.set("x-alfred-route", route.route);
+
           /// Loop through any middleware
           for (var middleware in route.middleware) {
             if (isDone) {
@@ -260,7 +262,8 @@ extension RequestHelpers on HttpRequest {
 
   /// Get params
   ///
-  Map<String, String> get params => RouteMatcher.getParams("/", uri.path);
+  Map<String, String> get params => RouteMatcher.getParams(
+      response.headers.value("x-alfred-route") ?? "", uri.path);
 }
 
 extension ResponseHelpers on HttpResponse {
