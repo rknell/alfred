@@ -319,3 +319,5 @@ main() async {
   await app.listen();
 }
 ```
+
+Alfred always checks for a matching api route before falling back to a static route.
