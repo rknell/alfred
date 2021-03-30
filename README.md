@@ -249,7 +249,7 @@ instantiate the app. For example:
 
 ```dart
 main() async {
-  app = Alfred(on500: errorHandler);
+  app = Alfred(onInternalError: errorHandler);
   await app.listen(port);
   app.get("/throwserror", (req, res) => throw Exception("generic exception")); 
 }
@@ -267,7 +267,7 @@ behaviour, but if you want to override it, simply handle it in the app declarati
 
 ```dart
 main() async {
-  app = Alfred(on404: missingHandler);
+  app = Alfred(onNotFound: missingHandler);
   await app.listen(port);
 }
 
