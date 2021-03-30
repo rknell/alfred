@@ -8,7 +8,6 @@ environment:
 
 dependencies:
   http_server: ^1.0.0
-  uri: ^1.0.0
   mime_type: ^1.0.0
   enum_to_string: ^2.0.1
 
