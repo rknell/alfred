@@ -12,3 +12,5 @@ build/
 # Directory created by dartdoc
 doc/api/
 .idea
+coverage.lcov
+coverage
