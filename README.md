@@ -6,12 +6,14 @@ A performant, express like server framework with a few bonuses that make life ev
 
 Quickstart:
 ```dart
-main(){
+import 'package:alfred/alfred.dart';
+
+main() async {
   final app = Alfred();
-  
+
   app.get("/example", (req, res) => "Hello world");
 
-  app.listen();
+  await app.listen();
 
   print("Listening on port 3000");
 }
@@ -51,6 +53,10 @@ and run the project.
 if you have ever used expressjs before you should be right at home
 
 ```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
 main() async {
   final app = Alfred();
 
@@ -65,7 +71,7 @@ main() async {
   app.get("/file", (req, res)=>File("test/files/image.jpg"));
 
   app.get("/html", (req, res){
-    res.contentType = ContentType.html;
+    res.headers.contentType = ContentType.html;
     return "<html><body><h1>Test HTML</h1></body></html>";
   });
 
@@ -76,15 +82,16 @@ main() async {
 It should do pretty much what you expect. Handling bodies though do need an "await":
 
 ```dart
+import 'package:alfred/alfred.dart';
+
 main() async {
   final app = Alfred();
 
   app.post("/post-route", (req, res) async {
-    final body = jsonDecode(await req.body); //JSON body
+    final body = await req.body; //JSON body
   });
 
   await app.listen(); //Listening on port 3000
- 
 }
 ```
 
@@ -103,16 +110,20 @@ File - Binary, with mime type inferred by extension
 If you want to return HTML, just set the content type to HTML like this:
 
 ```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
 main() async {
   final app = Alfred();
 
   app.get("/html", (req, res){
-      res.headers.contentType = ContentType.html;
-      return "<html><body><h1>Title!</h1></body></html>";
+    res.headers.contentType = ContentType.html;
+    return "<html><body><h1>Title!</h1></body></html>";
   });
 
   await app.listen(); //Listening on port 3000
- 
+
 }
 ```
 
@@ -126,12 +137,16 @@ You can just set the right headers, but there is a handy little helper that will
 See `res.setDownload` below.
 
 ```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
 main() async {
   final app = Alfred();
 
   app.get("/image/download", (req, res) {
     res.setDownload(filename: "image.jpg");
-    return File("model10.jpg");
+    return File("test/files/image.jpg");
   });
 
   await app.listen(); //Listening on port 3000
@@ -191,12 +206,18 @@ At present the middleware system probably isn't built out enough, but will do fo
 Right now you can specify a middleware for all routes by declaring:
 
 ```dart
+import 'package:alfred/alfred.dart';
+
 main() async {
   final app = Alfred();
   app.all("*", (req, res) {
     // Perform action
   });
-  final server = await app.listen();
+  
+  app.get("/otherFunction", (req, res){
+    //Action performed next
+  });
+  await app.listen();
 }
 ```
 
@@ -205,20 +226,19 @@ Middleware declared this way will be executed in the order its added to the app.
 You can also add middleware to a route like so:
 
 ```dart
-main() async {
-  final app = Alfred();
-  app.all("/example/:id/:name", (req, res) {
-    req.params["id"] != null == true;
-    req.params["name"] != null == true;
-  }, middleware: [
-      exampleMiddleware
-    ]);
-  
-  final server = await app.listen();
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
+exampleMiddlware(HttpRequest req, HttpResponse res) {
+  // Do work
 }
 
-function exampleMiddlware(HttpRequest req, HttpResponse res){
-  // Do work
+main() async {
+  final app = Alfred();
+  app.all("/example/:id/:name", (req, res) {}, middleware: [exampleMiddlware]);
+
+  final server = await app.listen();
 }
 ```
 
@@ -238,8 +258,7 @@ You can either set the status code on the response object yourself and send the 
 you can do this from any route:
 
 ```dart
-route(req, res)=>
-  throw AlfredException(400, {"message": "invalid request"});
+app.get("/",(req, res) => throw AlfredException(400, {"message": "invalid request"}));
 ```
 
 If any of the routes bubble an unhandled error, it will catch it and throw a 500 error.
@@ -248,15 +267,17 @@ If you want to handle the logic when a 500 error is thrown, you can add a custom
 instantiate the app. For example:
 
 ```dart
+import 'package:alfred/alfred.dart';
+
 main() async {
-  app = Alfred(onInternalError: errorHandler);
-  await app.listen(port);
-  app.get("/throwserror", (req, res) => throw Exception("generic exception")); 
+  final app = Alfred(onInternalError: errorHandler);
+  await app.listen();
+  app.get("/throwserror", (req, res) => throw Exception("generic exception"));
 }
 
-function errorHandler(req, res){
-    res.statusCode = 500;
-    return {"message": "error not handled"};
+errorHandler(req, res){
+  res.statusCode = 500;
+  return {"message": "error not handled"};
 }
 ```
 
@@ -266,14 +287,16 @@ function errorHandler(req, res){
 behaviour, but if you want to override it, simply handle it in the app declaration.
 
 ```dart
+import 'package:alfred/alfred.dart';
+
 main() async {
-  app = Alfred(onNotFound: missingHandler);
-  await app.listen(port);
+  final app = Alfred(onNotFound: missingHandler);
+  await app.listen();
 }
 
-function missingHandler(req, res){
-    res.statusCode = 404;
-    return {"message": "not found"};
+missingHandler(req, res){
+  res.statusCode = 404;
+  return {"message": "not found"};
 }
 ```
 ## Static Files
@@ -282,11 +305,15 @@ This one is super easy - just pass in a public path and a dart Directory object 
 the rest.
 
 ```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
 main() async {
-  app = Alfred();
+  final app = Alfred();
 
   app.static("/public", Directory("test/files"));
 
-  await app.listen(port);
+  await app.listen();
 }
 ```

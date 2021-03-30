@@ -257,6 +257,10 @@ extension RequestHelpers on HttpRequest {
   /// Get the content type
   ///
   ContentType? get contentType => headers.contentType;
+
+  /// Get params
+  ///
+  Map<String, String> get params => RouteMatcher.getParams("/", uri.path);
 }
 
 extension ResponseHelpers on HttpResponse {
