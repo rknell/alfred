@@ -22,10 +22,10 @@ main() async {
 ## Motivation and philosophy
 
 TlDr:  
-    - A minimum of dependencies, 
-    - A minimum of code (145 lines at last check), and sticking close to dart core libraries
-    - Ease of use
-    - Predictable, well established semantics
+- A minimum of dependencies, 
+- A minimum of code (145 lines at last check), and sticking close to dart core libraries
+- Ease of use
+- Predictable, well established semantics
 
 I came to dart with a NodeJS / React Native & Cordova background. Previously I had used express for
 my server framework, almost always calling "res.json()". I just wanted a simple framework that would

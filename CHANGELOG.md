@@ -1,3 +1,7 @@
+## 0.0.3+2
+
+- Removing unused dependency
+
 ## 0.0.3+1
 
 - Fixing repo link in dart pub

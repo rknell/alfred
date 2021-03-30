@@ -1,6 +1,6 @@
 name: alfred
 description: A performant, expressjs like server framework with a few bonuses that make life even easier.
-version: 0.0.3+1
+version: 0.0.3+2
 repository: https://github.com/rknell/alfred
 
 environment:
