@@ -1,7 +1,7 @@
 name: alfred
 description: A performant, expressjs like server framework with a few bonuses that make life even easier.
 version: 0.0.3
-repository: https://github.com/rknell/dart_webserver
+repository: https://github.com/rknell/alfred
 
 environment:
   sdk: '>=2.12.0 <3.0.0'

@@ -1,3 +1,7 @@
+## 0.0.3+1
+
+- Fixing repo link in dart pub
+
 ## 0.0.3
 
 - Fixing route params
