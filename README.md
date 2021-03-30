@@ -164,7 +164,7 @@ Access the dart drivers for the database system you want directly, they all use 
 
 - Mongo - https://pub.dev/packages/mongo_dart
 - Postgres - https://pub.dev/packages/postgres
-- SQLLite -  https://pub.dev/packages/sqflite (careful about this one its mac only, just for example)
+- SQLLite -  https://pub.dev/packages/sqlite3
 
 You will be fine. I have used them this way and they work just fine.
 
