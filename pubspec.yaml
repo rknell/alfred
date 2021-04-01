@@ -11,8 +11,8 @@ dependencies:
   mime_type: ^1.0.0
   enum_to_string: ^2.0.1
   queue: ^3.0.0-nullsafety.0
+  pedantic: ^1.9.0
 
 dev_dependencies:
-  pedantic: ^1.9.0
   test: ^1.14.4
   http:
