@@ -204,6 +204,9 @@ class Alfred {
       } else {
         // Loop through the routes in the order they are in the routes list
         for (var route in effectiveRoutes) {
+          if (isDone) {
+            break;
+          }
           //TODO: This is a hack to match the params of the selected route
           request.response.headers.set("x-alfred-route", route.route);
 
@@ -271,7 +274,6 @@ class Alfred {
     if (result != null) {
       for (var handler in typeHandlers) {
         if (handler.shouldHandle(result)) {
-          print(result.runtimeType);
           await handler.handler(request, request.response, result);
           break;
         }

@@ -1,3 +1,7 @@
+## 0.1.0-alpha.3
+
+- Bug fix for return types
+
 ## 0.1.0-alpha.2
 
 - Some fixes for CORS & readme example
