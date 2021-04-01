@@ -7,7 +7,7 @@ class Chicken {
 void main() {
   final app = Alfred();
 
-  app.typeHandlers.add(TypeHandler<Chicken>((req, res, val) async {
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
     res.write((val as Chicken).response);
     await res.close();
   }));

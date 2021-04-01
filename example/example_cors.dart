@@ -1,7 +1,7 @@
 import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 
-main() async {
+void main() async {
   final app = Alfred();
 
   // Warning: defaults to origin "*"

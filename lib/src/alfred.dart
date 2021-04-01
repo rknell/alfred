@@ -139,7 +139,10 @@ class Alfred {
               middleware = const []}) =>
       _createRoute(path, callback, Method.all, middleware);
 
-  HttpRoute _createRoute(path, callback, Method method,
+  HttpRoute _createRoute(
+      String path,
+      FutureOr Function(HttpRequest req, HttpResponse res) callback,
+      Method method,
       [List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
           const []]) {
     final route = HttpRoute(path, callback, method, middleware: middleware);
@@ -163,7 +166,7 @@ class Alfred {
 
   /// Handles and routes an incoming request
   ///
-  Future _incomingRequest(HttpRequest request) async {
+  Future<void> _incomingRequest(HttpRequest request) async {
     bool isDone = false;
 
     if (logRequests) {
@@ -172,9 +175,7 @@ class Alfred {
 
     // We track if the response has been resolved in order to exit out early
     // the list of routes (ie the middleware returned)
-    unawaited(request.response.done.then((value) {
-      isDone = true;
-    }));
+    unawaited(request.response.done.then((dynamic value) => isDone = true));
 
     // Work out all the routes we need to process
     final effectiveRoutes = RouteMatcher.match(
@@ -190,7 +191,7 @@ class Alfred {
       if (effectiveRoutes.isEmpty) {
         if (onNotFound != null) {
           // Otherwise check if a custom 404 handler has been provided
-          final result = await onNotFound!(request, request.response);
+          final dynamic result = await onNotFound!(request, request.response);
           if (result != null && !isDone) {
             await _handleResponse(result, request);
           }
@@ -252,7 +253,8 @@ class Alfred {
       print(s);
       if (onInternalError != null) {
         // Handle the error with a custom response
-        final result = await onInternalError!(request, request.response);
+        final dynamic result =
+            await onInternalError!(request, request.response);
         if (result != null && !isDone) {
           await _handleResponse(result, request);
         }

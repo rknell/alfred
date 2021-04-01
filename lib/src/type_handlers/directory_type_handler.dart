@@ -6,7 +6,7 @@ import '../extensions/response_helpers.dart';
 import 'type_handler.dart';
 
 TypeHandler get directoryTypeHandler =>
-    TypeHandler<Directory>((req, res, val) async {
+    TypeHandler<Directory>((req, res, dynamic val) async {
       final filePath =
           "${val.path}/${req.uri.path.replaceFirst(req.route.replaceAll("*", ""), "")}";
       final file = File(filePath);
