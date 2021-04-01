@@ -1,6 +1,6 @@
 import 'package:http/http.dart' as http;
 
-main() async {
+void main() async {
   final stopwatch = Stopwatch()..start();
   final actions = <Future>[];
   for (var i = 0; i < 1000; i++) {

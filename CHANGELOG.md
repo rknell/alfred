@@ -1,3 +1,15 @@
+## 0.1.0-0
+
+- Huge update, 
+- BREAKING: removed static routes, you now return a directory and specify a wildcard in the routes
+- BREAKING: renamed RequestMethod to just Method
+- You now have wildcards in all parts of the routes
+- There is now an optional CORS middleware
+- Support for PATCH and OPTIONS methods added
+- You can now create custom type handlers or override the default ones
+- Bug fix: Middleware now works on all methods
+- TODO: document some of the new stuff!
+
 ## 0.0.3+2
 
 - Removing unused dependency

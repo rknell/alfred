@@ -126,6 +126,22 @@ void main() {
     expect(response.body, "test string");
   });
 
+  test("it handles an options request", () async {
+    app.options("/test", (req, res) => "test string");
+
+    /// TODO: Need to find a way to send an options request. The HTTP library doesn't
+    /// seem to support it.
+    ///
+    // final response = await http.head(Uri.parse("http://localhost:$port/test"));
+    // expect(response.body, "test string");
+  });
+
+  test("it handles a patch request", () async {
+    app.patch("/test", (req, res) => "test string");
+    final response = await http.patch(Uri.parse("http://localhost:$port/test"));
+    expect(response.body, "test string");
+  });
+
   test("it handles a route that hits all methods", () async {
     app.all("/test", (req, res) => "test all");
     final responseGet =
@@ -249,7 +265,7 @@ void main() {
   });
 
   test("it serves static files", () async {
-    app.static("/files", Directory("test/files"));
+    app.get("/files/*", (req, res) => Directory("test/files"));
 
     final response =
         await http.get(Uri.parse("http://localhost:$port/files/dummy.pdf"));

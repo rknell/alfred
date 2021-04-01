@@ -1,11 +1,10 @@
-import 'dart:async';
-import 'dart:io';
-
 import '../alfred.dart';
+import 'alfred.dart';
+import 'http_route.dart';
 
 class RouteMatcher {
   static List<HttpRoute> match(
-      String input, List<HttpRoute> options, RouteMethod method) {
+      String input, List<HttpRoute> options, Method method) {
     final inputParts = List<String>.from(Uri.parse(input).pathSegments);
 
     if (inputParts.isNotEmpty && inputParts.last == "") {
@@ -15,7 +14,9 @@ class RouteMatcher {
     var output = <HttpRoute>[];
 
     for (var item in options) {
-      if (item.method != method && item.method != RouteMethod.all) {
+      bool mustWildcard = false;
+
+      if (item.method != method && item.method != Method.all) {
         continue;
       }
 
@@ -31,13 +32,26 @@ class RouteMatcher {
       }
 
       if (itemParts.length != inputParts.length) {
+        mustWildcard = true;
+      }
+
+      if (itemParts.length > inputParts.length) {
         continue;
       }
 
       var matchesAll = true;
-      for (var i = 0; i < inputParts.length; i++) {
+      bool didWildcard = false;
+      for (var i = 0; i < itemParts.length; i++) {
         if (itemParts[i].startsWith(":")) {
           continue;
+        }
+        if (itemParts[i] == "*") {
+          didWildcard = true;
+          break;
+        }
+        if (itemParts[i].endsWith("*")) {
+          didWildcard = true;
+          break;
         }
         if (!RegExp("^${itemParts[i]}\$", caseSensitive: false)
             .hasMatch(inputParts[i])) {
@@ -45,7 +59,8 @@ class RouteMatcher {
           break;
         }
       }
-      if (matchesAll) {
+      if ((mustWildcard == false || mustWildcard && didWildcard) &&
+          matchesAll) {
         output.add(item);
       }
     }
@@ -57,7 +72,7 @@ class RouteMatcher {
     final inputParts = input.split("/")..remove("");
 
     if (inputParts.length != routeParts.length) {
-      throw NotFoundException();
+      throw NotMatchingRouteException();
     }
 
     final output = <String, String>{};
@@ -78,14 +93,7 @@ class RouteMatcher {
   }
 }
 
-class HttpRoute {
-  final String route;
-  final FutureOr Function(HttpRequest req, HttpResponse res) callback;
-  final RouteMethod method;
-  final List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware;
-
-  HttpRoute(this.route, this.callback, this.method,
-      {this.middleware = const []});
-}
-
-class NotFoundException implements Exception {}
+/// Throws when trying to extract params and the route you are extracting from
+/// does not match the supplied pattern
+///
+class NotMatchingRouteException implements Exception {}

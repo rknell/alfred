@@ -1,11 +1,14 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:alfred/alfred.dart';
 
-main() async {
+void main() async {
   final app = Alfred(onNotFound: missingHandler);
   await app.listen();
 }
 
-missingHandler(req, res) {
+FutureOr missingHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 404;
   return {"message": "not found"};
 }

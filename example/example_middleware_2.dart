@@ -1,6 +1,6 @@
 import 'package:alfred/alfred.dart';
 
-main() async {
+void main() async {
   final app = Alfred();
   app.all("*", (req, res) {
     // Perform action

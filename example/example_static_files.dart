@@ -2,10 +2,11 @@ import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
-main() async {
+void main() async {
   final app = Alfred();
 
-  app.static("/public", Directory("test/files"));
+  /// Note the wildcard (*) this is very important!!
+  app.get("/public/*", (req, res) => Directory("test/files"));
 
   await app.listen();
 }

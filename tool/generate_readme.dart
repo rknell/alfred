@@ -1,3 +1,10 @@
+import 'dart:io';
+
+String importExample(String name) =>
+    File("example/$name").readAsStringSync().trim();
+
+main() {
+  final template = """
 # Alfred
 
 A performant, express like server framework with a few bonuses that make life even easier.
@@ -6,17 +13,7 @@ A performant, express like server framework with a few bonuses that make life ev
 
 Quickstart:
 ```dart
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  app.get("/example", (req, res) => "Hello world");
-
-  await app.listen();
-
-  print("Listening on port 3000");
-}
+${importExample("example_quickstart.dart")}
 ``` 
 
 ## Motivation and philosophy
@@ -53,47 +50,13 @@ and run the project.
 if you have ever used expressjs before you should be right at home
 
 ```dart
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  app.get("/text", (req, res) => "Text response");
-
-  app.get("/json", (req, res) => {"json_response": true});
-
-  app.get("/jsonExpressStyle", (req, res) {
-    res.json({"type": "traditional_json_response"});
-  });
-
-  app.get("/file", (req, res) => File("test/files/image.jpg"));
-
-  app.get("/html", (req, res) {
-    res.headers.contentType = ContentType.html;
-    return "<html><body><h1>Test HTML</h1></body></html>";
-  });
-
-  await app.listen(6565); //Listening on port 6565
-}
+${importExample("example.dart")}
 ```
 
 It should do pretty much what you expect. Handling bodies though do need an "await":
 
 ```dart
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  app.post("/post-route", (req, res) async {
-    final body = await req.body; //JSON body
-    body != null; //true
-  });
-
-  await app.listen(); //Listening on port 3000
-}
+${importExample("example_body_parsing.dart")}
 ```
 
 Internally dart provides a body parser, so no extra dependencies there.
@@ -111,20 +74,7 @@ File - Binary, with mime type inferred by extension
 If you want to return HTML, just set the content type to HTML like this:
 
 ```dart
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  app.get("/html", (req, res) {
-    res.headers.contentType = ContentType.html;
-    return "<html><body><h1>Title!</h1></body></html>";
-  });
-
-  await app.listen(); //Listening on port 3000
-}
+${importExample("example_html.dart")}
 ```
 
 ## File downloads
@@ -137,20 +87,7 @@ You can just set the right headers, but there is a handy little helper that will
 See `res.setDownload` below.
 
 ```dart
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  app.get("/image/download", (req, res) {
-    res.setDownload(filename: "image.jpg");
-    return File("test/files/image.jpg");
-  });
-
-  await app.listen(); //Listening on port 3000
-}
+${importExample("example_file_downloads.dart")}
 ```
 
 ## But what about Mongo or Postgres or <Databse x>?
@@ -189,16 +126,7 @@ matching, mostly just stick with the route name and param syntax from Express:
 So for example:
 
 ```dart
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-  app.all("/example/:id/:name", (req, res) {
-    req.params["id"] != null;
-    req.params["name"] != null;
-  });
-  await app.listen();
-}
+${importExample("example_routing.dart")}
 ```
 
 You can also use a wildcard for a route, and provided another route hasn't already resolved the
@@ -206,26 +134,7 @@ response it will be hit. So for example if you want to authenticate a whole sect
 can do this:
 
 ```dart
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-_authenticationMiddleware(HttpRequest req, HttpResponse res) async {
-  res.statusCode = 401;
-  await res.close();
-}
-
-main() async {
-  final app = Alfred();
-
-  app.all("/resource*", (req, res) => _authenticationMiddleware);
-
-  app.get("/resource", (req, res) {}); //Will not be hit
-  app.post("/resource", (req, res) {}); //Will not be hit
-  app.post("/resource/1", (req, res) {}); //Will not be hit
-
-  await app.listen();
-}
+${importExample("example_middleware_authentication_wildcard.dart")}
 ```
 
 ## Middleware
@@ -235,19 +144,7 @@ At present the middleware system probably isn't built out enough, but will do fo
 Right now you can specify a middleware for all routes by declaring:
 
 ```dart
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-  app.all("*", (req, res) {
-    // Perform action
-  });
-
-  app.get("/otherFunction", (req, res) {
-    //Action performed next
-  });
-  await app.listen();
-}
+${importExample("example_middleware_2.dart")}
 ```
 
 Middleware declared this way will be executed in the order its added to the app.
@@ -255,24 +152,7 @@ Middleware declared this way will be executed in the order its added to the app.
 You can also add middleware to a route like so:
 
 ```dart
-import 'dart:async';
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-FutureOr exampleMiddlware(HttpRequest req, HttpResponse res) {
-  // Do work
-}
-
-void main() async {
-  final app = Alfred();
-  app.all("/example/:id/:name", (req, res) {
-    req.params["id"] != null; //true
-    req.params["name"] != null; //true;
-  }, middleware: [exampleMiddlware]);
-
-  await app.listen(); //Listening on port 3000
-}
+${importExample("example_middleware.dart")}
 ```
 
 ### What? No 'next'? how do I even?
@@ -300,20 +180,7 @@ If you want to handle the logic when a 500 error is thrown, you can add a custom
 instantiate the app. For example:
 
 ```dart
-import 'dart:async';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred(onInternalError: errorHandler);
-  await app.listen();
-  app.get("/throwserror", (req, res) => throw Exception("generic exception"));
-}
-
-FutureOr errorHandler(req, res) {
-  res.statusCode = 500;
-  return {"message": "error not handled"};
-}
+${importExample("example_error_handling.dart")}
 ```
 
 ### 404 Handling
@@ -322,20 +189,7 @@ FutureOr errorHandler(req, res) {
 behaviour, but if you want to override it, simply handle it in the app declaration.
 
 ```dart
-import 'dart:async';
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred(onNotFound: missingHandler);
-  await app.listen();
-}
-
-FutureOr missingHandler(HttpRequest req, HttpResponse res) {
-  res.statusCode = 404;
-  return {"message": "not found"};
-}
+${importExample("example_missing_handler.dart")}
 ```
 ## Static Files
 
@@ -343,18 +197,12 @@ This one is super easy - just pass in a public path and a dart Directory object 
 the rest.
 
 ```dart
-import 'dart:io';
-
-import 'package:alfred/alfred.dart';
-
-void main() async {
-  final app = Alfred();
-
-  /// Note the wildcard (*) this is very important!!
-  app.get("/public/*", (req, res) => Directory("test/files"));
-
-  await app.listen();
-}
+${importExample("example_static_files.dart")}
 ```
 
 Alfred always checks for a matching api route before falling back to a static route.
+
+  """;
+
+  File("README.md").writeAsStringSync(template.trim());
+}

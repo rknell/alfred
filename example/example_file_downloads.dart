@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
-main() async {
+void main() async {
   final app = Alfred();
 
   app.get("/image/download", (req, res) {
