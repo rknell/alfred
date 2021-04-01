@@ -20,8 +20,8 @@ TypeHandler get listIntTypeHandler =>
 TypeHandler get uint8listTypeHandler =>
     TypeHandler<Uint8List>(_binaryTypeHandler);
 
-TypeHandler get binaryStreamTypeHandler => TypeHandler<Stream<List<int>>>(
-        (req, res, dynamic val) async {
+TypeHandler get binaryStreamTypeHandler =>
+    TypeHandler<Stream<List<int>>>((req, res, dynamic val) async {
       if (res.headers.contentType == null ||
           res.headers.contentType!.value == "text/plain") {
         res.headers.contentType = ContentType.binary;
