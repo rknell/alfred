@@ -23,7 +23,7 @@ void main() async {
 
 TlDr:  
 - A minimum of dependencies, 
-- A minimum of code (145 lines at last check), and sticking close to dart core libraries
+- A minimum of code (199 lines at last check), and sticking close to dart core libraries
 - Ease of use
 - Predictable, well established semantics
 
@@ -365,6 +365,7 @@ Alfred always checks for a matching api route before falling back to a static ro
 
 There is a cors middleware supplied for your convenience. 
 
+```dart
 import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 
@@ -376,3 +377,4 @@ main() async {
 
   await app.listen();
 }
+```

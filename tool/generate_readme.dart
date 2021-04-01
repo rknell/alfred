@@ -207,7 +207,9 @@ Alfred always checks for a matching api route before falling back to a static ro
 
 There is a cors middleware supplied for your convenience. 
 
+```dart
 ${importExample("example_cors.dart")}
+```
 
   """;
 
