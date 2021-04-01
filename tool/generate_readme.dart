@@ -1,7 +1,7 @@
 import 'dart:io';
 
 String importExample(String name) =>
-    File("example/$name").readAsStringSync().trim();
+    File('example/$name').readAsStringSync().trim();
 
 void main() {
   final template = """
@@ -220,5 +220,5 @@ ${importExample("example_cors.dart")}
 
   """;
 
-  File("README.md").writeAsStringSync(template.trim());
+  File('README.md').writeAsStringSync(template.trim());
 }

@@ -150,7 +150,7 @@ class Alfred {
   /// Call this function to fire off the server
   ///
   Future<HttpServer> listen(
-      [int port = 3000, dynamic bindIp = "0.0.0.0"]) async {
+      [int port = 3000, dynamic bindIp = '0.0.0.0']) async {
     final _server = await HttpServer.bind(bindIp, port);
     _server.idleTimeout = Duration(seconds: 1);
 
@@ -164,10 +164,10 @@ class Alfred {
   /// Handles and routes an incoming request
   ///
   Future _incomingRequest(HttpRequest request) async {
-    bool isDone = false;
+    var isDone = false;
 
     if (logRequests) {
-      print("${request.method} - ${request.uri.toString()}");
+      print('${request.method} - ${request.uri.toString()}');
     }
 
     // We track if the response has been resolved in order to exit out early
@@ -198,7 +198,7 @@ class Alfred {
         } else {
           // Otherwise throw a generic 404;
           request.response.statusCode = 404;
-          request.response.write("404 not found");
+          request.response.write('404 not found');
           await request.response.close();
         }
       } else {
@@ -208,7 +208,7 @@ class Alfred {
             break;
           }
           //TODO: This is a hack to match the params of the selected route
-          request.response.headers.set("x-alfred-route", route.route);
+          request.response.headers.set('x-alfred-route', route.route);
 
           /// Loop through any middleware
           for (var middleware in route.middleware) {

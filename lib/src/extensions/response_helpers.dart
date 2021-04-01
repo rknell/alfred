@@ -11,7 +11,7 @@ extension ResponseHelpers on HttpResponse {
   /// Set the appropriate headers to download the file
   ///
   void setDownload({required String filename}) {
-    headers.add("Content-Disposition", "attachment; filename=$filename");
+    headers.add('Content-Disposition', 'attachment; filename=$filename');
   }
 
   /// Set the content type from the extension ie. 'pdf'
@@ -19,7 +19,7 @@ extension ResponseHelpers on HttpResponse {
   void setContentTypeFromExtension(String extension) {
     final mime = mimeFromExtension(extension);
     if (mime != null) {
-      final split = mime.split("/");
+      final split = mime.split('/');
       headers.contentType = ContentType(split[0], split[1]);
     }
   }
@@ -28,7 +28,7 @@ extension ResponseHelpers on HttpResponse {
   ///
   void setContentTypeFromFile(File file) {
     if (headers.contentType == null ||
-        headers.contentType!.mimeType == "text/plain") {
+        headers.contentType!.mimeType == 'text/plain') {
       headers.contentType = file.contentType;
     } else {
       headers.contentType == ContentType.binary;

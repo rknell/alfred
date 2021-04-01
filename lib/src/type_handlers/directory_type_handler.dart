@@ -12,7 +12,7 @@ TypeHandler get directoryTypeHandler =>
       final file = File(filePath);
       final exists = await file.exists();
       if (!exists) {
-        throw AlfredException(404, {"message": "file not found"});
+        throw AlfredException(404, {'message': 'file not found'});
       }
       res.setContentTypeFromFile(file);
       await res.addStream(file.openRead());

@@ -23,5 +23,5 @@ extension RequestHelpers on HttpRequest {
 
   /// Get the matched route of the current request
   ///
-  String get route => response.headers.value("x-alfred-route") ?? "";
+  String get route => response.headers.value('x-alfred-route') ?? '';
 }

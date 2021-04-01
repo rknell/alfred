@@ -13,7 +13,7 @@ extension FileHelpers on File {
   ContentType? get contentType {
     final mimeType = this.mimeType;
     if (mimeType != null) {
-      final split = mimeType.split("/");
+      final split = mimeType.split('/');
       return ContentType(split[0], split[1]);
     }
   }
