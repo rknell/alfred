@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:alfred/alfred.dart';
+import 'package:alfred/src/middleware/cors.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
@@ -290,5 +291,15 @@ void main() {
     final response =
         await http.get(Uri.parse("http://localhost:$port/test/15"));
     expect(response.body, "15");
+  });
+
+  test("it should implement cors correctly", () async {
+    app.all("*", cors(origin: "test-origin"));
+
+    final response = await http.get(Uri.parse("http://localhost:$port/test"));
+    expect(response.headers.containsKey("access-control-allow-origin"), true);
+    expect(response.headers["access-control-allow-origin"], "test-origin");
+    expect(response.headers.containsKey("access-control-allow-headers"), true);
+    expect(response.headers.containsKey("access-control-allow-methods"), true);
   });
 }

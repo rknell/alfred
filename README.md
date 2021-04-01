@@ -206,16 +206,17 @@ response it will be hit. So for example if you want to authenticate a whole sect
 can do this:
 
 ```dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
-_authenticationMiddleware(HttpRequest req, HttpResponse res) async {
+FutureOr _authenticationMiddleware(HttpRequest req, HttpResponse res) async {
   res.statusCode = 401;
   await res.close();
 }
 
-main() async {
+void main() async {
   final app = Alfred();
 
   app.all("/resource*", (req, res) => _authenticationMiddleware);
@@ -358,3 +359,20 @@ void main() async {
 ```
 
 Alfred always checks for a matching api route before falling back to a static route.
+
+
+## CORS
+
+There is a cors middleware supplied for your convenience. 
+
+import 'package:alfred/alfred.dart';
+import 'package:alfred/src/middleware/cors.dart';
+
+main() async {
+  final app = Alfred();
+
+  // Warning: defaults to origin "*"
+  app.all("*", cors(origin: "myorigin.com"));
+
+  await app.listen();
+}

@@ -1,3 +1,11 @@
+## 0.1.0-alpha.2
+
+- Some fixes for CORS & readme example
+
+## 0.1.0-alpha.1
+
+- Readme correction for static routes
+
 ## 0.1.0-alpha.0
 
 - Huge update, 

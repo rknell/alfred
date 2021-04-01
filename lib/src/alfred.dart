@@ -28,8 +28,6 @@ class Alfred {
   /// routes by calling the [get,post,put,delete] methods.
   final routes = <HttpRoute>[];
 
-  final _staticFiles = <String, HttpRoute>{};
-
   /// HttpServer instance from the dart:io library
   ///
   /// If there is anything the app can't do, you can do it through here.

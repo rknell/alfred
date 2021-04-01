@@ -1,13 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
-_authenticationMiddleware(HttpRequest req, HttpResponse res) async {
+FutureOr _authenticationMiddleware(HttpRequest req, HttpResponse res) async {
   res.statusCode = 401;
   await res.close();
 }
 
-main() async {
+void main() async {
   final app = Alfred();
 
   app.all("/resource*", (req, res) => _authenticationMiddleware);

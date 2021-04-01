@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:alfred/src/type_handlers/type_handler.dart';
 
-_binaryTypeHandler(req, res, val) async {
+FutureOr _binaryTypeHandler(req, res, val) async {
   if (res.headers.contentType == null ||
       res.headers.contentType!.value == "text/plain") {
     res.headers.contentType = ContentType.binary;

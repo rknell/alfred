@@ -3,7 +3,7 @@ import 'dart:io';
 String importExample(String name) =>
     File("example/$name").readAsStringSync().trim();
 
-main() {
+void main() {
   final template = """
 # Alfred
 
@@ -20,7 +20,7 @@ ${importExample("example_quickstart.dart")}
 
 TlDr:  
 - A minimum of dependencies, 
-- A minimum of code (145 lines at last check), and sticking close to dart core libraries
+- A minimum of code (199 lines at last check), and sticking close to dart core libraries
 - Ease of use
 - Predictable, well established semantics
 
@@ -201,6 +201,13 @@ ${importExample("example_static_files.dart")}
 ```
 
 Alfred always checks for a matching api route before falling back to a static route.
+
+
+## CORS
+
+There is a cors middleware supplied for your convenience. 
+
+${importExample("example_cors.dart")}
 
   """;
 

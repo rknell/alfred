@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
-cors(
+/// CORS Middlware.
+///
+/// Has some sensible defaults. You probably want to change the origin
+FutureOr Function(HttpRequest, HttpResponse) cors(
     {int age = 86400,
     String headers = "Content-Type",
     String methods = "POST, GET, OPTIONS, PUT, PATCH",
