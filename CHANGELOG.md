@@ -1,4 +1,4 @@
-## 0.1.0-0
+## 0.1.0-alpha.0
 
 - Huge update, 
 - BREAKING: removed static routes, you now return a directory and specify a wildcard in the routes
