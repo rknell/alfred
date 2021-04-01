@@ -101,12 +101,13 @@ Internally dart provides a body parser, so no extra dependencies there.
 The big difference you will see is the option to not call `res.send` or `res.json` etc - although you still can.
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
-List<dynamic> - JSON
-Map<String, Object?> - JSON
-String - Plain text
-Stream<List<int>> - Binary
-List<int> - Binary
-File - Binary, with mime type inferred by extension
+- List<dynamic> - JSON
+- Map<String, Object?> - JSON
+- String - Plain text
+- Stream<List<int>> - Binary
+- List<int> - Binary
+- File - Binary, with mime type inferred by extension
+- Directory - Serves static files
 
 If you want to return HTML, just set the content type to HTML like this:
 
@@ -124,6 +125,34 @@ void main() async {
   });
 
   await app.listen(); //Listening on port 3000
+}
+```
+
+### Custom type handlers
+If you want to create custom type handlers, just add them to the type handler
+array in the app object. This is a bit advanced, and I expect it would be more
+for devs wanting to extend Alfred:
+
+```dart
+import 'package:alfred/alfred.dart';
+
+class Chicken {
+  String get response => "I am a chicken";
+}
+
+void main() {
+  final app = Alfred();
+
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, val) async {
+    res.write((val as Chicken).response);
+    await res.close();
+  }));
+
+  /// The app will now return the Chicken.response if you return one from a route
+
+  app.get("/kfc", (req, res) => Chicken()); //I am a chicken;
+
+  app.listen(); //Listening on 3000
 }
 ```
 
@@ -357,9 +386,6 @@ void main() async {
   await app.listen();
 }
 ```
-
-Alfred always checks for a matching api route before falling back to a static route.
-
 
 ## CORS
 

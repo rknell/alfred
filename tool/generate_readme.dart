@@ -64,17 +64,27 @@ Internally dart provides a body parser, so no extra dependencies there.
 The big difference you will see is the option to not call `res.send` or `res.json` etc - although you still can.
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
-List<dynamic> - JSON
-Map<String, Object?> - JSON
-String - Plain text
-Stream<List<int>> - Binary
-List<int> - Binary
-File - Binary, with mime type inferred by extension
+- List<dynamic> - JSON
+- Map<String, Object?> - JSON
+- String - Plain text
+- Stream<List<int>> - Binary
+- List<int> - Binary
+- File - Binary, with mime type inferred by extension
+- Directory - Serves static files
 
 If you want to return HTML, just set the content type to HTML like this:
 
 ```dart
 ${importExample("example_html.dart")}
+```
+
+### Custom type handlers
+If you want to create custom type handlers, just add them to the type handler
+array in the app object. This is a bit advanced, and I expect it would be more
+for devs wanting to extend Alfred:
+
+```dart
+${importExample("example_custom_type_handler.dart")}
 ```
 
 ## File downloads
@@ -199,9 +209,6 @@ the rest.
 ```dart
 ${importExample("example_static_files.dart")}
 ```
-
-Alfred always checks for a matching api route before falling back to a static route.
-
 
 ## CORS
 
