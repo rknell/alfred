@@ -3,6 +3,26 @@ import 'dart:io';
 String importExample(String name) =>
     File("example/$name").readAsStringSync().trim();
 
+int numOfCodeLines() {
+  var allCodeLines = Directory('lib/')
+      .listSync(recursive: true)
+      .where((file) => file is File && file.path.endsWith('.dart'))
+      .map((file) => (file as File).readAsLinesSync())
+      .fold<List<String>>([], (prev, lines) => [...prev, ...lines]);
+
+  return allCodeLines
+      .where((line) => line.withoutComments().trim().isNotEmpty)
+      .where((line) => !line.trim().startsWith('import '))
+      .toList()
+      .length;
+}
+
+extension CommentsRemover on String {
+  String withoutComments() {
+    return replaceAll(RegExp(r'//.*'), '');
+  }
+}
+
 void main() {
   final template = """
 # Alfred
@@ -20,7 +40,7 @@ ${importExample("example_quickstart.dart")}
 
 TlDr:  
 - A minimum of dependencies, 
-- A minimum of code (199 lines at last check), and sticking close to dart core libraries
+- A minimum of code (${numOfCodeLines()} lines at last check), and sticking close to dart core libraries
 - Ease of use
 - Predictable, well established semantics
 
