@@ -11,15 +11,13 @@ void main() {
   late Alfred app;
   late int port;
 
-  setUp(() async {
+  setUp(() {
     port = Random().nextInt(65535 - 1024) + 1024;
     app = Alfred();
-    await app.listen(port);
+    return app.listen(port);
   });
 
-  tearDown(() async {
-    await app.close();
-  });
+  tearDown(() => app.close());
 
   test("it should return a string correctly", () async {
     app.get("/test", (req, res) => "test string");

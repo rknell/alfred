@@ -11,5 +11,7 @@ linter:
     omit_local_variable_types: false
 
 analyzer:
-#   exclude:
-#     - path/to/excluded/files/**
+  exclude: [build/**]
+  strong-mode:
+    implicit-casts: false
+    implicit-dynamic: false

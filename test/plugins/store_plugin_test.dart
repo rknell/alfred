@@ -4,7 +4,7 @@ import 'package:alfred/alfred.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
-main() {
+void main() {
   late Alfred app;
   late int port;
 

@@ -1,3 +1,11 @@
+## 0.1.0-alpha.4
+
+- Added support for "plugins" to extend the http request object and store data
+- Added ability to listen to all closed responses (great for logging or cleaning up plugin logic)
+- Added req.setStoreValue and req.getStoreValue methods to persist data across middleware - WARNING - this API may change before 0.1.0 lands
+- Enabled strong mode (thanks @felixblaschke) Also a big thanks for all the other code analysis you have performed and advice given
+- Cleaned up some functions to simplify them (thanks @ykmnkmi)
+
 ## 0.1.0-alpha.3
 
 - Bug fix for return types

@@ -143,7 +143,7 @@ class Chicken {
 void main() {
   final app = Alfred();
 
-  app.typeHandlers.add(TypeHandler<Chicken>((req, res, val) async {
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
     res.write((val as Chicken).response);
     await res.close();
   }));
@@ -340,7 +340,7 @@ void main() async {
   app.get("/throwserror", (req, res) => throw Exception("generic exception"));
 }
 
-FutureOr errorHandler(req, res) {
+FutureOr errorHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 500;
   return {"message": "error not handled"};
 }
@@ -395,7 +395,7 @@ There is a cors middleware supplied for your convenience.
 import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 
-main() async {
+void main() async {
   final app = Alfred();
 
   // Warning: defaults to origin "*"

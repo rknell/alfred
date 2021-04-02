@@ -205,12 +205,16 @@ class Alfred {
 
     // We track if the response has been resolved in order to exit out early
     // the list of routes (ie the middleware returned)
-    unawaited(request.response.done.then((dynamic _) {
+<<<<<<< HEAD
+    unawaited(request.response.done.then((value) {
       isDone = true;
       for (var listener in _onDoneListeners) {
         listener(request, request.response);
       }
     }));
+=======
+    unawaited(request.response.done.then((dynamic value) => isDone = true));
+>>>>>>> b03acc44de6186a1416a3134dc1b19d10c1a6a23
 
     // Work out all the routes we need to process
     final effectiveRoutes = RouteMatcher.match(

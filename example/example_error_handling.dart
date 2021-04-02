@@ -8,7 +8,7 @@ void main() async {
   app.get("/throwserror", (req, res) => throw Exception("generic exception"));
 }
 
-FutureOr errorHandler(req, res) {
+FutureOr errorHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 500;
   return {"message": "error not handled"};
 }
