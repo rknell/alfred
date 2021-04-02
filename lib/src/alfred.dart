@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:alfred/src/plugins/store_plugin.dart';
 import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
 import 'package:alfred/src/type_handlers/directory_type_handler.dart';
 import 'package:alfred/src/type_handlers/file_type_handler.dart';
@@ -10,6 +11,7 @@ import 'package:alfred/src/type_handlers/type_handler.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:queue/queue.dart';
+import 'package:uuid/uuid.dart';
 
 import 'alfred_exception.dart';
 import 'http_route.dart';
@@ -51,7 +53,29 @@ class Alfred {
   /// in the [simultaneousProcessing] param in the constructor
   late Queue requestQueue;
 
-  List<TypeHandler> typeHandlers = [];
+  /// An array of [TypeHandler] that Alfred walks through in order to determine
+  /// if it can handle a value returned from a route.
+  ///
+  var typeHandlers = <TypeHandler>[];
+
+  final _onDoneListeners = <void Function(HttpRequest req, HttpResponse res)>[];
+
+  /// Register a listenener when a request is complete
+  ///
+  /// Typically would be used for logging, benchmarking or cleaning up data
+  /// used when writing a plugin.
+  ///
+  Function registerOnDoneListener(
+      void Function(HttpRequest, HttpResponse) listener) {
+    _onDoneListeners.add(listener);
+    return listener;
+  }
+
+  /// Dispose of any on done listeners when you are done with them.
+  ///
+  void removeOnDoneListener(Function listener) {
+    _onDoneListeners.remove(listener);
+  }
 
   /// Constructor
   ///
@@ -66,6 +90,7 @@ class Alfred {
   }) {
     requestQueue = Queue(parallel: simultaneousProcessing);
     _registerDefaultTypeHandlers();
+    _registerPluginListeners();
   }
 
   void _registerDefaultTypeHandlers() {
@@ -79,6 +104,10 @@ class Alfred {
       fileTypeHandler,
       directoryTypeHandler
     ]);
+  }
+
+  void _registerPluginListeners() {
+    registerOnDoneListener(storePluginOnDoneHandler);
   }
 
   /// Create a get route
@@ -165,6 +194,7 @@ class Alfred {
   ///
   Future _incomingRequest(HttpRequest request) async {
     bool isDone = false;
+    request.response.headers.set("x-alfred-requestid", Uuid().v4());
 
     if (logRequests) {
       print("${request.method} - ${request.uri.toString()}");
@@ -174,6 +204,9 @@ class Alfred {
     // the list of routes (ie the middleware returned)
     unawaited(request.response.done.then((value) {
       isDone = true;
+      for (var listener in _onDoneListeners) {
+        listener(request, request.response);
+      }
     }));
 
     // Work out all the routes we need to process
@@ -207,8 +240,7 @@ class Alfred {
           if (isDone) {
             break;
           }
-          //TODO: This is a hack to match the params of the selected route
-          request.response.headers.set("x-alfred-route", route.route);
+          request.setStoreValue("_internal_route", route.route);
 
           /// Loop through any middleware
           for (var middleware in route.middleware) {

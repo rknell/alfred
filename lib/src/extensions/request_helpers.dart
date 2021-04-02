@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:http_server/http_server.dart';
 
+import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
 
 /// Some convenience methods on the [HttpRequest] object to make the api
@@ -23,5 +24,9 @@ extension RequestHelpers on HttpRequest {
 
   /// Get the matched route of the current request
   ///
-  String get route => response.headers.value("x-alfred-route") ?? "";
+  String get route => getStoreValue("_internal_route") ?? "";
+
+  /// The request id is used to write plugins that handle logic outside of the
+  /// response and request cycle
+  String get requestId => response.headers.value("x-alfred-requestid")!;
 }

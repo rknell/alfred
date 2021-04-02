@@ -9,4 +9,5 @@ export 'src/extensions/request_helpers.dart';
 export 'src/extensions/response_helpers.dart';
 export 'src/http_route.dart';
 export 'src/middleware/cors.dart';
+export 'src/plugins/store_plugin.dart';
 export 'src/type_handlers/type_handler.dart';
