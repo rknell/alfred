@@ -24,9 +24,9 @@ extension RequestHelpers on HttpRequest {
 
   /// Get the matched route of the current request
   ///
-  String get route => getStoreValue("_internal_route") as String? ?? "";
+  String get route => getStoreValue('_internal_route') as String? ?? '';
 
   /// The request id is used to write plugins that handle logic outside of the
   /// response and request cycle
-  String get requestId => response.headers.value("x-alfred-requestid")!;
+  String get requestId => response.headers.value('x-alfred-requestid')!;
 }

@@ -7,7 +7,7 @@ import 'package:alfred/src/type_handlers/type_handler.dart';
 FutureOr _binaryTypeHandler(
     HttpRequest req, HttpResponse res, dynamic val) async {
   if (res.headers.contentType == null ||
-      res.headers.contentType!.value == "text/plain") {
+      res.headers.contentType!.value == 'text/plain') {
     res.headers.contentType = ContentType.binary;
   }
   res.add(val as List<int>);
@@ -23,7 +23,7 @@ TypeHandler get uint8listTypeHandler =>
 TypeHandler get binaryStreamTypeHandler =>
     TypeHandler<Stream<List<int>>>((req, res, dynamic val) async {
       if (res.headers.contentType == null ||
-          res.headers.contentType!.value == "text/plain") {
+          res.headers.contentType!.value == 'text/plain') {
         res.headers.contentType = ContentType.binary;
       }
       await res.addStream(val as Stream<List<int>>);

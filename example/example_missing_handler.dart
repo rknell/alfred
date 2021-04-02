@@ -10,5 +10,5 @@ void main() async {
 
 FutureOr missingHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 404;
-  return {"message": "not found"};
+  return {'message': 'not found'};
 }

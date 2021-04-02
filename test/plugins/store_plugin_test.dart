@@ -18,44 +18,44 @@ void main() {
     await app.close();
   });
 
-  test("it should store and retrieve a value on a request", () async {
-    bool didHit = false;
-    app.all("/test", (req, res) {
-      expect(req.route, "/test");
-      req.setStoreValue("testValue", "bah!");
-      expect(req.getStoreValue("testValue"), "bah!");
+  test('it should store and retrieve a value on a request', () async {
+    var didHit = false;
+    app.all('/test', (req, res) {
+      expect(req.route, '/test');
+      req.setStoreValue('testValue', 'bah!');
+      expect(req.getStoreValue('testValue'), 'bah!');
       didHit = true;
-      return "done";
+      return 'done';
     });
-    await http.get(Uri.parse("http://localhost:$port/test"));
+    await http.get(Uri.parse('http://localhost:$port/test'));
     expect(didHit, true);
   });
 
-  test("it handles an on done listener and cleans up the store", () async {
+  test('it handles an on done listener and cleans up the store', () async {
     var hitCount = 0;
     final listener = app.registerOnDoneListener((req, res) {
       hitCount++;
     });
 
-    app.get("/test", (req, res) => "done");
-    await http.get(Uri.parse("http://localhost:$port/test"));
+    app.get('/test', (req, res) => 'done');
+    await http.get(Uri.parse('http://localhost:$port/test'));
     expect(hitCount, 1);
     app.removeOnDoneListener(listener);
-    await http.get(Uri.parse("http://localhost:$port/test"));
+    await http.get(Uri.parse('http://localhost:$port/test'));
     expect(hitCount, 1);
     expect(app.storeOutstandingRequests.isEmpty, true);
   });
 
-  test("the store is correctly available across multiple routes", () async {
+  test('the store is correctly available across multiple routes', () async {
     var didHit = false;
-    app.get("*", (req, res) {
-      req.setStoreValue("userid", "123456");
+    app.get('*', (req, res) {
+      req.setStoreValue('userid', '123456');
     });
-    app.get("/user", (req, res) {
+    app.get('/user', (req, res) {
       didHit = true;
-      expect(req.getStoreValue("userid"), "123456");
+      expect(req.getStoreValue('userid'), '123456');
     });
-    await http.get(Uri.parse("http://localhost:$port/user"));
+    await http.get(Uri.parse('http://localhost:$port/user'));
     expect(didHit, true);
   });
 }
