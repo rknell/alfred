@@ -11,11 +11,11 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  app.get("/example", (req, res) => "Hello world");
+  app.get('/example', (req, res) => 'Hello world');
 
   await app.listen();
 
-  print("Listening on port 3000");
+  print('Listening on port 3000');
 }
 ``` 
 
@@ -60,19 +60,19 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  app.get("/text", (req, res) => "Text response");
+  app.get('/text', (req, res) => 'Text response');
 
-  app.get("/json", (req, res) => {"json_response": true});
+  app.get('/json', (req, res) => {'json_response': true});
 
-  app.get("/jsonExpressStyle", (req, res) {
-    res.json({"type": "traditional_json_response"});
+  app.get('/jsonExpressStyle', (req, res) {
+    res.json({'type': 'traditional_json_response'});
   });
 
-  app.get("/file", (req, res) => File("test/files/image.jpg"));
+  app.get('/file', (req, res) => File('test/files/image.jpg'));
 
-  app.get("/html", (req, res) {
+  app.get('/html', (req, res) {
     res.headers.contentType = ContentType.html;
-    return "<html><body><h1>Test HTML</h1></body></html>";
+    return '<html><body><h1>Test HTML</h1></body></html>';
   });
 
   await app.listen(6565); //Listening on port 6565
@@ -87,7 +87,7 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  app.post("/post-route", (req, res) async {
+  app.post('/post-route', (req, res) async {
     final body = await req.body; //JSON body
     body != null; //true
   });
@@ -119,9 +119,9 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  app.get("/html", (req, res) {
+  app.get('/html', (req, res) {
     res.headers.contentType = ContentType.html;
-    return "<html><body><h1>Title!</h1></body></html>";
+    return '<html><body><h1>Title!</h1></body></html>';
   });
 
   await app.listen(); //Listening on port 3000
@@ -137,7 +137,7 @@ for devs wanting to extend Alfred:
 import 'package:alfred/alfred.dart';
 
 class Chicken {
-  String get response => "I am a chicken";
+  String get response => 'I am a chicken';
 }
 
 void main() {
@@ -150,7 +150,7 @@ void main() {
 
   /// The app will now return the Chicken.response if you return one from a route
 
-  app.get("/kfc", (req, res) => Chicken()); //I am a chicken;
+  app.get('/kfc', (req, res) => Chicken()); //I am a chicken;
 
   app.listen(); //Listening on 3000
 }
@@ -173,9 +173,9 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  app.get("/image/download", (req, res) {
-    res.setDownload(filename: "image.jpg");
-    return File("test/files/image.jpg");
+  app.get('/image/download', (req, res) {
+    res.setDownload(filename: 'image.jpg');
+    return File('test/files/image.jpg');
   });
 
   await app.listen(); //Listening on port 3000
@@ -222,9 +222,9 @@ import 'package:alfred/alfred.dart';
 
 void main() async {
   final app = Alfred();
-  app.all("/example/:id/:name", (req, res) {
-    req.params["id"] != null;
-    req.params["name"] != null;
+  app.all('/example/:id/:name', (req, res) {
+    req.params['id'] != null;
+    req.params['name'] != null;
   });
   await app.listen();
 }
@@ -248,11 +248,11 @@ FutureOr _authenticationMiddleware(HttpRequest req, HttpResponse res) async {
 void main() async {
   final app = Alfred();
 
-  app.all("/resource*", (req, res) => _authenticationMiddleware);
+  app.all('/resource*', (req, res) => _authenticationMiddleware);
 
-  app.get("/resource", (req, res) {}); //Will not be hit
-  app.post("/resource", (req, res) {}); //Will not be hit
-  app.post("/resource/1", (req, res) {}); //Will not be hit
+  app.get('/resource', (req, res) {}); //Will not be hit
+  app.post('/resource', (req, res) {}); //Will not be hit
+  app.post('/resource/1', (req, res) {}); //Will not be hit
 
   await app.listen();
 }
@@ -269,11 +269,11 @@ import 'package:alfred/alfred.dart';
 
 void main() async {
   final app = Alfred();
-  app.all("*", (req, res) {
+  app.all('*', (req, res) {
     // Perform action
   });
 
-  app.get("/otherFunction", (req, res) {
+  app.get('/otherFunction', (req, res) {
     //Action performed next
   });
   await app.listen();
@@ -296,9 +296,9 @@ FutureOr exampleMiddlware(HttpRequest req, HttpResponse res) {
 
 void main() async {
   final app = Alfred();
-  app.all("/example/:id/:name", (req, res) {
-    req.params["id"] != null; //true
-    req.params["name"] != null; //true;
+  app.all('/example/:id/:name', (req, res) {
+    req.params['id'] != null; //true
+    req.params['name'] != null; //true;
   }, middleware: [exampleMiddlware]);
 
   await app.listen(); //Listening on port 3000
@@ -337,12 +337,12 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred(onInternalError: errorHandler);
   await app.listen();
-  app.get("/throwserror", (req, res) => throw Exception("generic exception"));
+  app.get('/throwserror', (req, res) => throw Exception('generic exception'));
 }
 
 FutureOr errorHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 500;
-  return {"message": "error not handled"};
+  return {'message': 'error not handled'};
 }
 ```
 
@@ -364,7 +364,7 @@ void main() async {
 
 FutureOr missingHandler(HttpRequest req, HttpResponse res) {
   res.statusCode = 404;
-  return {"message": "not found"};
+  return {'message': 'not found'};
 }
 ```
 ## Static Files
@@ -381,7 +381,7 @@ void main() async {
   final app = Alfred();
 
   /// Note the wildcard (*) this is very important!!
-  app.get("/public/*", (req, res) => Directory("test/files"));
+  app.get('/public/*', (req, res) => Directory('test/files'));
 
   await app.listen();
 }
@@ -399,7 +399,7 @@ void main() async {
   final app = Alfred();
 
   // Warning: defaults to origin "*"
-  app.all("*", cors(origin: "myorigin.com"));
+  app.all('*', cors(origin: 'myorigin.com'));
 
   await app.listen();
 }
