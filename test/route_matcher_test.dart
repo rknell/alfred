@@ -32,7 +32,7 @@ void main() {
         RouteMatcher.match("/a/123/go/a", testRoutes, Method.get)
             .map((e) => e.route)
             .toList(),
-        []);
+        <String>[]);
     expect(
         RouteMatcher.match("/b/a/adskfjasjklf/another", testRoutes, Method.get)
             .map((e) => e.route)

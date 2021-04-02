@@ -6,5 +6,5 @@ class TypeHandler<T> {
 
   FutureOr Function(HttpRequest req, HttpResponse res, dynamic value) handler;
 
-  bool shouldHandle(Object item) => item is T;
+  bool shouldHandle(dynamic item) => item is T;
 }
