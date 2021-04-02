@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:alfred/src/type_handlers/type_handler.dart';
 
-FutureOr _jsonHandler(req, res, val) async {
+FutureOr _jsonHandler(req, res, val) {
   res.headers.contentType = ContentType.json;
   res.write(jsonEncode(val));
-  await res.close();
+  return res.close();
 }
 
 TypeHandler get jsonMapTypeHandler =>

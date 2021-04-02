@@ -37,15 +37,15 @@ extension ResponseHelpers on HttpResponse {
 
   /// Helper method for those used to res.json()
   ///
-  Future json(Object? json) async {
+  Future json(Object? json) {
     headers.contentType = ContentType.json;
     write(jsonEncode(json));
-    await close();
+    return close();
   }
 
   /// Helper method to just send data;
-  Future send(Object? data) async {
+  Future send(Object? data) {
     write(data);
-    await close();
+    return close();
   }
 }
