@@ -69,6 +69,19 @@ void main() {
         ['*', '/a']);
   });
 
+  test('it should generously match wildcards for sub-paths', () {
+    final testRoutes = [
+      HttpRoute('path/*', (req, res) async {}, Method.get),
+    ];
+
+    expect(
+        RouteMatcher.match('/path/to', testRoutes, Method.get).isNotEmpty, true);
+    expect(
+        RouteMatcher.match('/path/', testRoutes, Method.get).isNotEmpty, true);
+    expect(
+        RouteMatcher.match('/path', testRoutes, Method.get).isNotEmpty, true);
+  });
+
   test('it should respect the routemethod', () {
     final testRoutes = [
       HttpRoute('*', (req, res) async {}, Method.post),
