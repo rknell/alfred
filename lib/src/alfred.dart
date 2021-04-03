@@ -51,7 +51,7 @@ class Alfred {
   ///
   /// Set the number of simultaneous connections being processed at any one time
   /// in the [simultaneousProcessing] param in the constructor
-  late Queue requestQueue;
+  Queue requestQueue;
 
   /// An array of [TypeHandler] that Alfred walks through in order to determine
   /// if it can handle a value returned from a route.
@@ -87,8 +87,7 @@ class Alfred {
     this.onInternalError,
     this.logRequests = true,
     int simultaneousProcessing = 50,
-  }) {
-    requestQueue = Queue(parallel: simultaneousProcessing);
+  }) : requestQueue = Queue(parallel: simultaneousProcessing) {
     _registerDefaultTypeHandlers();
     _registerPluginListeners();
   }
