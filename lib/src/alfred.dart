@@ -60,7 +60,7 @@ class Alfred {
 
   final _onDoneListeners = <void Function(HttpRequest req, HttpResponse res)>[];
 
-  /// Register a listenener when a request is complete
+  /// Register a listener when a request is complete
   ///
   /// Typically would be used for logging, benchmarking or cleaning up data
   /// used when writing a plugin.
