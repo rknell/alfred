@@ -277,6 +277,15 @@ void main() {
     expect(responseNotFound.body, '{"message":"file not found"}');
   });
 
+  test('it does not crash when File not exists', () async {
+    app.get('error', (req, res) => File('does-not-exists'));
+    app.get('works', (req, res) => 'works!');
+
+    await http.get(Uri.parse('http://localhost:$port/error'));
+    final request = await http.get(Uri.parse('http://localhost:$port/works'));
+    expect(request.statusCode, 200);
+  });
+
   test('it routes correctly for a / url', () async {
     app.get('/', (req, res) => 'working');
     final response = await http.get(Uri.parse('http://localhost:$port/'));
