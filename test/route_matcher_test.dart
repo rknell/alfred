@@ -74,8 +74,8 @@ void main() {
       HttpRoute('path/*', (req, res) async {}, Method.get),
     ];
 
-    expect(
-        RouteMatcher.match('/path/to', testRoutes, Method.get).isNotEmpty, true);
+    expect(RouteMatcher.match('/path/to', testRoutes, Method.get).isNotEmpty,
+        true);
     expect(
         RouteMatcher.match('/path/', testRoutes, Method.get).isNotEmpty, true);
     expect(

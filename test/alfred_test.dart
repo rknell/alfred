@@ -286,12 +286,14 @@ void main() {
     expect(r2.headers['content-type'], 'text/html');
     expect(r2.body.contains('I am a SPA Application'), true);
 
-    final r3 = await http.get(Uri.parse('http://localhost:$port/spa/index.html'));
+    final r3 =
+        await http.get(Uri.parse('http://localhost:$port/spa/index.html'));
     expect(r3.statusCode, 200);
     expect(r3.headers['content-type'], 'text/html');
     expect(r3.body.contains('I am a SPA Application'), true);
 
-    final r4 = await http.get(Uri.parse('http://localhost:$port/spa/assets/some.txt'));
+    final r4 =
+        await http.get(Uri.parse('http://localhost:$port/spa/assets/some.txt'));
     expect(r4.statusCode, 200);
     expect(r4.headers['content-type'], 'text/plain');
     expect(r4.body.contains('This is some txt'), true);

@@ -28,8 +28,8 @@ class RouteMatcher {
       /// Wildcard describes sub-path
       ///
       if (item.route.endsWith('/*')) {
-        final routeWithoutSlash =
-            item.route.normalizePath.substring(0, item.route.normalizePath.length - '/*'.length);
+        final routeWithoutSlash = item.route.normalizePath
+            .substring(0, item.route.normalizePath.length - '/*'.length);
         var normalizedInput = input.normalizePath;
         if (normalizedInput.startsWith(routeWithoutSlash)) {
           output.add(item);
