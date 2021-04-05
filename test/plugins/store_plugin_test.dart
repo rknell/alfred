@@ -22,8 +22,8 @@ void main() {
     var didHit = false;
     app.all('/test', (req, res) {
       expect(req.route, '/test');
-      req.setStoreValue('testValue', 'bah!');
-      expect(req.getStoreValue('testValue'), 'bah!');
+      req.store.set('testValue', 'bah!');
+      expect(req.store.get<String>('testValue'), 'bah!');
       didHit = true;
       return 'done';
     });
@@ -43,19 +43,21 @@ void main() {
     app.removeOnDoneListener(listener);
     await http.get(Uri.parse('http://localhost:$port/test'));
     expect(hitCount, 1);
-    expect(app.storeOutstandingRequests.isEmpty, true);
+    expect(_outstandingRequests.isEmpty, true);
   });
 
   test('the store is correctly available across multiple routes', () async {
     var didHit = false;
     app.get('*', (req, res) {
-      req.setStoreValue('userid', '123456');
+      req.store.set('userid', '123456');
     });
     app.get('/user', (req, res) {
       didHit = true;
-      expect(req.getStoreValue('userid'), '123456');
+      expect(req.store.get<String>('userid'), '123456');
     });
     await http.get(Uri.parse('http://localhost:$port/user'));
     expect(didHit, true);
   });
 }
+
+List<HttpRequest> get _outstandingRequests => storePluginData.keys.toList();
