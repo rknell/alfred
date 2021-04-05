@@ -114,13 +114,10 @@ class Alfred {
   /// Create a get route
   ///
   HttpRoute get(String path,
-      FutureOr Function(HttpRequest req, HttpResponse res) callback,
-      {List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
-          const []}) {
-    final route = HttpRoute(path, callback, Method.get, middleware: middleware);
-    routes.add(route);
-    return route;
-  }
+          FutureOr Function(HttpRequest req, HttpResponse res) callback,
+          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
+              middleware = const []}) =>
+      _createRoute(path, callback, Method.get, middleware);
 
   /// Create a post route
   ///
