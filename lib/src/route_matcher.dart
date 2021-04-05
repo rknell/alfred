@@ -25,6 +25,18 @@ class RouteMatcher {
         continue;
       }
 
+      /// Wildcard describes sub-path
+      ///
+      if (item.route.endsWith('/*')) {
+        final routeWithoutSlash = item.route.normalizePath
+            .substring(0, item.route.normalizePath.length - '/*'.length);
+        var normalizedInput = input.normalizePath;
+        if (normalizedInput.startsWith(routeWithoutSlash)) {
+          output.add(item);
+          continue;
+        }
+      }
+
       final itemParts = List<String>.from(Uri.parse(item.route).pathSegments);
 
       if (itemParts.isNotEmpty && itemParts.last == '') {
@@ -90,6 +102,19 @@ class RouteMatcher {
       }
     }
     return output;
+  }
+}
+
+extension _PathNormalizer on String {
+  /// Trims all slashes at the start and end
+  String get normalizePath {
+    if (startsWith('/')) {
+      return substring('/'.length).normalizePath;
+    }
+    if (endsWith('/')) {
+      return substring(0, length - '/'.length).normalizePath;
+    }
+    return this;
   }
 }
 

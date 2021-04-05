@@ -270,11 +270,33 @@ void main() {
         await http.get(Uri.parse('http://localhost:$port/files/dummy.pdf'));
     expect(response.statusCode, 200);
     expect(response.headers['content-type'], 'application/pdf');
+  });
 
-    final responseNotFound = await http
-        .get(Uri.parse('http://localhost:$port/files/doesnotexist.png'));
-    expect(responseNotFound.statusCode, 404);
-    expect(responseNotFound.body, '{"message":"file not found"}');
+  test('it serves SPA projects', () async {
+    app.get('/spa/*', (req, res) => Directory('test/files/spa'));
+    app.get('/spa/*', (req, res) => File('test/files/spa/index.html'));
+
+    final r1 = await http.get(Uri.parse('http://localhost:$port/spa'));
+    expect(r1.statusCode, 200);
+    expect(r1.headers['content-type'], 'text/html');
+    expect(r1.body.contains('I am a SPA Application'), true);
+
+    final r2 = await http.get(Uri.parse('http://localhost:$port/spa/'));
+    expect(r2.statusCode, 200);
+    expect(r2.headers['content-type'], 'text/html');
+    expect(r2.body.contains('I am a SPA Application'), true);
+
+    final r3 =
+        await http.get(Uri.parse('http://localhost:$port/spa/index.html'));
+    expect(r3.statusCode, 200);
+    expect(r3.headers['content-type'], 'text/html');
+    expect(r3.body.contains('I am a SPA Application'), true);
+
+    final r4 =
+        await http.get(Uri.parse('http://localhost:$port/spa/assets/some.txt'));
+    expect(r4.statusCode, 200);
+    expect(r4.headers['content-type'], 'text/plain');
+    expect(r4.body.contains('This is some txt'), true);
   });
 
   test('it does not crash when File not exists', () async {
