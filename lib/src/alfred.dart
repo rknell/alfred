@@ -293,9 +293,11 @@ class Alfred {
         await request.response.close();
       } else {
         //Otherwise fall back to a generic 500 error
-        request.response.statusCode = 500;
-        request.response.write(e);
-        await request.response.close();
+        try {
+          request.response.statusCode = 500;
+          request.response.write(e);
+          await request.response.close();
+        } catch (_) {}
       }
     }
   }
