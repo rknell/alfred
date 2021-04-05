@@ -4,6 +4,7 @@ export 'package:http_server/http_server.dart' show HttpBodyFileUpload;
 
 export 'src/alfred.dart';
 export 'src/alfred_exception.dart';
+export 'src/extensions/nested_route.dart';
 export 'src/extensions/file_helpers.dart';
 export 'src/extensions/request_helpers.dart';
 export 'src/extensions/response_helpers.dart';
