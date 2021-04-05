@@ -12,7 +12,6 @@ import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:pedantic/pedantic.dart';
 import 'package:queue/queue.dart';
-import 'package:uuid/uuid.dart';
 
 import 'alfred_exception.dart';
 import 'http_route.dart';
@@ -195,7 +194,6 @@ class Alfred {
   ///
   Future<void> _incomingRequest(HttpRequest request) async {
     var isDone = false;
-    request.response.headers.set('x-alfred-requestid', Uuid().v4());
 
     if (logRequests) {
       print('${request.method} - ${request.uri.toString()}');
@@ -241,7 +239,7 @@ class Alfred {
           if (isDone) {
             break;
           }
-          request.setStoreValue('_internal_route', route.route);
+          request.store.set('_internal_route', route.route);
 
           /// Loop through any middleware
           for (var middleware in route.middleware) {
