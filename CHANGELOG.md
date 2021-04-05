@@ -1,3 +1,10 @@
+## 0.1.0-alpha.5
+
+- Added web socket support
+- Clear support for nested routes
+- Preventing a full crash in some circumstances
+- Support for Single Page Apps
+
 ## 0.1.0-alpha.4
 
 - Added support for "plugins" to extend the http request object and store data
