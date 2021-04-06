@@ -66,5 +66,4 @@ void main() {
     channel.sink.add('test');
     var response = (await channel.stream.toList());
   });
-
 }

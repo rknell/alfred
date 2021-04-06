@@ -1,3 +1,7 @@
+## 0.1.0-alpha.7
+
+- Better handling when there is no appropriate type handler
+
 ## 0.1.0-alpha.6
 
 - Removed dependency on UUID

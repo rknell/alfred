@@ -331,4 +331,14 @@ void main() {
     expect(response.headers.containsKey('access-control-allow-headers'), true);
     expect(response.headers.containsKey('access-control-allow-methods'), true);
   });
+
+  test("it should throw an appropriate error when a return type isn't found",
+      () async {
+    app.get('/test', (req, res) => _UnknownType());
+    final response = await http.get(Uri.parse('http://localhost:$port/test'));
+    expect(response.statusCode, 500);
+    expect(response.body.contains('_UnknownType'), true);
+  });
 }
+
+class _UnknownType {}

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:alfred/src/extensions/request_helpers.dart';
 import 'package:alfred/src/plugins/store_plugin.dart';
 import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
 import 'package:alfred/src/type_handlers/directory_type_handler.dart';
@@ -306,11 +307,16 @@ class Alfred {
   ///
   Future<void> _handleResponse(dynamic result, HttpRequest request) async {
     if (result != null) {
+      var handled = false;
       for (var handler in typeHandlers) {
         if (handler.shouldHandle(result)) {
           await handler.handler(request, request.response, result);
+          handled = true;
           break;
         }
+      }
+      if (!handled) {
+        throw NoTypeHandlerError(result, request);
       }
     }
   }
@@ -322,4 +328,15 @@ class Alfred {
       await server!.close(force: force);
     }
   }
+}
+
+class NoTypeHandlerError extends Error {
+  final dynamic object;
+  final HttpRequest request;
+
+  NoTypeHandlerError(this.object, this.request);
+
+  @override
+  String toString() =>
+      'No type handler found for ${object.runtimeType} / ${object.toString()} \nRoute: ${request.route}\nIf the app is running in production mode, the type name may be minified. Run it in debug mode to resolve';
 }
