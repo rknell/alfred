@@ -19,7 +19,7 @@ void main() {
   app.logWriter = (messageFn, type) {
     switch (type) {
       case LogType.debug:
-        // avoid evaluating too much debugs messages
+        // avoid evaluating too much debug messages
         if (log.level <= Level.FINE) {
           log.fine(messageFn());
         }

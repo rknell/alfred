@@ -108,10 +108,12 @@ class Alfred {
   }
 
   void _registerDefaultLogWriter(LogType logLevel) {
-    logWriter = (dynamic messageFn, type) {
+    logWriter = (dynamic Function() messageFn, type) {
       if (type.index >= logLevel.index) {
-        print(
-            '${DateTime.now()} - ${EnumToString.convertToString(type)} - ${messageFn()}');
+        var timestamp = DateTime.now();
+        var logType = EnumToString.convertToString(type);
+        var message = messageFn().toString();
+        print('$timestamp - $logType - $message');
       }
     };
   }
