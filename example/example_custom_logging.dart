@@ -19,7 +19,10 @@ void main() {
   app.logWriter = (messageFn, type) {
     switch (type) {
       case LogType.debug:
-        log.fine(messageFn());
+        // avoid evaluating too much debugs messages
+        if (log.level <= Level.FINE) {
+          log.fine(messageFn());
+        }
         break;
       case LogType.info:
         log.info(messageFn());
@@ -34,6 +37,7 @@ void main() {
   };
 
   // Configure routing...
+  app.get('/resource', (req, res) => 'response');
 
   app.listen();
 }
