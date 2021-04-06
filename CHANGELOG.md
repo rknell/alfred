@@ -1,3 +1,8 @@
+## 0.1.0-alpha.6
+
+- Removed dependency on UUID
+- Improved logic for storage plugin
+
 ## 0.1.0-alpha.5
 
 - Added web socket support
