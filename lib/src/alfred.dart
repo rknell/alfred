@@ -20,6 +20,9 @@ import 'route_matcher.dart';
 
 enum Method { get, post, put, delete, patch, options, all }
 
+/// Indicates the severity of logged message
+enum LogType { debug, info, warn, error }
+
 /// Server application class
 ///
 /// This is the core of the server application. Generally you would create one
@@ -36,9 +39,11 @@ class Alfred {
   /// If there is anything the app can't do, you can do it through here.
   HttpServer? server;
 
-  /// Log requests immediately as they come in
+  /// Writer to handle internal logging.
   ///
-  bool logRequests;
+  /// It can optionally exchanged with your own logging solution.
+  /// ```
+  late void Function(dynamic Function() messageFn, LogType type) logWriter;
 
   /// Optional handler for when a route is not found
   ///
@@ -78,7 +83,15 @@ class Alfred {
     _onDoneListeners.remove(listener);
   }
 
-  /// Constructor
+  /// Creates a new Alfred application.
+  ///
+  /// The default [logWriter] can be tuned by changing the [logLevel]:
+  /// - [LogType.error]: prints errors
+  /// - [LogType.warn]: prints errors and warning
+  /// - [LogType.info]: prints errors, warning and requests
+  /// - [LogType.debug]: prints errors, warning, requests and further details
+  ///
+  /// *Note: Changing the [logLevel] only effects the default [logWriter].*
   ///
   /// [simultaneousProcessing] is the number of requests doing work at any one
   /// time. If the amount of unprocessed incoming requests exceed this number,
@@ -86,11 +99,21 @@ class Alfred {
   Alfred({
     this.onNotFound,
     this.onInternalError,
-    this.logRequests = true,
+    LogType logLevel = LogType.info,
     int simultaneousProcessing = 50,
   }) : requestQueue = Queue(parallel: simultaneousProcessing) {
     _registerDefaultTypeHandlers();
     _registerPluginListeners();
+    _registerDefaultLogWriter(logLevel);
+  }
+
+  void _registerDefaultLogWriter(LogType logLevel) {
+    logWriter = (dynamic messageFn, type) {
+      if (type.index >= logLevel.index) {
+        print(
+            '${DateTime.now()} - ${EnumToString.convertToString(type)} - ${messageFn()}');
+      }
+    };
   }
 
   void _registerDefaultTypeHandlers() {
@@ -188,6 +211,7 @@ class Alfred {
       requestQueue.add(() => _incomingRequest(request));
     });
 
+    logWriter(() => 'HTTP Server listening on port $port', LogType.info);
     return server = _server;
   }
 
@@ -196,9 +220,8 @@ class Alfred {
   Future<void> _incomingRequest(HttpRequest request) async {
     var isDone = false;
 
-    if (logRequests) {
-      print('${request.method} - ${request.uri.toString()}');
-    }
+    logWriter(
+        () => '${request.method} - ${request.uri.toString()}', LogType.info);
 
     // We track if the response has been resolved in order to exit out early
     // the list of routes (ie the middleware returned)
@@ -207,6 +230,7 @@ class Alfred {
       for (var listener in _onDoneListeners) {
         listener(request, request.response);
       }
+      logWriter(() => 'Response sent to client', LogType.debug);
     }));
 
     // Work out all the routes we need to process
@@ -221,6 +245,7 @@ class Alfred {
       // or see if there are any static routes to fall back to, otherwise
       // continue and process the routes
       if (effectiveRoutes.isEmpty) {
+        logWriter(() => 'No matching route found.', LogType.debug);
         if (onNotFound != null) {
           // Otherwise check if a custom 404 handler has been provided
           final dynamic result = await onNotFound!(request, request.response);
@@ -240,6 +265,7 @@ class Alfred {
           if (isDone) {
             break;
           }
+          logWriter(() => 'Match route: ${route.route}', LogType.debug);
           request.store.set('_internal_route', route.route);
 
           /// Loop through any middleware
@@ -248,6 +274,8 @@ class Alfred {
             if (isDone) {
               break;
             }
+            logWriter(
+                () => 'Apply middleware associated with route', LogType.debug);
             await _handleResponse(
                 await middleware(request, request.response), request);
           }
@@ -257,6 +285,7 @@ class Alfred {
           if (isDone) {
             break;
           }
+          logWriter(() => 'Execute route callback function', LogType.debug);
           await _handleResponse(
               await route.callback(request, request.response), request);
         }
@@ -268,8 +297,10 @@ class Alfred {
         ///
         if (!isDone) {
           if (request.response.contentLength == -1) {
-            print(
-                "Warning: Returning a response with no content. ${effectiveRoutes.map((e) => e.route).join(", ")}");
+            logWriter(
+                () => 'Warning: Returning a response with no content. '
+                    '${effectiveRoutes.map((e) => e.route).join(', ')}',
+                LogType.warn);
           }
           await request.response.close();
         }
@@ -280,8 +311,8 @@ class Alfred {
       await _handleResponse(e.response, request);
     } catch (e, s) {
       // Its all broken, bail (but don't crash)
-      print(e);
-      print(s);
+      logWriter(() => e, LogType.error);
+      logWriter(() => s, LogType.error);
       if (onInternalError != null) {
         // Handle the error with a custom response
         final dynamic result =
@@ -310,6 +341,9 @@ class Alfred {
       var handled = false;
       for (var handler in typeHandlers) {
         if (handler.shouldHandle(result)) {
+          logWriter(
+              () => 'Apply TypeHandler for result type: ${result.runtimeType}',
+              LogType.debug);
           await handler.handler(request, request.response, result);
           handled = true;
           break;
