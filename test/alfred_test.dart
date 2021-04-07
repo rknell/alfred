@@ -272,6 +272,15 @@ void main() {
     expect(response.headers['content-type'], 'application/pdf');
   });
 
+  test('it serves static files although directories do not match', () async {
+    app.get('/my/directory/*', (req, res) => Directory('test/files'));
+
+    final response = await http
+        .get(Uri.parse('http://localhost:$port/my/directory/dummy.pdf'));
+    expect(response.statusCode, 200);
+    expect(response.headers['content-type'], 'application/pdf');
+  });
+
   test('it serves SPA projects', () async {
     app.get('/spa/*', (req, res) => Directory('test/files/spa'));
     app.get('/spa/*', (req, res) => File('test/files/spa/index.html'));
