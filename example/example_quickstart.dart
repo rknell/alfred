@@ -6,6 +6,4 @@ void main() async {
   app.get('/example', (req, res) => 'Hello world');
 
   await app.listen();
-
-  print('Listening on port 3000');
 }
