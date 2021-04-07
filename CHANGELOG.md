@@ -1,3 +1,8 @@
+## 0.1.0
+
+- Adding custom logging
+- Releasing API update for general use
+
 ## 0.1.0-alpha.7
 
 - Better handling when there is no appropriate type handler
