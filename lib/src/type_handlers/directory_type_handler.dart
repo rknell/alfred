@@ -43,6 +43,7 @@ Future _respondWithFile(HttpResponse res, File file) async {
   await res.close();
 }
 
+
 extension _Logger on HttpRequest {
   void log(String Function() msgFn) =>
       alfred.logWriter(() => 'DirectoryTypeHandler: ${msgFn()}', LogType.debug);
