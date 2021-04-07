@@ -5,9 +5,7 @@ void main() {
 
   Directory('tool/templates/documentation').listSync().forEach((file) {
     if (file.path.endsWith('.md')) {
-      var name = file.path
-          .split('/')
-          .last;
+      var name = file.path.split('/').last;
       process(file as File, File('documentation/$name'));
     }
   });
@@ -29,7 +27,7 @@ List<String> codeMacro(List<String> lines) {
       var path = line.substring(line.indexOf('@code') + '@code'.length).trim();
       var file = File(path);
       var extension =
-      file.path.substring(file.path.lastIndexOf('.') + '.'.length);
+          file.path.substring(file.path.lastIndexOf('.') + '.'.length);
       var code = file.readAsStringSync().trim().split('\n');
 
       result.add('```$extension');
