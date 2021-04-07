@@ -339,6 +339,22 @@ void main() {
     expect(response.statusCode, 500);
     expect(response.body.contains('_UnknownType'), true);
   });
+
+  test('it should log out request information', () async {
+    app.get('/resource', (req, res) => 'response', middleware: [cors()]);
+    var logs = <String>[];
+    app.logWriter = (msgFn, type) => logs.add('$type ${msgFn()}');
+    await http.get(Uri.parse('http://localhost:$port/resource'));
+
+    bool inLog(String part) =>
+        logs.isNotEmpty && logs.where((log) => log.contains(part)).isNotEmpty;
+
+    expect(inLog('info GET - /resource'), true);
+    expect(inLog('debug Match route: /resource'), true);
+    expect(inLog('debug Apply middleware'), true);
+    expect(inLog('debug Apply TypeHandler for result type: String'), true);
+    expect(inLog('debug Response sent to client'), true);
+  });
 }
 
 class _UnknownType {}

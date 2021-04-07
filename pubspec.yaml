@@ -16,4 +16,5 @@ dependencies:
 dev_dependencies:
   test: ^1.14.4
   web_socket_channel: ^2.0.0
+  logging: ^1.0.1
   http:
