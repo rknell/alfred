@@ -122,7 +122,8 @@ void main() {
   test('not found with directory type handler', () async {
     app.get('/files/*', (req, res) => Directory('test/files'));
 
-    final r = await http.get(Uri.parse('http://localhost:$port/files/no-file.zip'));
+    final r =
+        await http.get(Uri.parse('http://localhost:$port/files/no-file.zip'));
     expect(r.body, '404 not found');
     expect(r.statusCode, 404);
   });
