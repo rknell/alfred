@@ -106,6 +106,39 @@ void main() {
     expect(response.statusCode, 404);
   });
 
+  test('not found with middleware', () async {
+    app.all('*', cors());
+    app.get('resource2', (req, res) {});
+
+    final r1 = await http.get(Uri.parse('http://localhost:$port/resource1'));
+    expect(r1.body, '404 not found');
+    expect(r1.statusCode, 404);
+
+    final r2 = await http.get(Uri.parse('http://localhost:$port/resource2'));
+    expect(r2.body, '');
+    expect(r2.statusCode, 200);
+  });
+
+  test('not found with directory type handler', () async {
+    app.get('/files/*', (req, res) => Directory('test/files'));
+
+    final r = await http.get(Uri.parse('http://localhost:$port/no-file.zip'));
+    expect(r.body, '404 not found');
+    expect(r.statusCode, 404);
+  });
+
+  test('not found with file type handler', () async {
+    app.onNotFound = (req, res) {
+      res.statusCode = HttpStatus.notFound;
+      return 'Custom404Message';
+    };
+    app.get('/index.html', (req, res) => File('does-not.exists'));
+
+    final r = await http.get(Uri.parse('http://localhost:$port/index.html'));
+    expect(r.body, 'Custom404Message');
+    expect(r.statusCode, 404);
+  });
+
   test('it handles a post request', () async {
     app.post('/test', (req, res) => 'test string');
     final response = await http.post(Uri.parse('http://localhost:$port/test'));
@@ -341,7 +374,7 @@ void main() {
   });
 
   test('it should log out request information', () async {
-    app.get('/resource', (req, res) => 'response', middleware: [cors()]);
+    app.get('/resource', (req, res) => 'r', middleware: [cors()]);
     var logs = <String>[];
     app.logWriter = (msgFn, type) => logs.add('$type ${msgFn()}');
     await http.get(Uri.parse('http://localhost:$port/resource'));
