@@ -375,7 +375,7 @@ void main() {
   });
 
   test('it should log out request information', () async {
-    app.get('/resource', (req, res) => 'r', middleware: [cors()]);
+    app.get('/resource', (req, res) => 'response', middleware: [cors()]);
     var logs = <String>[];
     app.logWriter = (msgFn, type) => logs.add('$type ${msgFn()}');
     await http.get(Uri.parse('http://localhost:$port/resource'));
