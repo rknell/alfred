@@ -12,8 +12,8 @@ TypeHandler get directoryTypeHandler =>
       directory = directory as Directory;
       var usedRoute = req.route;
 
-      assert(usedRoute.endsWith('*'),
-          'TypeHandler of type Directory needs a route declaration that ends with a wildcard (*). Found: $usedRoute');
+      assert(usedRoute.contains('*'),
+          'TypeHandler of type Directory needs a route declaration that contains a wildcard (*). Found: $usedRoute');
 
       final virtualPath = req.uri.path
           .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
