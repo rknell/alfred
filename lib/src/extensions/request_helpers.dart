@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:http_server/http_server.dart';
+import 'package:alfred/src/body_parser/http_body.dart';
 
 import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
