@@ -220,6 +220,10 @@ class Alfred {
   /// Handles and routes an incoming request
   ///
   Future<void> _incomingRequest(HttpRequest request) async {
+    /// Expose this Alfred instance for middleware or other utility functions
+    request.store.set('_internal_alfred', this);
+
+    /// Variable to track the close of the response
     var isDone = false;
 
     logWriter(
