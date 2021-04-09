@@ -12,4 +12,8 @@ class HttpRoute {
 
   HttpRoute(this.route, this.callback, this.method,
       {this.middleware = const []});
+
+  /// Returns `true` if route can match multiple routes due to usage of
+  /// wildcards (`*`)
+  bool get usesWildcardMatcher => route.contains('*');
 }

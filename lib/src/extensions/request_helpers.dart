@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:alfred/src/body_parser/http_body.dart';
 
+import '../../alfred.dart';
 import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
 
@@ -25,4 +26,8 @@ extension RequestHelpers on HttpRequest {
   /// Get the matched route of the current request
   ///
   String get route => store.get<String?>('_internal_route') ?? '';
+
+  /// Get Alfred instance which is associated with this request
+  ///
+  Alfred get alfred => store.get<Alfred>('_internal_alfred');
 }

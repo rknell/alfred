@@ -220,6 +220,10 @@ class Alfred {
   /// Handles and routes an incoming request
   ///
   Future<void> _incomingRequest(HttpRequest request) async {
+    /// Expose this Alfred instance for middleware or other utility functions
+    request.store.set('_internal_alfred', this);
+
+    /// Variable to track the close of the response
     var isDone = false;
 
     logWriter(
@@ -248,20 +252,11 @@ class Alfred {
       // continue and process the routes
       if (effectiveRoutes.isEmpty) {
         logWriter(() => 'No matching route found.', LogType.debug);
-        if (onNotFound != null) {
-          // Otherwise check if a custom 404 handler has been provided
-          final dynamic result = await onNotFound!(request, request.response);
-          if (result != null && !isDone) {
-            await _handleResponse(result, request);
-          }
-          await request.response.close();
-        } else {
-          // Otherwise throw a generic 404;
-          request.response.statusCode = 404;
-          request.response.write('404 not found');
-          await request.response.close();
-        }
+        await _respondNotFound(request, isDone);
       } else {
+        /// Tracks if one route is using a wildcard
+        var nonWildcardRouteMatch = false;
+
         // Loop through the routes in the order they are in the routes list
         for (var route in effectiveRoutes) {
           if (isDone) {
@@ -269,6 +264,8 @@ class Alfred {
           }
           logWriter(() => 'Match route: ${route.route}', LogType.debug);
           request.store.set('_internal_route', route.route);
+          nonWildcardRouteMatch =
+              !route.usesWildcardMatcher || nonWildcardRouteMatch;
 
           /// Loop through any middleware
           for (var middleware in route.middleware) {
@@ -299,10 +296,14 @@ class Alfred {
         ///
         if (!isDone) {
           if (request.response.contentLength == -1) {
-            logWriter(
-                () => 'Warning: Returning a response with no content. '
-                    '${effectiveRoutes.map((e) => e.route).join(', ')}',
-                LogType.warn);
+            if (nonWildcardRouteMatch) {
+              logWriter(
+                  () => 'Warning: Returning a response with no content. '
+                      '${effectiveRoutes.map((e) => e.route).join(', ')}',
+                  LogType.warn);
+            } else {
+              await _respondNotFound(request, isDone);
+            }
           }
           await request.response.close();
         }
@@ -311,6 +312,8 @@ class Alfred {
       // The user threw a handle HTTP Exception
       request.response.statusCode = e.statusCode;
       await _handleResponse(e.response, request);
+    } on NotFoundError catch (_) {
+      await _respondNotFound(request, isDone);
     } catch (e, s) {
       // Its all broken, bail (but don't crash)
       logWriter(() => e, LogType.error);
@@ -331,6 +334,24 @@ class Alfred {
           await request.response.close();
         } catch (_) {}
       }
+    }
+  }
+
+  /// Responds request with a NotFound response
+  ///
+  Future _respondNotFound(HttpRequest request, bool isDone) async {
+    if (onNotFound != null) {
+      // Otherwise check if a custom 404 handler has been provided
+      final dynamic result = await onNotFound!(request, request.response);
+      if (result != null && !isDone) {
+        await _handleResponse(result, request);
+      }
+      await request.response.close();
+    } else {
+      // Otherwise throw a generic 404;
+      request.response.statusCode = 404;
+      request.response.write('404 not found');
+      await request.response.close();
     }
   }
 
@@ -376,3 +397,7 @@ class NoTypeHandlerError extends Error {
   String toString() =>
       'No type handler found for ${object.runtimeType} / ${object.toString()} \nRoute: ${request.route}\nIf the app is running in production mode, the type name may be minified. Run it in debug mode to resolve';
 }
+
+/// Error used by middleware, utils or type handler to elevate
+/// a NotFound response.
+class NotFoundError extends Error {}

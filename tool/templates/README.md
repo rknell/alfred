@@ -1,10 +1,3 @@
-import 'dart:io';
-
-String importExample(String name) =>
-    File('example/$name').readAsStringSync().trim();
-
-void main() {
-  final template = """
 # Alfred
 
 A performant, express like server framework with a few bonuses that make life even easier.
@@ -12,14 +5,13 @@ A performant, express like server framework with a few bonuses that make life ev
 [![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
 Quickstart:
-```dart
-${importExample("example_quickstart.dart")}
-``` 
+
+@code example/example_quickstart.dart
 
 ## Motivation and philosophy
 
-TlDr:  
-- A minimum of dependencies, 
+TlDr:
+- A minimum of dependencies,
 - A minimum of code (199 lines at last check), and sticking close to dart core libraries
 - Ease of use
 - Predictable, well established semantics
@@ -28,8 +20,8 @@ I came to dart with a NodeJS / React Native & Cordova background. Previously I h
 my server framework, almost always calling "res.json()". I just wanted a simple framework that would
 allow me to pump out apps using dart on the server.
 
-I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I 
-looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched 
+I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I
+looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched
 the surface.
 
 Then I moved to Angel. Angel seemed a little less popular but concerned me because it was trying to
@@ -49,15 +41,11 @@ and run the project.
 
 if you have ever used expressjs before you should be right at home
 
-```dart
-${importExample("example.dart")}
-```
+@code example/example.dart
 
 It should do pretty much what you expect. Handling bodies though do need an "await":
 
-```dart
-${importExample("example_body_parsing.dart")}
-```
+@code example/example_body_parsing.dart
 
 Internally dart provides a body parser, so no extra dependencies there.
 
@@ -74,18 +62,14 @@ Each route accepts a Future as response. Currently you can pass back the followi
 
 If you want to return HTML, just set the content type to HTML like this:
 
-```dart
-${importExample("example_html.dart")}
-```
+@code example/example_html.dart
 
 ### Custom type handlers
 If you want to create custom type handlers, just add them to the type handler
 array in the app object. This is a bit advanced, and I expect it would be more
 for devs wanting to extend Alfred:
 
-```dart
-${importExample("example_custom_type_handler.dart")}
-```
+@code example/example_custom_type_handler.dart
 
 ## File downloads
 
@@ -96,9 +80,7 @@ You can just set the right headers, but there is a handy little helper that will
 
 See `res.setDownload` below.
 
-```dart
-${importExample("example_file_downloads.dart")}
-```
+@code example/example_file_downloads.dart
 
 ## But what about Mongo or Postgres or <Databse x>?
 
@@ -128,24 +110,20 @@ provides over the core library is the routing and route param extraction.
 
 ## Routing
 
-Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex 
+Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex
 matching, mostly just stick with the route name and param syntax from Express:
 
 "/path/to/:id/property" etc
 
 So for example:
 
-```dart
-${importExample("example_routing.dart")}
-```
+@code example/example_routing.dart
 
 You can also use a wildcard for a route, and provided another route hasn't already resolved the
 response it will be hit. So for example if you want to authenticate a whole section of an api you
 can do this:
 
-```dart
-${importExample("example_middleware_authentication_wildcard.dart")}
-```
+@code example/example_middleware_authentication_wildcard.dart
 
 ## Middleware
 
@@ -153,17 +131,13 @@ At present the middleware system probably isn't built out enough, but will do fo
 
 Right now you can specify a middleware for all routes by declaring:
 
-```dart
-${importExample("example_middleware_2.dart")}
-```
+@code example/example_middleware_2.dart
 
 Middleware declared this way will be executed in the order its added to the app.
 
 You can also add middleware to a route like so:
 
-```dart
-${importExample("example_middleware.dart")}
-```
+@code example/example_middleware.dart
 
 ### What? No 'next'? how do I even?
 
@@ -177,48 +151,37 @@ If you return null it will yield to the next middleware or route.
 
 ## Error handling
 
-You can either set the status code on the response object yourself and send the data manually, or 
+You can either set the status code on the response object yourself and send the data manually, or
 you can do this from any route:
 
-```dart
 app.get("/",(req, res) => throw AlfredException(400, {"message": "invalid request"}));
-```
 
 If any of the routes bubble an unhandled error, it will catch it and throw a 500 error.
 
-If you want to handle the logic when a 500 error is thrown, you can add a custom handler when you 
+If you want to handle the logic when a 500 error is thrown, you can add a custom handler when you
 instantiate the app. For example:
 
-```dart
-${importExample("example_error_handling.dart")}
-```
+@code example/example_error_handling.dart
 
 ### 404 Handling
 
 404 Handling works the same as 500 error handling (or uncaught error handling). There is a default
 behaviour, but if you want to override it, simply handle it in the app declaration.
 
-```dart
-${importExample("example_missing_handler.dart")}
-```
+@code example/example_missing_handler.dart
 ## Static Files
 
 This one is super easy - just pass in a public path and a dart Directory object and Alfred does
 the rest.
 
-```dart
-${importExample("example_static_files.dart")}
-```
+@code example/example_static_files.dart
 
 ## CORS
 
-There is a cors middleware supplied for your convenience. 
+There is a cors middleware supplied for your convenience.
 
-```dart
-${importExample("example_cors.dart")}
-```
+@code example/example_cors.dart
 
-  """;
+## Logging
 
-  File('README.md').writeAsStringSync(template.trim());
-}
+For more details on logging [click here](documentation/logging.md).

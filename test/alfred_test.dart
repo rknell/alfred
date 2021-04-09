@@ -106,6 +106,40 @@ void main() {
     expect(response.statusCode, 404);
   });
 
+  test('not found with middleware', () async {
+    app.all('*', cors());
+    app.get('resource2', (req, res) {});
+
+    final r1 = await http.get(Uri.parse('http://localhost:$port/resource1'));
+    expect(r1.body, '404 not found');
+    expect(r1.statusCode, 404);
+
+    final r2 = await http.get(Uri.parse('http://localhost:$port/resource2'));
+    expect(r2.body, '');
+    expect(r2.statusCode, 200);
+  });
+
+  test('not found with directory type handler', () async {
+    app.get('/files/*', (req, res) => Directory('test/files'));
+
+    final r =
+        await http.get(Uri.parse('http://localhost:$port/files/no-file.zip'));
+    expect(r.body, '404 not found');
+    expect(r.statusCode, 404);
+  });
+
+  test('not found with file type handler', () async {
+    app.onNotFound = (req, res) {
+      res.statusCode = HttpStatus.notFound;
+      return 'Custom404Message';
+    };
+    app.get('/index.html', (req, res) => File('does-not.exists'));
+
+    final r = await http.get(Uri.parse('http://localhost:$port/index.html'));
+    expect(r.body, 'Custom404Message');
+    expect(r.statusCode, 404);
+  });
+
   test('it handles a post request', () async {
     app.post('/test', (req, res) => 'test string');
     final response = await http.post(Uri.parse('http://localhost:$port/test'));
@@ -268,6 +302,15 @@ void main() {
 
     final response =
         await http.get(Uri.parse('http://localhost:$port/files/dummy.pdf'));
+    expect(response.statusCode, 200);
+    expect(response.headers['content-type'], 'application/pdf');
+  });
+
+  test('it serves static files although directories do not match', () async {
+    app.get('/my/directory/*', (req, res) => Directory('test/files'));
+
+    final response = await http
+        .get(Uri.parse('http://localhost:$port/my/directory/dummy.pdf'));
     expect(response.statusCode, 200);
     expect(response.headers['content-type'], 'application/pdf');
   });
