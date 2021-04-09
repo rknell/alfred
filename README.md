@@ -5,6 +5,7 @@ A performant, express like server framework with a few bonuses that make life ev
 [![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
 Quickstart:
+
 ```dart
 import 'package:alfred/alfred.dart';
 
@@ -14,15 +15,13 @@ void main() async {
   app.get('/example', (req, res) => 'Hello world');
 
   await app.listen();
-
-  print('Listening on port 3000');
 }
-``` 
+```
 
 ## Motivation and philosophy
 
-TlDr:  
-- A minimum of dependencies, 
+TlDr:
+- A minimum of dependencies,
 - A minimum of code (199 lines at last check), and sticking close to dart core libraries
 - Ease of use
 - Predictable, well established semantics
@@ -31,8 +30,8 @@ I came to dart with a NodeJS / React Native & Cordova background. Previously I h
 my server framework, almost always calling "res.json()". I just wanted a simple framework that would
 allow me to pump out apps using dart on the server.
 
-I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I 
-looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched 
+I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I
+looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched
 the surface.
 
 Then I moved to Angel. Angel seemed a little less popular but concerned me because it was trying to
@@ -210,7 +209,7 @@ provides over the core library is the routing and route param extraction.
 
 ## Routing
 
-Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex 
+Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex
 matching, mostly just stick with the route name and param syntax from Express:
 
 "/path/to/:id/property" etc
@@ -317,16 +316,14 @@ If you return null it will yield to the next middleware or route.
 
 ## Error handling
 
-You can either set the status code on the response object yourself and send the data manually, or 
+You can either set the status code on the response object yourself and send the data manually, or
 you can do this from any route:
 
-```dart
 app.get("/",(req, res) => throw AlfredException(400, {"message": "invalid request"}));
-```
 
 If any of the routes bubble an unhandled error, it will catch it and throw a 500 error.
 
-If you want to handle the logic when a 500 error is thrown, you can add a custom handler when you 
+If you want to handle the logic when a 500 error is thrown, you can add a custom handler when you
 instantiate the app. For example:
 
 ```dart
@@ -389,7 +386,7 @@ void main() async {
 
 ## CORS
 
-There is a cors middleware supplied for your convenience. 
+There is a cors middleware supplied for your convenience.
 
 ```dart
 import 'package:alfred/alfred.dart';
@@ -404,3 +401,7 @@ void main() async {
   await app.listen();
 }
 ```
+
+## Logging
+
+For more details on logging [click here](documentation/logging.md).
