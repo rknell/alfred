@@ -1,4 +1,4 @@
-dart tool/generate_readme.dart
+dart tool/generate_documentation.dart
 dart fix --apply
 dartanalyzer --fatal-warnings lib test example
 dartfmt -w .

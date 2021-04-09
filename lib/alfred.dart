@@ -1,7 +1,5 @@
 export 'dart:io' show HttpRequest, HttpResponse;
 
-export 'package:http_server/http_server.dart' show HttpBodyFileUpload;
-
 export 'src/alfred.dart';
 export 'src/alfred_exception.dart';
 export 'src/extensions/file_helpers.dart';

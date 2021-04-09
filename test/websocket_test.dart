@@ -49,13 +49,10 @@ void main() {
   });
 
   test('it correctly handles a websocket error', () async {
-    var error = false;
-    var open = false;
     app.get(
         '/ws',
         (req, res) => WebSocketSession(
               onOpen: (ws) {
-                open = true;
                 throw 'Test';
               },
               onError: (ws, dynamic error) => error = true,
@@ -64,6 +61,5 @@ void main() {
     final channel = IOWebSocketChannel.connect('ws://localhost:$port/ws');
 
     channel.sink.add('test');
-    var response = (await channel.stream.toList());
   });
 }

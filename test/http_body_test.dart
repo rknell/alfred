@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:http_server/http_server.dart';
+import 'package:alfred/src/body_parser/http_body.dart';
 import 'package:test/test.dart';
 
 import 'http_fakes.dart';
