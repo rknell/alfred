@@ -147,6 +147,7 @@ void main() {
     final testRoutes = [
       HttpRoute('[a-z]+/[0-9]+', _callback, Method.get),
       HttpRoute('[a-z]{5}', _callback, Method.get),
+      HttpRoute('(a|b)/c', _callback, Method.get),
     ];
 
     expect(match('a/b', testRoutes), <String>[]);
@@ -157,6 +158,8 @@ void main() {
     expect(match('abc42', testRoutes), <String>[]);
     expect(match('abcde', testRoutes), <String>['[a-z]{5}']);
     expect(match('final', testRoutes), <String>['[a-z]{5}']);
+    expect(match('a/c', testRoutes), <String>['(a|b)/c']);
+    expect(match('b/c', testRoutes), <String>['(a|b)/c']);
   });
 }
 
