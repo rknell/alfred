@@ -1,20 +1,19 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
+import 'common.dart';
 
 void main() {
   late Alfred app;
   late int port;
 
-  setUp(() {
-    port = Random().nextInt(65535 - 1024) + 1024;
+  setUp(() async {
     app = Alfred();
-    return app.listen(port);
+    port = await app.listenForTest();
   });
 
   tearDown(() => app.close());

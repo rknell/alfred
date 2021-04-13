@@ -202,7 +202,7 @@ class Alfred {
     return route;
   }
 
-  /// Call this function to fire off the server
+  /// Call this function to fire off the server.
   ///
   Future<HttpServer> listen(
       [int port = 3000, dynamic bindIp = '0.0.0.0']) async {
@@ -213,7 +213,8 @@ class Alfred {
       requestQueue.add(() => _incomingRequest(request));
     });
 
-    logWriter(() => 'HTTP Server listening on port $port', LogType.info);
+    logWriter(
+        () => 'HTTP Server listening on port ${_server.port}', LogType.info);
     return server = _server;
   }
 

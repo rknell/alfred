@@ -1,18 +1,17 @@
-import 'dart:math';
-
 import 'package:alfred/alfred.dart';
 import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
 import 'package:test/test.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'common.dart';
+
 void main() {
   late Alfred app;
   late int port;
 
-  setUp(() {
-    port = Random().nextInt(65535 - 1024) + 1024;
+  setUp(() async {
     app = Alfred();
-    return app.listen(port);
+    port = await app.listenForTest();
   });
 
   tearDown(() => app.close());

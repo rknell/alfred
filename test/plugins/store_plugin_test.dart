@@ -1,17 +1,16 @@
-import 'dart:math';
-
 import 'package:alfred/alfred.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
+
+import '../common.dart';
 
 void main() {
   late Alfred app;
   late int port;
 
   setUp(() async {
-    port = Random().nextInt(65535 - 1024) + 1024;
     app = Alfred();
-    await app.listen(port);
+    port = await app.listenForTest();
   });
 
   tearDown(() async {
