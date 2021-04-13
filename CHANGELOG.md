@@ -1,3 +1,9 @@
+## 0.1.1
+
+- Improve directory handling
+- Better 404 handling
+- Changed type handler functions signature
+
 ## 0.1.0
 
 - Adding custom logging
