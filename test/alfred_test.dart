@@ -315,6 +315,19 @@ void main() {
     expect(response.headers['content-type'], 'application/pdf');
   });
 
+  test('it serves static files with basic filtering', () async {
+    app.get('/my/directory/*.pdf', (req, res) => Directory('test/files'));
+
+    final r1 = await http
+        .get(Uri.parse('http://localhost:$port/my/directory/dummy.pdf'));
+    expect(r1.statusCode, 200);
+    expect(r1.headers['content-type'], 'application/pdf');
+
+    final r2 = await http
+        .get(Uri.parse('http://localhost:$port/my/directory/image.jpg'));
+    expect(r2.statusCode, 404);
+  });
+
   test('it serves SPA projects', () async {
     app.get('/spa/*', (req, res) => Directory('test/files/spa'));
     app.get('/spa/*', (req, res) => File('test/files/spa/index.html'));

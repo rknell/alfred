@@ -5,77 +5,50 @@ import 'http_route.dart';
 class RouteMatcher {
   static List<HttpRoute> match(
       String input, List<HttpRoute> options, Method method) {
-    final inputParts = List<String>.from(Uri.parse(input).pathSegments);
+    final output = <HttpRoute>[];
 
-    if (inputParts.isNotEmpty && inputParts.last == '') {
-      inputParts.removeLast();
+    final inputPath = Uri.parse(input).path.normalizePath;
+
+    for (final option in options) {
+      /// Check if http method matches
+      if (option.method != method && option.method != Method.all) {
+        continue;
+      }
+
+      /// Split route path into segments
+      final segments = Uri.parse(option.route.normalizePath).pathSegments;
+
+      var matcher = '^';
+      for (var segment in segments) {
+        if (segment == '*' &&
+            segment != segments.first &&
+            segment == segments.last) {
+          /// Generously match path if last segment is wildcard (*)
+          /// Example: 'some/path/*' => should match 'some/path'
+          matcher += '/?.*';
+        } else if (segment != segments.first) {
+          /// Add path separators
+          matcher += '/';
+        }
+
+        /// escape period character
+        segment = segment.replaceAll('.', r'\.');
+
+        /// parameter (':something') to anything but slash
+        segment = segment.replaceAll(RegExp(':.+'), '[^/]+?');
+
+        /// wildcard ('*') to anything
+        segment = segment.replaceAll('*', '.*?');
+
+        matcher += segment;
+      }
+      matcher += r'$';
+
+      if (RegExp(matcher, caseSensitive: false).hasMatch(inputPath)) {
+        output.add(option);
+      }
     }
 
-    var output = <HttpRoute>[];
-
-    for (var item in options) {
-      var mustWildcard = false;
-
-      if (item.method != method && item.method != Method.all) {
-        continue;
-      }
-
-      if (item.route == '*') {
-        output.add(item);
-        continue;
-      }
-
-      /// Wildcard describes sub-path
-      ///
-      if (item.route.endsWith('/*')) {
-        final routeWithoutSlash = item.route.normalizePath
-            .substring(0, item.route.normalizePath.length - '/*'.length);
-        var normalizedInput = input.normalizePath;
-        if (normalizedInput.startsWith(routeWithoutSlash)) {
-          output.add(item);
-          continue;
-        }
-      }
-
-      final itemParts = List<String>.from(Uri.parse(item.route).pathSegments);
-
-      if (itemParts.isNotEmpty && itemParts.last == '') {
-        itemParts.removeLast();
-      }
-
-      if (itemParts.length != inputParts.length) {
-        mustWildcard = true;
-      }
-
-      if (itemParts.length > inputParts.length) {
-        continue;
-      }
-
-      var matchesAll = true;
-      var didWildcard = false;
-      for (var i = 0; i < itemParts.length; i++) {
-        if (itemParts[i].startsWith(':')) {
-          continue;
-        }
-        if (itemParts[i] == '*') {
-          didWildcard = true;
-          break;
-        }
-        if (itemParts[i].endsWith('*')) {
-          didWildcard = true;
-          break;
-        }
-        if (!RegExp('^${itemParts[i]}\$', caseSensitive: false)
-            .hasMatch(inputParts[i])) {
-          matchesAll = false;
-          break;
-        }
-      }
-      if ((mustWildcard == false || mustWildcard && didWildcard) &&
-          matchesAll) {
-        output.add(item);
-      }
-    }
     return output;
   }
 
