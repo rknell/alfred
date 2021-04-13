@@ -3,6 +3,7 @@
 - Improve directory handling
 - Better 404 handling
 - Changed type handler functions signature
+- Uri decodes route params
 
 ## 0.1.0
 

@@ -70,7 +70,7 @@ class RouteMatcher {
         final routeParams = routePart.split(':')..remove('');
 
         for (var item in routeParams) {
-          output[item] = inputPart;
+          output[item] = Uri.decodeComponent(inputPart);
         }
       }
     }

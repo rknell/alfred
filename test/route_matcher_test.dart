@@ -55,10 +55,13 @@ void main() {
   });
 
   test('it should extract the route params correctly', () {
-    expect(RouteMatcher.getParams('/a/:value/:value2', '/a/input/input2'), {
-      'value': 'input',
-      'value2': 'input2',
-    });
+    expect(
+        RouteMatcher.getParams(
+            '/a/:value/:value2', '/a/input/Item%20inventory%20summary'),
+        {
+          'value': 'input',
+          'value2': 'Item inventory summary',
+        });
   });
 
   test('it should correctly match routes that have a partial match', () {
