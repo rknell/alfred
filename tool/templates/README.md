@@ -185,3 +185,11 @@ There is a cors middleware supplied for your convenience.
 ## Logging
 
 For more details on logging [click here](documentation/logging.md).
+
+## Multi threading and isolates
+
+You can use the app in multithreaded mode. When spawning this way, requests are evenly distributed
+amongst the various isolates. Alfred is not particularly prescriptive about how you manage the isolates
+just that "it works" when you fire up multiples.
+
+@code example/example_multithreading.dart

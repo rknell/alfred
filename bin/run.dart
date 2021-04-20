@@ -1,8 +1,17 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:alfred/alfred.dart';
+import 'package:pedantic/pedantic.dart';
 
 Future<void> main() async {
+  for (var i = 0; i < 5; i++) {
+    unawaited(Isolate.spawn(runIsolate, ''));
+  }
+  runIsolate(null);
+}
+
+void runIsolate(dynamic message) async {
   final app = Alfred();
 
   app.all('/example', (req, res) => 'Hello world');

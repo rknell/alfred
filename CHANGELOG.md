@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Adding support for multithreading / isolates
+
 ## 0.1.1
 
 - Improve directory handling

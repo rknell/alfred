@@ -1,11 +1,14 @@
 import 'package:http/http.dart' as http;
+import 'package:pedantic/pedantic.dart';
+import 'package:queue/queue.dart';
 
 void main() async {
   final stopwatch = Stopwatch()..start();
-  final actions = <Future>[];
-  for (var i = 0; i < 1000; i++) {
-    actions.add(http.get(Uri.parse('http://localhost:12345/files/dummy.pdf')));
+  final queue = Queue(parallel: 500);
+  for (var i = 0; i < 10000; i++) {
+    unawaited(queue.add(
+        () => http.get(Uri.parse('http://localhost:3000/files/dummy.pdf'))));
   }
-  await Future.wait<void>(actions);
+  await queue.onComplete;
   print(stopwatch.elapsed);
 }
