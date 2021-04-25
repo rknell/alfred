@@ -1,3 +1,7 @@
+## 0.1.2+1
+
+- Updating readme
+
 ## 0.1.2
 
 - Adding support for multithreading / isolates
