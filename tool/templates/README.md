@@ -1,6 +1,6 @@
 # Alfred
 
-A performant, express like server framework with a few bonuses that make life even easier.
+A performant, expressjs like server framework thats easy to use and has all the bits in one place.
 
 [![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
@@ -8,40 +8,40 @@ Quickstart:
 
 @code example/example_quickstart.dart
 
-## Motivation and philosophy
+Index
+- [Core principles](#core-principles)
+- [Usage overview](#usage-overview)
+    - [Quick start guide](#quick-start-guide)
+- [Routing & incoming requests](#routing--incoming-requests)
+    - [Route params](#route-params)
+    - [Query string variables](#query-string-variables)
+    - [Body parsing](#body-parsing)
+- [Middleware](#middleware)
+    - [No 'next'?](#what-no-next-how-do-i-even)
+    - [CORS](#cors)
+- [Responses](#responses)
+    - [Custom type handlers](#custom-type-handlers)
+    - [Static Files](#static-files)
+    - [File downloads](#file-downloads)
+- [Error handling](#error-handling)
+    - [404 Handling](#404-handling)
+- [Databases](#but-what-about-mongo-or-postgres-or-databse-x)
+- [What I want to do isn't listed](#what-i-want-to-do-isnt-listed)
+- [Websockets](#websockets)
+- [Logging](#logging)
+- [Multi threading & isolates](#multi-threading-and-isolates)
+- [Contributions](#contributions)
 
-TlDr:
+## Core principles
 - A minimum of dependencies,
 - A minimum of code and sticking close to dart core libraries - easy to maintain!
 - Ease of use
 - Predictable, well established semantics
-- Everything you need all in one place
+- 90%+ of everything you need all ready to go
 
-I came to dart with a NodeJS & Mongo / React Native & Cordova background. I had used express for
-my server framework, almost always calling "res.json()". I just wanted a simple framework that would
-allow me to pump out apps using dart on the server.
+[Read about the background behind the project or why its different to shelf](documentation/background.md)
 
-I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I
-looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched
-the surface. I was nervous about the server framework having so much of an opinion about the database
-as well as the web server - I just wanted something that did one thing well.
-
-Then I moved to Angel. Angel seemed a little less popular but concerned me because it was trying to
-do "everything" with one developer. It proved to be an excellent framework and its creator Tobe is
-a real asset to the dart community. Unfortunately he decided to discontinue dev, and it was just too
-big of a project to crack. I wanted something smaller.
-
-Then Null safety hit and I realised that betting big on these huge libraries was a bit of a risk.
-I now have a number of projects I need to migrate off the platform, for something that should be pretty
-simple.
-
-Hence Alfred was born. It's a couple of hundred lines of code and was largely pumped out over a weekend. 
-It should be trivial for the community to maintain if it comes to that - but also easy for myself to 
-support and run the project.
-
-A number of people have asked why they should use Alfred over shelf, [I have an answer here](https://github.com/rknell/alfred/issues/44#issuecomment-825339899)
-
-## Usage
+## Usage overview
 
 If you have ever used expressjs before you should be right at home:
 
@@ -76,57 +76,7 @@ If you want to return a different type and have it handled automatically, you ca
 If its all a bit overwhelming @iapicca put together a quick start guide which goes into a little 
 more detail: https://medium.com/@iapicca/alfred-an-express-like-server-framework-written-in-dart-1661e8963db9
 
-## File downloads
-
-As mentioned above - if you want to return a file, simply return it from the route callback.
-However the browser will probably try to render it in browser, and not download it.
-
-You can just set the right headers, but there is a handy little helper that will do it all for you.
-
-See `res.setDownload` below.
-
-@code example/example_file_downloads.dart
-
-## But what about Mongo or Postgres or <Databse x>?
-
-The other two systems that inspired this project to be kicked off - Aqueduct and Angel - both had
-some sort of database integration built in.
-
-**You do not need this.**
-
-Access the dart drivers for the database system you want directly, they all use them behind the scenes:
-
-- Mongo - https://pub.dev/packages/mongo_dart
-- Postgres - https://pub.dev/packages/postgres
-- SQLLite -  https://pub.dev/packages/sqlite3
-
-You will be fine. I have used them this way and they work.
-
-I have rolled my own classes that act as a sort of ORM, especially around Mongo. Its suprisingly effective
-and doesn't rely on much code.
-
-## Low level access
-
-While there are bunch of helpers built in - you have direct access to the low level apis available
-from the dart:io package. All helpers are just extension methods to:
-
-- HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
-- HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
-
-So you can compose and write any content you can imagine there. The only tangible benefit this library
-provides over the core library is the routing and route param extraction.
-
-## Custom type handlers
-Alfred has a pretty cool mechanism thanks to Dart's type system to automatically resolve a response
-based on the returned type from a route. These are called `Type Handlers`.
-
-If you want to create custom type handlers, just add them to the type handler
-array in the app object. This is a bit advanced, and I expect it would be more
-for devs wanting to extend Alfred:
-
-@code example/example_custom_type_handler.dart
-
-## Routing
+## Routing & incoming requests
 
 Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex
 matching, mostly just stick with the route name and param syntax from Express:
@@ -142,6 +92,26 @@ response it will be hit. So for example if you want to authenticate a whole sect
 can do this:
 
 @code example/example_middleware_authentication_wildcard.dart
+
+### Route params
+
+You can access any params for routes from the `req.params` object as below:
+
+@code example/example_routing.dart
+
+### Query string variables
+
+Querystring variables are exposed `req.uri.queryParameters` object in the request as below:
+
+@code example/example_querystring.dart
+
+### Body parsing
+
+To access the body, simply call `await req.body`.
+
+Alfred will interpret the body type from the content type headers and parse it appropriately. It handles url encoded, multipart & json bodies out of the box.
+
+@code example/example_body_parsing.dart
 
 ## Middleware
 
@@ -164,6 +134,57 @@ If you return null it will yield to the next middleware or route.
 
 ** returning null is the equivalent of 'next' **
 
+### CORS
+
+There is a cors middleware supplied for your convenience. Its also a great example of how to write a middleware for Alfred
+
+@code example/example_cors.dart
+
+## Responses
+
+Alfred is super easy, generally you just return JSON, a file, a String or a Binary stream and you are all good.
+
+The big difference from express is you will see is the option to not call `res.send` or `res.json` etc - although you still can.
+Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
+
+- `List<dynamic>` - JSON
+- `Map<String, Object?>` - JSON
+- `String` - Plain text
+- `Stream<List<int>>` - Binary
+- `List<int>` - Binary
+- `File` - Binary, with mime type inferred by extension
+- `Directory` - Serves static files
+
+Each type listed above has a `Type Handler` build in. [You can create your own custom type handlers](#custom-type-handlers)
+
+### Custom type handlers
+Alfred has a pretty cool mechanism thanks to Dart's type system to automatically resolve a response
+based on the returned type from a route. These are called `Type Handlers`.
+
+If you want to create custom type handlers, just add them to the type handler
+array in the app object. This is a bit advanced, and I expect it would be more
+for devs wanting to extend Alfred:
+
+@code example/example_custom_type_handler.dart
+
+### Static Files
+
+This one is super easy - just pass in a public path and a dart Directory object and Alfred does
+the rest.
+
+@code example/example_static_files.dart
+
+### File downloads
+
+As mentioned above - if you want to return a file, simply return it from the route callback.
+However the browser will probably try to render it in browser, and not download it.
+
+You can just set the right headers, but there is a handy little helper that will do it all for you.
+
+See `res.setDownload` below.
+
+@code example/example_file_downloads.dart
+
 ## Error handling
 
 You can either set the status code on the response object yourself and send the data manually, or
@@ -185,12 +206,35 @@ behaviour, but if you want to override it, simply handle it in the app declarati
 
 @code example/example_missing_handler.dart
 
-## Static Files
+## But what about Mongo or Postgres or <Database x>?
 
-This one is super easy - just pass in a public path and a dart Directory object and Alfred does
-the rest.
+The other two systems that inspired this project to be kicked off - Aqueduct and Angel - both had
+some sort of database integration built in.
 
-@code example/example_static_files.dart
+**You do not need this.**
+
+Access the dart drivers for the database system you want directly, they all use them behind the scenes:
+
+- Mongo - https://pub.dev/packages/mongo_dart
+- Postgres - https://pub.dev/packages/postgres
+- SQLLite -  https://pub.dev/packages/sqlite3
+
+You will be fine. I have used them this way and they work.
+
+I have rolled my own classes that act as a sort of ORM, especially around Mongo. Its suprisingly effective
+and doesn't rely on much code.
+
+## What I want to do isn't listed
+
+While there are bunch of helpers built in - you have direct access to the low level apis available
+from the dart:io package. All helpers are just extension methods to:
+
+- HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
+- HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
+
+So you can compose and write any content you can imagine there. If there is something you wan't to do
+that isn't expressly listed by the library, you will be able to do it with a minimum of research into
+underlying libraries. A core part of the architecture is to not build you into a wall.
 
 ## Websockets
 
@@ -199,12 +243,6 @@ Alfred supports websockets too!
 There is a quick chat client in the examples
 
 @code example/example_websocket/example_websocket.dart
-
-## CORS
-
-There is a cors middleware supplied for your convenience.
-
-@code example/example_cors.dart
 
 ## Logging
 
@@ -217,3 +255,9 @@ amongst the various isolates. Alfred is not particularly prescriptive about how 
 just that "it works" when you fire up multiples.
 
 @code example/example_multithreading.dart
+
+# Contributions
+
+PRs are welcome and encouraged! This is a community project and as long as the PR keeps within the key principles listed it will probably be accepted. If you have an improvement you would like to to add but are not sure just reach out in the issues section.
+
+Before you submit your code, you can run the `ci_checks.sh` shell script that will do many of the tests the CI suite will perform.
