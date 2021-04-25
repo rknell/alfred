@@ -22,17 +22,19 @@ void main() async {
 
 TlDr:
 - A minimum of dependencies,
-- A minimum of code (199 lines at last check), and sticking close to dart core libraries
+- A minimum of code and sticking close to dart core libraries - easy to maintain!
 - Ease of use
 - Predictable, well established semantics
+- Everything you need all in one place
 
-I came to dart with a NodeJS / React Native & Cordova background. Previously I had used express for
+I came to dart with a NodeJS & Mongo / React Native & Cordova background. I had used express for
 my server framework, almost always calling "res.json()". I just wanted a simple framework that would
 allow me to pump out apps using dart on the server.
 
 I started with Aqueduct - It seemed like it was the most popular and better supported of the ones I
 looked at. Aqueduct caused a bunch of errors that were nearly impossible to debug after you scratched
-the surface.
+the surface. I was nervous about the server framework having so much of an opinion about the database
+as well as the web server - I just wanted something that did one thing well.
 
 Then I moved to Angel. Angel seemed a little less popular but concerned me because it was trying to
 do "everything" with one developer. It proved to be an excellent framework and its creator Tobe is
@@ -43,13 +45,15 @@ Then Null safety hit and I realised that betting big on these huge libraries was
 I now have a number of projects I need to migrate off the platform, for something that should be pretty
 simple.
 
-Hence Alfred was born. Its (at the day of this writing) a couple of hundred lines of code. It should
-be trivial for the community to maintain if it comes to that - but also easy for myself to maintain
-and run the project.
+Hence Alfred was born. It's a couple of hundred lines of code and was largely pumped out over a weekend. 
+It should be trivial for the community to maintain if it comes to that - but also easy for myself to 
+support and run the project.
+
+A number of people have asked why they should use Alfred over shelf, [I have an answer here](https://github.com/rknell/alfred/issues/44#issuecomment-825339899)
 
 ## Usage
 
-if you have ever used expressjs before you should be right at home
+If you have ever used expressjs before you should be right at home:
 
 ```dart
 import 'dart:io';
@@ -100,13 +104,13 @@ Internally dart provides a body parser, so no extra dependencies there.
 The big difference you will see is the option to not call `res.send` or `res.json` etc - although you still can.
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
-- List<dynamic> - JSON
-- Map<String, Object?> - JSON
-- String - Plain text
-- Stream<List<int>> - Binary
-- List<int> - Binary
-- File - Binary, with mime type inferred by extension
-- Directory - Serves static files
+- `List<dynamic>` - JSON
+- `Map<String, Object?>` - JSON
+- `String` - Plain text
+- `Stream<List<int>>` - Binary
+- `List<int>` - Binary
+- `File` - Binary, with mime type inferred by extension
+- `Directory` - Serves static files
 
 If you want to return HTML, just set the content type to HTML like this:
 
@@ -127,33 +131,13 @@ void main() async {
 }
 ```
 
-### Custom type handlers
-If you want to create custom type handlers, just add them to the type handler
-array in the app object. This is a bit advanced, and I expect it would be more
-for devs wanting to extend Alfred:
+If you want to return a different type and have it handled automatically, you can extend Alfred with
+[custom type handlers](#custom-type-handlers).
 
-```dart
-import 'package:alfred/alfred.dart';
+### Quick start guide
 
-class Chicken {
-  String get response => 'I am a chicken';
-}
-
-void main() {
-  final app = Alfred();
-
-  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
-    res.write((val as Chicken).response);
-    await res.close();
-  }));
-
-  /// The app will now return the Chicken.response if you return one from a route
-
-  app.get('/kfc', (req, res) => Chicken()); //I am a chicken;
-
-  app.listen(); //Listening on 3000
-}
-```
+If its all a bit overwhelming @iapicca put together a quick start guide which goes into a little 
+more detail: https://medium.com/@iapicca/alfred-an-express-like-server-framework-written-in-dart-1661e8963db9
 
 ## File downloads
 
@@ -183,7 +167,7 @@ void main() async {
 
 ## But what about Mongo or Postgres or <Databse x>?
 
-The other two systems that inspired this project to be kicked off - Aqueduct and Mongo - both had
+The other two systems that inspired this project to be kicked off - Aqueduct and Angel - both had
 some sort of database integration built in.
 
 **You do not need this.**
@@ -194,7 +178,10 @@ Access the dart drivers for the database system you want directly, they all use 
 - Postgres - https://pub.dev/packages/postgres
 - SQLLite -  https://pub.dev/packages/sqlite3
 
-You will be fine. I have used them this way and they work just fine.
+You will be fine. I have used them this way and they work.
+
+I have rolled my own classes that act as a sort of ORM, especially around Mongo. Its suprisingly effective
+and doesn't rely on much code.
 
 ## Low level access
 
@@ -206,6 +193,37 @@ from the dart:io package. All helpers are just extension methods to:
 
 So you can compose and write any content you can imagine there. The only tangible benefit this library
 provides over the core library is the routing and route param extraction.
+
+## Custom type handlers
+Alfred has a pretty cool mechanism thanks to Dart's type system to automatically resolve a response
+based on the returned type from a route. These are called `Type Handlers`.
+
+If you want to create custom type handlers, just add them to the type handler
+array in the app object. This is a bit advanced, and I expect it would be more
+for devs wanting to extend Alfred:
+
+```dart
+import 'package:alfred/alfred.dart';
+
+class Chicken {
+  String get response => 'I am a chicken';
+}
+
+void main() {
+  final app = Alfred();
+
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
+    res.write((val as Chicken).response);
+    await res.close();
+  }));
+
+  /// The app will now return the Chicken.response if you return one from a route
+
+  app.get('/kfc', (req, res) => Chicken()); //I am a chicken;
+
+  app.listen(); //Listening on 3000
+}
+```
 
 ## Routing
 
@@ -230,7 +248,7 @@ void main() async {
 ```
 
 You can also use a wildcard for a route, and provided another route hasn't already resolved the
-response it will be hit. So for example if you want to authenticate a whole section of an api you
+response it will be hit. So for example if you want to authenticate a whole section of an api youc 
 can do this:
 
 ```dart
@@ -259,9 +277,7 @@ void main() async {
 
 ## Middleware
 
-At present the middleware system probably isn't built out enough, but will do for most use cases.
-
-Right now you can specify a middleware for all routes by declaring:
+You can specify a middleware for all routes by using wildcards:
 
 ```dart
 import 'package:alfred/alfred.dart';
@@ -270,18 +286,24 @@ void main() async {
   final app = Alfred();
   app.all('*', (req, res) {
     // Perform action
+    req.headers.add('x-custom-header', "Alfred isn't bad");
+
+    /// No need to call next as we don't send a response.
+    /// Alfred will find the next matching route
   });
 
   app.get('/otherFunction', (req, res) {
     //Action performed next
+    return {'message': 'complete'};
   });
+
   await app.listen();
 }
 ```
 
 Middleware declared this way will be executed in the order its added to the app.
 
-You can also add middleware to a route like so:
+You can also add middleware to a route, this is great to enforce authentication etc on an endpoint:
 
 ```dart
 import 'dart:async';
@@ -291,21 +313,20 @@ import 'package:alfred/alfred.dart';
 
 FutureOr exampleMiddlware(HttpRequest req, HttpResponse res) {
   // Do work
+  if (req.headers.value('Authorization') != 'apikey') {
+    throw AlfredException(401, {'message': 'authentication failed'});
+  }
 }
 
 void main() async {
   final app = Alfred();
-  app.all('/example/:id/:name', (req, res) {
-    req.params['id'] != null; //true
-    req.params['name'] != null; //true;
-  }, middleware: [exampleMiddlware]);
+  app.all('/example/:id/:name', (req, res) {}, middleware: [exampleMiddlware]);
 
   await app.listen(); //Listening on port 3000
 }
 ```
 
-### What? No 'next'? how do I even?
-
+### What? No 'next'? how do I even?  
 OK, so the rules are simple. If a middleware resolves a http request, no future middleware gets executed.
 
 So if you return an object from the middleware, you are preventing future middleware from executing.
@@ -364,6 +385,7 @@ FutureOr missingHandler(HttpRequest req, HttpResponse res) {
   return {'message': 'not found'};
 }
 ```
+
 ## Static Files
 
 This one is super easy - just pass in a public path and a dart Directory object and Alfred does
@@ -381,6 +403,56 @@ void main() async {
   app.get('/public/*', (req, res) => Directory('test/files'));
 
   await app.listen();
+}
+```
+
+## Websockets
+
+Alfred supports websockets too!
+
+There is a quick chat client in the examples
+
+```dart
+import 'dart:async';
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
+
+Future<void> main() async {
+  final app = Alfred();
+
+  // Path to this Dart file
+  var dir = File(Platform.script.path).parent.path;
+
+  // Deliver web client for chat
+  app.get('/', (req, res) => File('$dir/chat-client.html'));
+
+  // Track connected clients
+  var users = <WebSocket>[];
+
+  // WebSocket chat relay implementation
+  app.get('/ws', (req, res) {
+    return WebSocketSession(
+      onOpen: (ws) {
+        users.add(ws);
+        users
+            .where((user) => user != ws)
+            .forEach((user) => user.send('A new user joined the chat.'));
+      },
+      onClose: (ws) {
+        users.remove(ws);
+        users.forEach((user) => user.send('A user has left.'));
+      },
+      onMessage: (ws, dynamic data) async {
+        users.forEach((user) => user.send(data));
+      },
+    );
+  });
+
+  final server = await app.listen();
+
+  print('Listening on ${server.port}');
 }
 ```
 
