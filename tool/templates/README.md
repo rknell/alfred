@@ -8,7 +8,7 @@ Quickstart:
 
 @code example/example_quickstart.dart
 
-Index
+# Index
 - [Core principles](#core-principles)
 - [Usage overview](#usage-overview)
     - [Quick start guide](#quick-start-guide)
