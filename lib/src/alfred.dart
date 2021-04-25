@@ -11,7 +11,6 @@ import 'package:alfred/src/type_handlers/string_type_handler.dart';
 import 'package:alfred/src/type_handlers/type_handler.dart';
 import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:queue/queue.dart';
 
 import 'alfred_exception.dart';
@@ -387,6 +386,8 @@ class Alfred {
     }
   }
 }
+
+void unawaited(Future<Null> then) {}
 
 class NoTypeHandlerError extends Error {
   final dynamic object;

@@ -11,10 +11,10 @@ dependencies:
   mime_type: ^1.0.0
   enum_to_string: ^2.0.1
   queue: ^3.1.0
-  pedantic: ^1.11.0
 
 dev_dependencies:
   test: ^1.14.4
   web_socket_channel: ^2.0.0
   logging: ^1.0.1
   http:
+  pedantic: ^1.11.0

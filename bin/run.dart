@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:alfred/alfred.dart';
-import 'package:pedantic/pedantic.dart';
 
 Future<void> main() async {
   for (var i = 0; i < 5; i++) {
@@ -41,3 +40,5 @@ void runIsolate(dynamic message) async {
 
   print('Listening on ${server.port}');
 }
+
+void unawaited(Future<dynamic> then) {}
