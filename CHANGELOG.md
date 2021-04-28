@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Adding support for json serialized objects
+
 ## 0.1.2+1
 
 - Updating readme

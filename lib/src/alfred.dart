@@ -7,6 +7,7 @@ import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
 import 'package:alfred/src/type_handlers/directory_type_handler.dart';
 import 'package:alfred/src/type_handlers/file_type_handler.dart';
 import 'package:alfred/src/type_handlers/json_type_handlers.dart';
+import 'package:alfred/src/type_handlers/serializable_type_handler.dart';
 import 'package:alfred/src/type_handlers/string_type_handler.dart';
 import 'package:alfred/src/type_handlers/type_handler.dart';
 import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
@@ -127,7 +128,8 @@ class Alfred {
       jsonMapTypeHandler,
       fileTypeHandler,
       directoryTypeHandler,
-      websocketTypeHandler
+      websocketTypeHandler,
+      serializableTypeHandler
     ]);
   }
 

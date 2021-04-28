@@ -56,13 +56,18 @@ Internally dart provides a body parser, so no extra dependencies there.
 The big difference you will see is the option to not call `res.send` or `res.json` etc - although you still can.
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
-- `List<dynamic>` - JSON
-- `Map<String, Object?>` - JSON
-- `String` - Plain text
-- `Stream<List<int>>` - Binary
-- `List<int>` - Binary
-- `File` - Binary, with mime type inferred by extension
-- `Directory` - Serves static files
+| Return Dart Type | Returning REST type |
+| ----------------- | ------------------ |
+| `List<dynamic>` | JSON |
+| `Map<String, Object?>` | JSON |
+| Serializable object (Object.toJSON or Object.toJson) * see note | JSON |
+| `String` | Plain Text |
+| `Stream<List<int>>` | Binary |
+| `List<int>` | Binary |
+| `File` |  Binary, with mime type inferred by extension |
+| `Directory` | Serves static files |
+
+\* If your object has a "toJSON" or "toJson" function, alfred will run it, and then return the result
 
 If you want to return HTML, just set the content type to HTML like this:
 
