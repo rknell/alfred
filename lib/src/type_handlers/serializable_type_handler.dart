@@ -26,4 +26,6 @@ TypeHandler<dynamic> get serializableTypeHandler =>
           rethrow;
         }
       }
+
+      return false;
     });

@@ -233,7 +233,7 @@ class Alfred {
 
     // We track if the response has been resolved in order to exit out early
     // the list of routes (ie the middleware returned)
-    unawaited(request.response.done.then((dynamic _) {
+    _unawaited(request.response.done.then((dynamic _) {
       isDone = true;
       for (var listener in _onDoneListeners) {
         listener(request, request.response);
@@ -369,9 +369,12 @@ class Alfred {
           logWriter(
               () => 'Apply TypeHandler for result type: ${result.runtimeType}',
               LogType.debug);
-          await handler.handler(request, request.response, result);
-          handled = true;
-          break;
+          dynamic handlerResult =
+              await handler.handler(request, request.response, result);
+          if (handlerResult != false) {
+            handled = true;
+            break;
+          }
         }
       }
       if (!handled) {
@@ -380,17 +383,56 @@ class Alfred {
     }
   }
 
-  /// Close the server
+  /// Close the server and clean up any resources
   ///
+  /// Call this if you are shutting down the server but continuing to run
+  /// the app.
   Future close({bool force = true}) async {
     if (server != null) {
       await server!.close(force: force);
     }
   }
+
+  /// Print out the registered routes to the console
+  ///
+  /// Helpful to see whats available
+  void printRoutes() {
+    for (var route in routes) {
+      late String methodString;
+      switch (route.method) {
+        case Method.get:
+          methodString = '\x1B[33mGET\x1B[0m';
+          break;
+        case Method.post:
+          methodString = '\x1B[31mPOST\x1B[0m';
+          break;
+        case Method.put:
+          methodString = '\x1B[32mPUT\x1B[0m';
+          break;
+        case Method.delete:
+          methodString = '\x1B[34mDELETE\x1B[0m';
+          break;
+        case Method.patch:
+          methodString = '\x1B[35mPATCH\x1B[0m';
+          break;
+        case Method.options:
+          methodString = '\x1B[36mOPTIONS\x1B[0m';
+          break;
+        case Method.all:
+          methodString = '\x1B[37mALL\x1B[0m';
+          break;
+      }
+      print('${route.route} - $methodString');
+    }
+  }
 }
 
-void unawaited(Future<Null> then) {}
+/// Function to prevent linting errors.
+///
+void _unawaited(Future<Null> then) {}
 
+/// Error thrown when a type handler cannot be found for a returned item
+///
 class NoTypeHandlerError extends Error {
   final dynamic object;
   final HttpRequest request;

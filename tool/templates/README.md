@@ -29,6 +29,7 @@ Quickstart:
 - [What I want to do isn't listed](#what-i-want-to-do-isnt-listed)
 - [Websockets](#websockets)
 - [Logging](#logging)
+    - [Print routes](#print-routes)
 - [Multi threading & isolates](#multi-threading-and-isolates)
 - [Contributions](#contributions)
 
@@ -252,6 +253,13 @@ There is a quick chat client in the examples
 ## Logging
 
 For more details on logging [click here](documentation/logging.md).
+
+### Print routes
+
+Want to quickly print out the registered routes? (recommended when you fire up the server) 
+call Alfred.printRoutes ie:
+
+@code example/example_print_routes.dart
 
 ## Multi threading and isolates
 

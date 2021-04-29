@@ -15,6 +15,15 @@ extension RequestHelpers on HttpRequest {
   Future<Object?> get body async =>
       (await HttpBodyHandler.processRequest(this)).body;
 
+  /// Parse the body, and convert it to a json map
+  ///
+  Future<Map<String, dynamic>> get bodyAsJsonMap async =>
+      Map<String, dynamic>.from((await body) as Map);
+
+  /// Parse the body, and convert it to a json list
+  ///
+  Future<List<dynamic>> get bodyAsJsonList async => (await body) as List;
+
   /// Get the content type
   ///
   ContentType? get contentType => headers.contentType;

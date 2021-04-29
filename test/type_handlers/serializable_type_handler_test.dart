@@ -35,7 +35,8 @@ void main() {
 
     final response3 =
         await http.get(Uri.parse('http://localhost:$port/testNoSerialize'));
-    expect(response3.body, '');
+    expect(response3.statusCode, 500);
+    expect(response3.body.contains("_NonSerializableObj"), true);
   });
 }
 

@@ -1,3 +1,10 @@
+## 0.1.4
+
+- Adding Alfred.bodyAsJsonMap and Alfred.bodyAsJsonList functions
+- Fixing cors plugin to handle options call correctly
+- Adding printRoutes function
+- Fix issue with serialized objects that wasn't caught in tests
+
 ## 0.1.3
 
 - Adding support for json serialized objects

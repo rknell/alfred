@@ -39,6 +39,7 @@ void main() async {
 - [What I want to do isn't listed](#what-i-want-to-do-isnt-listed)
 - [Websockets](#websockets)
 - [Logging](#logging)
+    - [Print routes](#print-routes)
 - [Multi threading & isolates](#multi-threading-and-isolates)
 - [Contributions](#contributions)
 
@@ -558,6 +559,25 @@ Future<void> main() async {
 ## Logging
 
 For more details on logging [click here](documentation/logging.md).
+
+### Print routes
+
+Want to quickly print out the registered routes? (recommended when you fire up the server) 
+call Alfred.printRoutes ie:
+
+```dart
+import 'package:alfred/alfred.dart';
+
+void main() async {
+  final app = Alfred();
+
+  app.get('/html', (req, res) {});
+
+  app.printRoutes(); //Will print the routes to the console
+
+  await app.listen();
+}
+```
 
 ## Multi threading and isolates
 
