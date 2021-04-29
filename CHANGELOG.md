@@ -1,3 +1,7 @@
+## 0.1.4+1
+
+- Adding file upload docs
+
 ## 0.1.4
 
 - Adding Alfred.bodyAsJsonMap and Alfred.bodyAsJsonList functions

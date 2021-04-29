@@ -16,6 +16,7 @@ Quickstart:
     - [Route params](#route-params)
     - [Query string variables](#query-string-variables)
     - [Body parsing](#body-parsing)
+    - [File uploads](#file-uploads)
 - [Middleware](#middleware)
     - [No 'next'?](#what-no-next-how-do-i-even)
     - [CORS](#cors)
@@ -118,6 +119,15 @@ To access the body, simply call `await req.body`.
 Alfred will interpret the body type from the content type headers and parse it appropriately. It handles url encoded, multipart & json bodies out of the box.
 
 @code example/example_body_parsing.dart
+
+### File uploads
+
+To upload a file the body parser will handle exposing the data you need. Its actually pretty easy
+just give it a go and set a breakpoint to see what the body parser spits back.
+
+A working example of file uploads is below to get you started:
+
+@code example/example_upload_file.dart
 
 ## Middleware
 
