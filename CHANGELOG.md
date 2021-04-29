@@ -1,3 +1,7 @@
+## 0.1.4+2
+
+- It helps if you actually build the docs first
+
 ## 0.1.4+1
 
 - Adding file upload docs
