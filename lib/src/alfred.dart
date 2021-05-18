@@ -292,18 +292,13 @@ class Alfred {
         }
 
         /// If you got here and isDone is still false, you forgot to close
-        /// the response, or your didn't return anything. Either way its an error,
+        /// the response, or you didn't return anything. Either way its an error,
         /// but instead of letting the whole server hang as most frameworks do,
         /// lets at least close the connection out
         ///
         if (!isDone) {
           if (request.response.contentLength == -1) {
-            if (nonWildcardRouteMatch) {
-              logWriter(
-                  () => 'Warning: Returning a response with no content. '
-                      '${effectiveRoutes.map((e) => e.route).join(', ')}',
-                  LogType.warn);
-            } else {
+            if (nonWildcardRouteMatch == false) {
               await _respondNotFound(request, isDone);
             }
           }
