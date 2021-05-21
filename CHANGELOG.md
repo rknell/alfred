@@ -1,3 +1,7 @@
+## 0.1.4+4
+
+- Updating readme with deployment info
+
 ## 0.1.4+3
 
 - Removing a warning about returning a response with no content - it wasn't very reliable and also not that helpful
