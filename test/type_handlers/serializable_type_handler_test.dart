@@ -46,10 +46,4 @@ class _SerializableObjType1 {
   }
 }
 
-class _SerializableObjType2 {
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{'test': true};
-  }
-}
-
 class _NonSerializableObj {}
