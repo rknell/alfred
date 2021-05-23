@@ -42,7 +42,6 @@ void main() async {
 - [Logging](#logging)
     - [Print routes](#print-routes)
 - [Multi threading & isolates](#multi-threading-and-isolates)
-- [Deployment](#deployment)
 - [Contributions](#contributions)
 
 ## Core principles
@@ -667,13 +666,6 @@ void startInstance(dynamic message) async {
 /// Simple function to prevent linting errors, can be ignored
 void unawaited(Future future) {}
 ```
-    
-# Deployment
-    
-There are many ways to skin this cat, you can upload the source code to a VPS yourself, build a binary locally and upload it to a server somewhere, but a fairly elegant way to accomplish a production level deployment is to containerize an AOT build of the server and run it on a PAAS.
-    
-Lucky there is a tutorial for that!
-https://ryan-knell.medium.com/build-and-deploy-a-dart-server-using-alfred-docker-and-google-cloud-run-from-start-to-finish-d5066e3ab3c6
 
 # Deployment
 
