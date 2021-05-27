@@ -1,3 +1,7 @@
+## 0.1.4+5
+
+- Fixing incorrect mime type recognition 
+
 ## 0.1.4+4
 
 - Updating readme with deployment info
