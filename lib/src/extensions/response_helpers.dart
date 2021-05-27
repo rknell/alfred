@@ -31,7 +31,13 @@ extension ResponseHelpers on HttpResponse {
         headers.contentType!.mimeType == 'text/plain') {
       headers.contentType = file.contentType;
     } else {
-      headers.contentType == ContentType.binary;
+      final extension = file.path.split('.').last;
+      final suggestedMime = mimeFromExtension(extension);
+      if (suggestedMime != null) {
+        setContentTypeFromExtension(extension);
+      } else {
+        headers.contentType = ContentType.binary;
+      }
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
+
 import 'common.dart';
 
 void main() {
@@ -325,6 +326,27 @@ void main() {
     final r2 = await http
         .get(Uri.parse('http://localhost:$port/my/directory/image.jpg'));
     expect(r2.statusCode, 404);
+  });
+
+  test('it sets the mime type correctly for txt', () async {
+    app.get('/spa/*', (req, res) => Directory('test/files/spa'));
+    app.get('/spa/*', (req, res) => File('test/files/spa/index.html'));
+
+    final r4 =
+        await http.get(Uri.parse('http://localhost:$port/spa/assets/some.txt'));
+    expect(r4.statusCode, 200);
+    expect(r4.body.contains('This is some txt'), true);
+    expect(r4.headers['content-type'], 'text/plain');
+  });
+
+  test('it sets the mime type correctly for pdf', () async {
+    app.get('/spa/*', (req, res) => Directory('test/files/spa'));
+    app.get('/spa/*', (req, res) => File('test/files/spa/index.html'));
+
+    final r4 = await http
+        .get(Uri.parse('http://localhost:$port/spa/assets/dummy.pdf'));
+    expect(r4.statusCode, 200);
+    expect(r4.headers['content-type'], 'application/pdf');
   });
 
   test('it serves SPA projects', () async {

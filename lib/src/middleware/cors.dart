@@ -9,7 +9,7 @@ import 'package:alfred/alfred.dart';
 FutureOr Function(HttpRequest, HttpResponse) cors(
     {int age = 86400,
     String headers = '*',
-    String methods = 'POST, GET, OPTIONS, PUT, PATCH',
+    String methods = 'POST, GET, OPTIONS, PUT, PATCH, DELETE',
     String origin = '*'}) {
   return (HttpRequest req, HttpResponse res) {
     res.headers.set('Access-Control-Allow-Origin', origin);
