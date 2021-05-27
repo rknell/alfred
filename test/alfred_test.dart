@@ -5,6 +5,7 @@ import 'package:alfred/alfred.dart';
 import 'package:alfred/src/middleware/cors.dart';
 import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
+
 import 'common.dart';
 
 void main() {
@@ -298,6 +299,15 @@ void main() {
 
   test('it serves static files', () async {
     app.get('/files/*', (req, res) => Directory('test/files'));
+
+    final response =
+        await http.get(Uri.parse('http://localhost:$port/files/dummy.pdf'));
+    expect(response.statusCode, 200);
+    expect(response.headers['content-type'], 'application/pdf');
+  });
+
+  test('it serves static files with a trailing slash', () async {
+    app.get('/files/*', (req, res) => Directory('test/files/'));
 
     final response =
         await http.get(Uri.parse('http://localhost:$port/files/dummy.pdf'));

@@ -24,7 +24,7 @@ TypeHandler get directoryTypeHandler =>
             'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute');
 
         final filePath =
-            '${directory.path}${Uri.decodeComponent(virtualPath!)}';
+            '${directory.path}/${Uri.decodeComponent(virtualPath!)}';
 
         req.log(() => 'Resolve virtual path: $virtualPath');
 
