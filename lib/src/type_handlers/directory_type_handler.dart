@@ -12,14 +12,14 @@ TypeHandler get directoryTypeHandler =>
     TypeHandler<Directory>((req, res, dynamic directory) async {
       final usedRoute = req.route;
       String? virtualPath;
-      if (usedRoute.contains("*")) {
+      if (usedRoute.contains('*')) {
         virtualPath = req.uri.path
             .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
       }
 
       directory = directory as Directory;
 
-      if (req.method == "GET") {
+      if (req.method == 'GET' || req.method == 'HEAD') {
         assert(usedRoute.contains('*'),
             'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute');
 
@@ -37,7 +37,7 @@ TypeHandler get directoryTypeHandler =>
         try {
           var match = fileCandidates.firstWhere((file) => file.existsSync());
           req.log(() => 'Respond with file: ${match.path}');
-          await _respondWithFile(res, match);
+          await _respondWithFile(res, match, headerOnly: req.method == 'HEAD');
         } on StateError {
           req.log(() =>
               'Could not match with any file. Expected file at: $filePath');
@@ -80,9 +80,14 @@ TypeHandler get directoryTypeHandler =>
       }
     });
 
-Future _respondWithFile(HttpResponse res, File file) async {
+Future _respondWithFile(HttpResponse res, File file,
+    {bool headerOnly = false}) async {
   res.setContentTypeFromFile(file);
-  await res.addStream(file.openRead());
+
+  // This is necessary to deal with 'HEAD' requests
+  if (headerOnly == false) {
+    await res.addStream(file.openRead());
+  }
   await res.close();
 }
 
