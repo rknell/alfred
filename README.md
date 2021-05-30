@@ -437,7 +437,6 @@ This one is super easy - just pass in a public path and a dart Directory object 
 the rest.
 
 ```dart
-import 'dart:async';
 import 'dart:io';
 
 import 'package:alfred/alfred.dart';
@@ -445,26 +444,15 @@ import 'package:alfred/alfred.dart';
 void main() async {
   final app = Alfred();
 
-  FutureOr _apiKeyAuth(HttpRequest req, HttpResponse res) {
-    if (req.headers.value('Authorization') == 'MYAPIKEY') {
-      return null;
-    } else {
-      throw AlfredException(401, {'error': 'not authorized'});
-    }
-  }
-
   /// Note the wildcard (*) this is very important!!
   app.get('/public/*', (req, res) => Directory('test/files'));
-  app.post('/public', (req, res) => Directory('test/files'),
-      middleware: [_apiKeyAuth]);
-  app.delete('/public/*', (req, res) => Directory('test/files'),
-      middleware: [_apiKeyAuth]);
 
   await app.listen();
 }
 ```
 
-You can also pass in a directory and a POST or PUT command and upload files to a local directory if you are using multipart/form encoding:
+You can also pass in a directory and a POST or PUT command and upload files to a local directory if 
+you are using multipart/form encoding. Simply supply the field as `file`:
 
 ```dart
 import 'dart:io';
@@ -483,15 +471,27 @@ void main() async {
 If you want to delete a file?
 
 ```dart
+import 'dart:async';
 import 'dart:io';
 
 import 'package:alfred/alfred.dart';
+
+FutureOr isAuthenticatedMiddleware(HttpRequest req, HttpResponse res) {
+  if (req.headers.value('Authorization') != 'MYAPIKEY') {
+    throw AlfredException(
+        401, {'error': 'You are not authorized to perform this operation'});
+  }
+}
 
 void main() async {
   final app = Alfred();
 
   /// Note the wildcard (*) this is very important!!
-  app.delete('/public/*', (req, res) => Directory('test/files'));
+  ///
+  /// You almost certainly want to protect this endpoint with some middleware
+  /// to authenticate a user.
+  app.delete('/public/*', (req, res) => Directory('test/files'),
+      middleware: [isAuthenticatedMiddleware]);
 
   await app.listen();
 }
