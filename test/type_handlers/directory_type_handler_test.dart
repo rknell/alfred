@@ -56,7 +56,10 @@ void main() {
   test('it uploads a file to a subdirectory, creating it if it doesnt exist',
       () async {
     final uploadedFile = File('test/files/subdir/tmp.jpg');
-    Directory('test/files/subdir').deleteSync(recursive: true);
+    final subdir = Directory('test/files/subdir');
+    if (subdir.existsSync()) {
+      subdir.deleteSync(recursive: true);
+    }
 
     if (uploadedFile.existsSync() == true) {
       uploadedFile.deleteSync();
