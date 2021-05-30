@@ -183,12 +183,23 @@ for devs wanting to extend Alfred:
 
 @code example/example_custom_type_handler.dart
 
-### Static Files
+### Static Files, uploads and deleting
 
 This one is super easy - just pass in a public path and a dart Directory object and Alfred does
 the rest.
 
-@code example/example_static_files.dart
+@code example/example_static_get.dart
+
+You can also pass in a directory and a POST or PUT command and upload files to a local directory if 
+you are using multipart/form encoding. Simply supply the field as `file`:
+
+@code example/example_static_upload.dart
+
+If you want to delete a file?
+
+@code example/example_static_delete.dart
+
+Security? Build in a middleware function to authenticate a user etc. 
 
 ### File downloads
 

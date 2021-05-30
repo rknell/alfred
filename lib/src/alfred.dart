@@ -18,7 +18,24 @@ import 'alfred_exception.dart';
 import 'http_route.dart';
 import 'route_matcher.dart';
 
-enum Method { get, post, put, delete, patch, options, all }
+enum Method {
+  get,
+  post,
+  put,
+  delete,
+  patch,
+  options,
+  head,
+  copy,
+  link,
+  unlink,
+  purge,
+  lock,
+  unlock,
+  propfind,
+  view,
+  all
+}
 
 /// Indicates the severity of logged message
 enum LogType { debug, info, warn, error }
@@ -144,6 +161,14 @@ class Alfred {
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
       _createRoute(path, callback, Method.get, middleware);
+
+  /// Create a head route
+  ///
+  HttpRoute head(String path,
+          FutureOr Function(HttpRequest req, HttpResponse res) callback,
+          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
+              middleware = const []}) =>
+      _createRoute(path, callback, Method.head, middleware);
 
   /// Create a post route
   ///
@@ -415,6 +440,33 @@ class Alfred {
           break;
         case Method.all:
           methodString = '\x1B[37mALL\x1B[0m';
+          break;
+        case Method.head:
+          methodString = '\x1B[38mHEAD\x1B[0m';
+          break;
+        case Method.copy:
+          methodString = '\x1B[39mCOPY\x1B[0m';
+          break;
+        case Method.link:
+          methodString = '\x1B[40mLINK\x1B[0m';
+          break;
+        case Method.unlink:
+          methodString = '\x1B[41mUNLINK\x1B[0m';
+          break;
+        case Method.purge:
+          methodString = '\x1B[42mPURGE\x1B[0m';
+          break;
+        case Method.lock:
+          methodString = '\x1B[43mUNLOCK\x1B[0m';
+          break;
+        case Method.unlock:
+          methodString = '\x1B[44mUNLOCK\x1B[0m';
+          break;
+        case Method.propfind:
+          methodString = '\x1B[45mPROPFIND\x1B[0m';
+          break;
+        case Method.view:
+          methodString = '\x1B[46mVIEW\x1B[0m';
           break;
       }
       print('${route.route} - $methodString');

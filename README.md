@@ -431,10 +431,56 @@ void main() {
 }
 ```
 
-### Static Files
+### Static Files, uploads and deleting
 
 This one is super easy - just pass in a public path and a dart Directory object and Alfred does
 the rest.
+
+```dart
+import 'dart:async';
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
+void main() async {
+  final app = Alfred();
+
+  FutureOr _apiKeyAuth(HttpRequest req, HttpResponse res) {
+    if (req.headers.value('Authorization') == 'MYAPIKEY') {
+      return null;
+    } else {
+      throw AlfredException(401, {'error': 'not authorized'});
+    }
+  }
+
+  /// Note the wildcard (*) this is very important!!
+  app.get('/public/*', (req, res) => Directory('test/files'));
+  app.post('/public', (req, res) => Directory('test/files'),
+      middleware: [_apiKeyAuth]);
+  app.delete('/public/*', (req, res) => Directory('test/files'),
+      middleware: [_apiKeyAuth]);
+
+  await app.listen();
+}
+```
+
+You can also pass in a directory and a POST or PUT command and upload files to a local directory if you are using multipart/form encoding:
+
+```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
+void main() async {
+  final app = Alfred();
+
+  app.post('/public', (req, res) => Directory('test/files'));
+
+  await app.listen();
+}
+```
+
+If you want to delete a file?
 
 ```dart
 import 'dart:io';
@@ -445,11 +491,13 @@ void main() async {
   final app = Alfred();
 
   /// Note the wildcard (*) this is very important!!
-  app.get('/public/*', (req, res) => Directory('test/files'));
+  app.delete('/public/*', (req, res) => Directory('test/files'));
 
   await app.listen();
 }
 ```
+
+Security? Build in a middleware function to authenticate a user etc. 
 
 ### File downloads
 

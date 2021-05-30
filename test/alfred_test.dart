@@ -169,6 +169,12 @@ void main() {
     // expect(response.body, "test string");
   });
 
+  test('it handles a HEAD request', () async {
+    app.head('/test', (req, res) => 'test string');
+    final response = await http.head(Uri.parse('http://localhost:$port/test'));
+    expect(response.body.isEmpty, true);
+  });
+
   test('it handles a patch request', () async {
     app.patch('/test', (req, res) => 'test string');
     final response = await http.patch(Uri.parse('http://localhost:$port/test'));
@@ -306,6 +312,15 @@ void main() {
     expect(response.headers['content-type'], 'application/pdf');
   });
 
+  test('it serves static files with a trailing slash', () async {
+    app.get('/files/*', (req, res) => Directory('test/files/'));
+
+    final response =
+        await http.get(Uri.parse('http://localhost:$port/files/dummy.pdf'));
+    expect(response.statusCode, 200);
+    expect(response.headers['content-type'], 'application/pdf');
+  });
+
   test('it serves static files although directories do not match', () async {
     app.get('/my/directory/*', (req, res) => Directory('test/files'));
 
@@ -313,6 +328,14 @@ void main() {
         .get(Uri.parse('http://localhost:$port/my/directory/dummy.pdf'));
     expect(response.statusCode, 200);
     expect(response.headers['content-type'], 'application/pdf');
+  });
+
+  test('it cant exit the directory', () async {
+    app.get('/my/directory/*', (req, res) => Directory('test/files'));
+
+    final response = await http.get(
+        Uri.parse('http://localhost:$port/my/directory/../alfred_test.dart'));
+    expect(response.statusCode, 404);
   });
 
   test('it serves static files with basic filtering', () async {
@@ -431,6 +454,17 @@ void main() {
     expect(inLog('debug Apply middleware'), true);
     expect(inLog('debug Apply TypeHandler for result type: String'), true);
     expect(inLog('debug Response sent to client'), true);
+  });
+
+  test('it prints the routes without error', () {
+    app.get('/test', (req, res) => 'response');
+    app.post('/test', (req, res) => 'response');
+    app.put('/test', (req, res) => 'response');
+    app.delete('/test', (req, res) => 'response');
+    app.options('/test', (req, res) => 'response');
+    app.all('/test', (req, res) => 'response');
+    app.head('/test', (req, res) => 'response');
+    app.printRoutes();
   });
 }
 
