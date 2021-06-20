@@ -231,8 +231,12 @@ class Alfred {
   /// Call this function to fire off the server.
   ///
   Future<HttpServer> listen(
-      [int port = 3000, dynamic bindIp = '0.0.0.0', bool shared = true]) async {
-    final _server = await HttpServer.bind(bindIp, port, shared: shared);
+      [int port = 3000,
+      dynamic bindIp = '0.0.0.0',
+      bool shared = true,
+      int backlog = 0]) async {
+    final _server =
+        await HttpServer.bind(bindIp, port, shared: shared, backlog: backlog);
     _server.idleTimeout = Duration(seconds: 1);
 
     _server.listen((HttpRequest request) {
