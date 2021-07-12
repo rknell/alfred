@@ -602,7 +602,7 @@ from the dart:io package. All helpers are just extension methods to:
 - HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
 - HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
 
-So you can compose and write any content you can imagine there. If there is something you wan't to do
+So you can compose and write any content you can imagine there. If there is something you want to do
 that isn't expressly listed by the library, you will be able to do it with a minimum of research into
 underlying libraries. A core part of the architecture is to not build you into a wall.
 
