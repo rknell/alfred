@@ -9,15 +9,13 @@ import '../extensions/response_helpers.dart';
 import 'type_handler.dart';
 
 TypeHandler get directoryTypeHandler =>
-    TypeHandler<Directory>((req, res, dynamic directory) async {
+    TypeHandler<Directory>((req, res, Directory directory) async {
       final usedRoute = req.route;
       String? virtualPath;
       if (usedRoute.contains('*')) {
         virtualPath = req.uri.path
             .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
       }
-
-      directory = directory as Directory;
 
       if (req.method == 'GET' || req.method == 'HEAD') {
         assert(usedRoute.contains('*'),

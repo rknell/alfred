@@ -1,4 +1,5 @@
 import '../alfred.dart';
+import 'extensions/string_helpers.dart';
 import 'alfred.dart';
 import 'http_route.dart';
 
@@ -15,36 +16,7 @@ class RouteMatcher {
         continue;
       }
 
-      /// Split route path into segments
-      final segments = Uri.parse(option.route.normalizePath).pathSegments;
-
-      var matcher = '^';
-      for (var segment in segments) {
-        if (segment == '*' &&
-            segment != segments.first &&
-            segment == segments.last) {
-          /// Generously match path if last segment is wildcard (*)
-          /// Example: 'some/path/*' => should match 'some/path'
-          matcher += '/?.*';
-        } else if (segment != segments.first) {
-          /// Add path separators
-          matcher += '/';
-        }
-
-        /// escape period character
-        segment = segment.replaceAll('.', r'\.');
-
-        /// parameter (':something') to anything but slash
-        segment = segment.replaceAll(RegExp(':.+'), '[^/]+?');
-
-        /// wildcard ('*') to anything
-        segment = segment.replaceAll('*', '.*?');
-
-        matcher += segment;
-      }
-      matcher += r'$';
-
-      if (RegExp(matcher, caseSensitive: false).hasMatch(inputPath)) {
+      if (option.matcher.hasMatch(inputPath)) {
         output.add(option);
       }
     }
@@ -75,19 +47,6 @@ class RouteMatcher {
       }
     }
     return output;
-  }
-}
-
-extension _PathNormalizer on String {
-  /// Trims all slashes at the start and end
-  String get normalizePath {
-    if (startsWith('/')) {
-      return substring('/'.length).normalizePath;
-    }
-    if (endsWith('/')) {
-      return substring(0, length - '/'.length).normalizePath;
-    }
-    return this;
   }
 }
 

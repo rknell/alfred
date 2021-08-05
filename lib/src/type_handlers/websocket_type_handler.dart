@@ -5,8 +5,7 @@ import 'package:alfred/src/type_handlers/type_handler.dart';
 
 TypeHandler<WebSocketSession> get websocketTypeHandler =>
     TypeHandler<WebSocketSession>(
-        (HttpRequest req, HttpResponse res, dynamic value) async {
-      value = value as WebSocketSession;
+        (HttpRequest req, HttpResponse res, WebSocketSession value) async {
       var ws = await WebSocketTransformer.upgrade(req);
       value._start(ws);
     });

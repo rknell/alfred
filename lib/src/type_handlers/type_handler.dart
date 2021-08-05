@@ -1,10 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
-class TypeHandler<T> {
-  TypeHandler(this.handler);
+typedef TypeHandlerFunction<T> = FutureOr Function(HttpRequest req, HttpResponse res, T value);
 
-  FutureOr Function(HttpRequest req, HttpResponse res, T value) handler;
+class TypeHandler<T> {
+  TypeHandler(TypeHandlerFunction<T> handler) : handler = _wrap(handler);
+
+  TypeHandlerFunction<dynamic> handler;
 
   bool shouldHandle(dynamic item) => item is T;
+}
+
+TypeHandlerFunction<dynamic> _wrap<T>(TypeHandlerFunction<T> handler) {
+  return (HttpRequest req, HttpResponse res, dynamic value) => handler(req, res, value as T);
 }
