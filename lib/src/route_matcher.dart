@@ -4,10 +4,8 @@ import 'alfred.dart';
 import 'http_route.dart';
 
 class RouteMatcher {
-  static List<HttpRoute> match(
-      String input, List<HttpRoute> options, Method method) {
-    final output = <HttpRoute>[];
-
+  static Iterable<HttpRoute> match(
+      String input, List<HttpRoute> options, Method method) sync* {
     final inputPath = Uri.parse(input).path.normalizePath;
 
     for (final option in options) {
@@ -17,11 +15,9 @@ class RouteMatcher {
       }
 
       if (option.matcher.hasMatch(inputPath)) {
-        output.add(option);
+        yield option;
       }
     }
-
-    return output;
   }
 
   static Map<String, String> getParams(String route, String input) {

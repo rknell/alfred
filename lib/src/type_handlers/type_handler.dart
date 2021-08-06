@@ -4,7 +4,7 @@ import 'dart:io';
 class TypeHandler<T> {
   TypeHandler(this._handler);
 
-  FutureOr Function(HttpRequest, HttpResponse, T)  _handler;
+  final FutureOr Function(HttpRequest, HttpResponse, T)  _handler;
 
   FutureOr handler(HttpRequest req, HttpResponse res, dynamic item)
       => _handler(req, res, item as T);
