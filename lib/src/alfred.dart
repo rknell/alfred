@@ -290,6 +290,7 @@ class Alfred {
             break;
           }
           logWriter(() => 'Match route: ${route.route}', LogType.debug);
+          request.store.unset('_internal_params');
           request.store.set('_internal_route', route.route);
           nonWildcardRouteMatch =
               !route.usesWildcardMatcher || nonWildcardRouteMatch;
