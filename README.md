@@ -107,7 +107,7 @@ The big difference you will see is the option to not call `res.send` or `res.jso
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
 | Return Dart Type | Returning REST type |
-| ----------------- | ------------------ |
+| ---------------- | ------------------ |
 | `List<dynamic>` | JSON |
 | `Map<String, Object?>` | JSON |
 | Serializable object (Object.toJSON or Object.toJson) * see note | JSON |
@@ -151,32 +151,28 @@ more detail: https://medium.com/@iapicca/alfred-an-express-like-server-framework
 Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex
 matching, mostly just stick with the route name and param syntax from Express:
 
-"/path/to/:id/property" etc
+* `/path/to/:id/property` etc
 
 The Express syntax has been extended to support parameter patterns and types. To enforce parameter
 validation, a regular expression or a type specifier should be provided after the parameter name, using
-another ":" as a separator:
+another `:` as a separator:
 
-"/path/to/:id:\d+/property" will ensure "id" is a string consisting of decimal digits
-"/path/to/:id:[0-9a-f]+/property" will ensure "id" is a string consisting of hexadecimal digits
-"/path/to/:id:uuid/property" will ensure "id" is a string representing an UUID
+* `/path/to/:id:\d+/property` will ensure "id" is a string consisting of decimal digits
+* `/path/to/:id:[0-9a-f]+/property` will ensure "id" is a string consisting of hexadecimal digits
+* `/path/to/:id:uuid/property` will ensure "id" is a string representing an UUID
 
 Available built-in types are:
 
-* `int`: a decimal integer
-* * associated regular expression: `-?\d+`
-* `uint`: a positive decimal integer
-* * associated regular expression: `\d+`
-* `double`: a double (dot notation only -- scientific notation is not supported)
-* * associated regular expression: `-?\d+(?:\.\d+)`
-* `date`: a UTC date in the form of "year/month/day"
-* * associated regular expression: `-?\d{1,6}/(?:0[1-9]|1[012])/(?:0[1-9]|[12][0-9]|3[01])`
-* * note how this parameter type "absorbs" multiple segments of the URI
-* `timestamp`: number of milliseconds since Epoch
-* * associated regular expression: `-?\d+`
-* `uuid`: a string ressembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
-* * associated regular expression: `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
-* * note that no effort is made to ensure it is a valid UUID
+| Builtin Type | Description | Regular Expression |
+| ------------ | ----------- | ------------------ |
+| `int` | A decimal integer | `-?\d+` |
+| `uint` | A positive decimal integer | `\d+` |
+| `double` | A double (dot notation only -- scientific notation is not supported) | `-?\d+(?:\.\d+)` |
+| `date` | A UTC date in the form of "year/month/day" | `-?\d{1,6}/(?:0[1-9]|1[012])/(?:0[1-9]|[12][0-9]|3[01])` |
+| note how this parameter type "absorbs" multiple segments of the URI |
+| `timestamp` | Number of milliseconds since Epoch | `-?\d+` |
+| `uuid` | a string ressembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) | `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` |
+| note that no effort is made to ensure it is a valid UUID |
 
 So for example:
 
