@@ -153,6 +153,31 @@ matching, mostly just stick with the route name and param syntax from Express:
 
 "/path/to/:id/property" etc
 
+The Express syntax has been extended to support parameter patterns and types. To enforce parameter
+validation, a regular expression or a type specifier should be provided after the parameter name, using
+another ":" as a separator:
+
+"/path/to/:id:\d+/property" will ensure "id" is a string consisting of decimal digits
+"/path/to/:id:[0-9a-f]+/property" will ensure "id" is a string consisting of hexadecimal digits
+"/path/to/:id:uuid/property" will ensure "id" is a string representing an UUID
+
+Available built-in types are:
+
+* `int`: a decimal integer
+* * associated regular expression: `-?\d+`
+* `uint`: a positive decimal integer
+* * associated regular expression: `\d+`
+* `double`: a double (dot notation only -- scientific notation is not supported)
+* * associated regular expression: `-?\d+(?:\.\d+)`
+* `date`: a UTC date in the form of "year/month/day"
+* * associated regular expression: `-?\d{1,6}/(?:0[1-9]|1[012])/(?:0[1-9]|[12][0-9]|3[01])`
+* * note how this parameter type "absorbs" multiple segments of the URI
+* `timestamp`: number of milliseconds since Epoch
+* * associated regular expression: `-?\d+`
+* `uuid`: a string ressembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+* * associated regular expression: `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}`
+* * note that no effort is made to ensure it is a valid UUID
+
 So for example:
 
 ```dart
@@ -160,6 +185,11 @@ import 'package:alfred/alfred.dart';
 
 void main() async {
   final app = Alfred();
+  app.all('/example/:id:int/:name', (req, res) {
+    req.params['id'] != null;
+    req.params['id'] is int;
+    req.params['name'] != null;
+  });
   app.all('/example/:id/:name', (req, res) {
     req.params['id'] != null;
     req.params['name'] != null;

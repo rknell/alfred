@@ -165,8 +165,8 @@ void main() {
     /// TODO: Need to find a way to send an options request. The HTTP library doesn't
     /// seem to support it.
     ///
-    // final response = await http.head(Uri.parse("http://localhost:$port/test"));
-    // expect(response.body, "test string");
+    // final response = await http.options(Uri.parse('http://localhost:$port/test'));
+    // expect(response.body, 'test string');
   });
 
   test('it handles a HEAD request', () async {
@@ -419,6 +419,34 @@ void main() {
     app.get('/test/:id', (req, res) => req.params['id']);
     final response =
         await http.get(Uri.parse('http://localhost:$port/test/15'));
+    expect(response.body, '15');
+  });
+
+  test('it handles typed params', () async {
+    app.get('/blog/:year:int', (req, res) => 'Blog Entries for year ${req.params['year']}');
+    app.get('/blog/:date:date', (req, res) => 'Blog Entries for ${req.params['date']}');
+    app.get('/blog/:date:date/:id:uint/:title:*', (req, res) => 'Blog Entry #${req.params['id']} - ${req.params['date']} - ${req.params['title']}');
+    var response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/03/27/1/Initial%20Commit'));
+    expect(response.body, 'Blog Entry #1 - ${DateTime.utc(2021, 3, 27)} - Initial Commit');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20/59/Merged%20commit%20c391fcc'));
+    expect(response.body, 'Blog Entry #59 - ${DateTime.utc(2021, 8, 20)} - Merged commit c391fcc');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021'));
+    expect(response.body, 'Blog Entries for year 2021');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20'));
+    expect(response.body, 'Blog Entries for ${DateTime.utc(2021, 8, 20)}');
+  });
+
+  test('it handles params in routes with wildcards', () async {
+    app.get('/test/*/:id', (req, res) => req.params['id']);
+    var response =
+        await http.get(Uri.parse('http://localhost:$port/test/onelevel/15'));
+    expect(response.body, '15');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/test/two/levels/15'));
     expect(response.body, '15');
   });
 

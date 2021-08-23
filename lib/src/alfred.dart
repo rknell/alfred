@@ -267,7 +267,7 @@ class Alfred {
     }));
 
     // Work out all the routes we need to process
-    final effectiveRoutes = RouteMatcher.match(
+    final effectiveMatches = RouteMatcher.match(
         request.uri.toString(),
         routes,
         EnumToString.fromString<Method>(Method.values, request.method) ??
@@ -277,7 +277,7 @@ class Alfred {
       // If there are no effective routes, that means we need to throw a 404
       // or see if there are any static routes to fall back to, otherwise
       // continue and process the routes
-      if (effectiveRoutes.isEmpty) {
+      if (effectiveMatches.isEmpty) {
         logWriter(() => 'No matching route found.', LogType.debug);
         await _respondNotFound(request, isDone);
       } else {
@@ -285,18 +285,17 @@ class Alfred {
         var nonWildcardRouteMatch = false;
 
         // Loop through the routes in the order they are in the routes list
-        for (var route in effectiveRoutes) {
+        for (var match in effectiveMatches) {
           if (isDone) {
             break;
           }
-          logWriter(() => 'Match route: ${route.route}', LogType.debug);
-          request.store.unset('_internal_params');
-          request.store.set('_internal_route', route.route);
+          logWriter(() => 'Match route: ${match.route.route}', LogType.debug);
+          request.store.set('_internal_match', match);
           nonWildcardRouteMatch =
-              !route.usesWildcardMatcher || nonWildcardRouteMatch;
+              !match.route.usesWildcardMatcher || nonWildcardRouteMatch;
 
           /// Loop through any middleware
-          for (var middleware in route.middleware) {
+          for (var middleware in match.route.middleware) {
             // If the request has already completed, exit early.
             if (isDone) {
               break;
@@ -314,7 +313,7 @@ class Alfred {
           }
           logWriter(() => 'Execute route callback function', LogType.debug);
           await _handleResponse(
-              await route.callback(request, request.response), request);
+              await match.route.callback(request, request.response), request);
         }
 
         /// If you got here and isDone is still false, you forgot to close
