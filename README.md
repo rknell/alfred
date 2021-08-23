@@ -175,7 +175,7 @@ Available type specifiers are:
 | -------------- | ------------------ | --------- |
 | `int` | `-?\d+` | `int` |
 | `uint` | `\d+` | `int` |
-| `double` `-?\d+(?:\.\d+)` | `double` |
+| `double` | `-?\d+(?:\.\d+)` | `double` |
 | `date` | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
 | `timestamp` | `-?\d+` | `DateTime` |
 | `uuid` |  `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
