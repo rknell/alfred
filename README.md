@@ -163,16 +163,14 @@ another `:` as a separator:
 
 Available built-in types are:
 
-| Builtin Type | Description | Regular Expression |
-| ------------ | ----------- | ------------------ |
-| `int` | A decimal integer | `-?\d+` |
-| `uint` | A positive decimal integer | `\d+` |
-| `double` | A double (dot notation only -- scientific notation is not supported) | `-?\d+(?:\.\d+)` |
-| `date` | A UTC date in the form of "year/month/day" | `-?\d{1,6}/(?:0[1-9]|1[012])/(?:0[1-9]|[12][0-9]|3[01])` |
-| note how this parameter type "absorbs" multiple segments of the URI |
-| `timestamp` | Number of milliseconds since Epoch | `-?\d+` |
-| `uuid` | a string ressembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) | `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` |
-| note that no effort is made to ensure it is a valid UUID |
+| Builtin Type | Description | Regular Expression | Dart type |
+| ------------ | ----------- | ------------------ | --------- |
+| `int` | A decimal integer. | `-?\d+` | `int` |
+| `uint` | A positive decimal integer. | `\d+` | `int` |
+| `double` | A double (decimal notation only, scientific notation is not supported) | `-?\d+(?:\.\d+)` | `double` |
+| `date` | A UTC date in the form of "year/month/day"; please note how this parameter type "absorbs" multiple segments of the URI | `-?\d{1,6}/(?:0[1-9]||1[012])/(?:0[1-9]||[12][0-9]||3[01])` | `DateTime` |
+| `timestamp` | Number of milliseconds since Epoch | `-?\d+` | `DateTime` |
+| `uuid` | A string ressembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); please note that no effort is made to ensure this is a valid UUID | `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` |
 
 So for example:
 
