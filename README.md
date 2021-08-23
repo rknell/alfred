@@ -159,18 +159,26 @@ another `:` as a separator:
 
 * `/path/to/:id:\d+/property` will ensure "id" is a string consisting of decimal digits
 * `/path/to/:id:[0-9a-f]+/property` will ensure "id" is a string consisting of hexadecimal digits
+* `/path/to/:word:[a-z]+/property` will ensure "word" is a string consisting of letters only
 * `/path/to/:id:uuid/property` will ensure "id" is a string representing an UUID
 
-Available built-in types are:
+Available type specifiers are:
 
-| Builtin Type | Description | Regular Expression | Dart type |
-| ------------ | ----------- | ------------------ | --------- |
-| `int` | A decimal integer | `-?\d+` | `int` |
-| `uint` | A positive decimal integer | `\d+` | `int` |
-| `double` | A double (decimal form); note that scientific notation is not supported) | `-?\d+(?:\.\d+)` | `double` |
-| `date` | A UTC date in the form of "year/month/day"; note how this type "absorbs" multiple segments of the URI | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
-| `timestamp` | A UTC date expressed in number of milliseconds since Epoch | `-?\d+` | `DateTime` |
-| `uuid` | A string resembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); please note that no effort is made to ensure this is a valid UUID | `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
+* `int`: a decimal integer
+* `uint`: a positive decimal integer
+* `double`: a double (decimal form); note that scientific notation is not supported
+* `date`: a UTC date in the form of "year/month/day"; note how this type "absorbs" multiple segments of the URI
+* `timestamp`: a UTC date expressed in number of milliseconds since Epoch
+* `uuid`: a string resembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); note that no effort is made to ensure this is a valid UUID
+
+| Type Specifier | Regular Expression | Dart type |
+| -------------- | ------------------ | --------- |
+| `int` | `-?\d+` | `int` |
+| `uint` | `\d+` | `int` |
+| `double` `-?\d+(?:\.\d+)` | `double` |
+| `date` | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
+| `timestamp` | `-?\d+` | `DateTime` |
+| `uuid` |  `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
 
 So for example:
 
@@ -187,6 +195,12 @@ void main() async {
   app.all('/example/:id/:name', (req, res) {
     req.params['id'] != null;
     req.params['name'] != null;
+  });
+  app.get('/blog/:date:date/:id:int', (req, res) {
+    req.params['date'] != null;
+    req.params['date'] is DateTime;
+    req.params['id'] != null;
+    req.params['id'] is int;
   });
   await app.listen();
 }
