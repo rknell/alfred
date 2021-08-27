@@ -63,6 +63,9 @@ class HttpRoute {
     pattern += r'$';
     matcher = RegExp(pattern, caseSensitive: false);
   }
+
+  @override
+  String toString() => route;
 }
 
 // Throws when a route contains duplicate parameters
@@ -83,7 +86,8 @@ class HttpRouteParam {
   final HttpRouteParamType? type;
 
   Object getValue(String value) {
-    value = Uri.decodeComponent(value);
+    // path has been decoded already except for '/'
+    value = value.decodeUri(DecodeMode.SlashOnly);
     switch (type) {
       case HttpRouteParamType.int:
         return int.parse(value);
@@ -100,6 +104,10 @@ class HttpRouteParam {
         return DateTime.utc(components[0], components[1], components[2]);
       case HttpRouteParamType.timestamp:
         return DateTime.fromMillisecondsSinceEpoch(int.parse(value));
+      case HttpRouteParamType.hex:
+        return value;
+      case HttpRouteParamType.alpha:
+        return value;
       case HttpRouteParamType.uuid:
         // Dart does not have a builtin Uuid or Guid type
         // no effort is made to ensure UUID conforms to RFC4122
@@ -140,6 +148,14 @@ class HttpRouteParam {
           type = HttpRouteParamType.timestamp;
           pattern = r'-?\d+';
           break;
+        case 'hex':
+          type = HttpRouteParamType.hex;
+          pattern = r'[0-9a-f]+';
+          break;
+        case 'alpha':
+          type = HttpRouteParamType.alpha;
+          pattern = r'[a-z0-9_]+';
+          break;
         case 'uuid':
           type = HttpRouteParamType.uuid;
           pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
@@ -158,5 +174,7 @@ enum HttpRouteParamType {
   double,
   date,
   timestamp,
+  hex,
+  alpha,
   uuid
 }

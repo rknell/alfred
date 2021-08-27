@@ -6,7 +6,8 @@ import 'http_route.dart';
 class RouteMatcher {
   static Iterable<HttpRouteMatch> match(
       String input, List<HttpRoute> options, Method method) sync* {
-    final inputPath = Uri.parse(input).path.normalizePath;
+    // decode URL path before matching except for "/"
+    final inputPath = Uri.parse(input).path.normalizePath.decodeUri(DecodeMode.AllButSlash);
 
     for (final option in options) {
       // Check if http method matches
