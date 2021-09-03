@@ -12,3 +12,4 @@ export 'src/http_route.dart';
 export 'src/middleware/cors.dart';
 export 'src/plugins/store_plugin.dart';
 export 'src/type_handlers/type_handler.dart';
+export 'src/route_param_types/http_route_param_type.dart';

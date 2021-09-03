@@ -3,6 +3,14 @@ import 'dart:io';
 
 import 'package:alfred/src/extensions/request_helpers.dart';
 import 'package:alfred/src/plugins/store_plugin.dart';
+import 'package:alfred/src/route_param_types/alpha_param_type.dart';
+import 'package:alfred/src/route_param_types/date_param_type.dart';
+import 'package:alfred/src/route_param_types/double_param_type.dart';
+import 'package:alfred/src/route_param_types/hex_param_type.dart';
+import 'package:alfred/src/route_param_types/int_param_type.dart';
+import 'package:alfred/src/route_param_types/timestamp_param_type.dart';
+import 'package:alfred/src/route_param_types/uint_param_type.dart';
+import 'package:alfred/src/route_param_types/uuid_param_type.dart';
 import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
 import 'package:alfred/src/type_handlers/directory_type_handler.dart';
 import 'package:alfred/src/type_handlers/file_type_handler.dart';
@@ -119,6 +127,7 @@ class Alfred {
     LogType logLevel = LogType.info,
     int simultaneousProcessing = 50,
   }) : requestQueue = Queue(parallel: simultaneousProcessing) {
+    _registerDefaultParamTypes();
     _registerDefaultTypeHandlers();
     _registerPluginListeners();
     _registerDefaultLogWriter(logLevel);
@@ -147,6 +156,19 @@ class Alfred {
       directoryTypeHandler,
       websocketTypeHandler,
       serializableTypeHandler
+    ]);
+  }
+
+  void _registerDefaultParamTypes() {
+    HttpRouteParam.paramTypes.addAll([
+      IntParamType(),
+      UintParamType(),
+      DoubleParamType(),
+      DateParamType(),
+      TimestampParamType(),
+      HexParamType(),
+      AlphaParamType(),
+      UuidParamType()
     ]);
   }
 

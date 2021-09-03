@@ -4,6 +4,7 @@ import 'dart:io';
 import '../alfred.dart';
 import 'extensions/string_helpers.dart';
 import 'alfred.dart';
+import 'route_param_types/http_route_param_type.dart';
 
 class HttpRoute {
   final Method method;
@@ -44,19 +45,19 @@ class HttpRoute {
         pattern += '/';
       }
 
-      // escape period character
-      segment = segment.replaceAll('.', r'\.');
-
       // parse parameter if any
       final param = HttpRouteParam.tryParse(segment);
       if (param != null) {
         if (_params.containsKey(param.name)) throw DuplicateParameterException(param.name);
         _params[param.name] = param;
         segment = r'(?<' + param.name + r'>' + param.pattern + ')';
+      } else {
+        // escape period character
+        segment = segment.replaceAll('.', r'\.');
+        // wildcard ('*') to anything
+        segment = segment.replaceAll('*', '.*?');
       }
 
-      // wildcard ('*') to anything
-      segment = segment.replaceAll('*', '.*?');
       pattern += segment;
     }
 
@@ -68,8 +69,8 @@ class HttpRoute {
   String toString() => route;
 }
 
-// Throws when a route contains duplicate parameters
-//
+/// Throws when a route contains duplicate parameters
+///
 class DuplicateParameterException implements Exception {
   DuplicateParameterException(this.name);
 
@@ -85,96 +86,36 @@ class HttpRouteParam {
   final String pattern;
   final HttpRouteParamType? type;
 
-  Object getValue(String value) {
+  dynamic getValue(String value) {
     // path has been decoded already except for '/'
     value = value.decodeUri(DecodeMode.SlashOnly);
-    switch (type) {
-      case HttpRouteParamType.int:
-        return int.parse(value);
-      case HttpRouteParamType.uint:
-        return int.parse(value);
-      case HttpRouteParamType.double:
-        return double.parse(value);
-      case HttpRouteParamType.date:
-        // note: the RegExp enforces month between 1 and 12 and day between 1 and 31
-        // but it does not care about leap years and actual number of days in month
-        // DateTime will accept "invalid" dates and adjust the result accordingly
-        // eg. 2021-02-31 --> 2021-03-03 
-        final components = value.split('/').map(int.parse).toList();
-        return DateTime.utc(components[0], components[1], components[2]);
-      case HttpRouteParamType.timestamp:
-        return DateTime.fromMillisecondsSinceEpoch(int.parse(value));
-      case HttpRouteParamType.hex:
-        return value;
-      case HttpRouteParamType.alpha:
-        return value;
-      case HttpRouteParamType.uuid:
-        // Dart does not have a builtin Uuid or Guid type
-        // no effort is made to ensure UUID conforms to RFC4122
-        return value;
-      default:
-        return value;
-    }
+    return type?.parse(value) ?? value;
   }
 
+  static final paramTypes = <HttpRouteParamType>[];
+
   static HttpRouteParam? tryParse(String segment) {
+    /// route param is of the form ":name" or ":name:pattern"
+    /// the ":pattern" part can be a regular expression
+    /// or a param type name
     if (!segment.startsWith(':')) return null;
-    HttpRouteParamType? type;
     var pattern = '';
     var name = segment.substring(1);
+    HttpRouteParamType? type;
     final idx = name.indexOf(':');
     if (idx > 0) {
       pattern = name.substring(idx + 1);
       name = name.substring(0, idx);
-      switch (pattern.toLowerCase()) {
-        case 'int':
-          type = HttpRouteParamType.int;
-          pattern = r'-?\d+';
-          break;
-        case 'uint':
-          type = HttpRouteParamType.uint;
-          pattern = r'\d+';
-          break;
-        case 'double':
-          type = HttpRouteParamType.double;
-          pattern = r'-?\d+(?:\.\d+)?';
-          break;
-        case 'date':
-          type = HttpRouteParamType.date;
-          // note: make sure month is in range 01-12 and day is in range 01-31
-          pattern = r'-?\d{1,6}/(?:0[1-9]|1[012])/(?:0[1-9]|[12][0-9]|3[01])';
-          break;
-        case 'timestamp':
-          type = HttpRouteParamType.timestamp;
-          pattern = r'-?\d+';
-          break;
-        case 'hex':
-          type = HttpRouteParamType.hex;
-          pattern = r'[0-9a-f]+';
-          break;
-        case 'alpha':
-          type = HttpRouteParamType.alpha;
-          pattern = r'[a-z0-9_]+';
-          break;
-        case 'uuid':
-          type = HttpRouteParamType.uuid;
-          pattern = r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
-          break;
+      final typeName = pattern.toLowerCase();
+      type = paramTypes.cast<HttpRouteParamType?>().firstWhere((t) => t!.name == typeName, orElse: () => null);
+      if (type != null) {
+        // the pattern matches a param type name
+        pattern = type.pattern;
       }
     } else {
+      // anything but a slash
       pattern = r'[^/]+?';
     }
     return HttpRouteParam(name, pattern, type);
   }
-}
-
-enum HttpRouteParamType {
-  int,
-  uint,
-  double,
-  date,
-  timestamp,
-  hex,
-  alpha,
-  uuid
 }

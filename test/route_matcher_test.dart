@@ -3,6 +3,16 @@ import 'package:alfred/src/route_matcher.dart';
 import 'package:test/test.dart';
 
 void main() {
+
+  setUp(() {
+    // used to register default param types
+    Alfred();
+  });
+
+  tearDown(() {
+    HttpRouteParam.paramTypes.clear();
+  });
+
   test('it should match routes correctly', () {
     final testRoutes = [
       httpTestRoute('/a/:id/go'),
@@ -89,6 +99,50 @@ void main() {
         [ genericRoute ]);
   });
 
+  test('it should match routes correctly - custom typed parameters', () {
+    final frZip = FrenchPostalCodeTypeParameter();
+    final frPhone = FrenchPhoneNumberTypeParameter();
+    final recentDate = RecentDateTypeParameter();
+    final refNumber = RefNumberTypeParameter();
+
+    HttpRouteParam.paramTypes.add(frZip);
+    HttpRouteParam.paramTypes.add(frPhone);
+    HttpRouteParam.paramTypes.add(recentDate);
+    HttpRouteParam.paramTypes.add(refNumber);
+    try {
+      final intRoute = httpTestRoute(r'/xxx/:number:int');
+      final doubleRoute = httpTestRoute(r'/xxx/:number:double');
+      final frenchZipRoute = httpTestRoute(r'/xxx/:zip:zip-fr');
+      final frenchPhoneRoute = httpTestRoute(r'/xxx/:phone:phone-fr');
+      final altDateRoute = httpTestRoute(r'/xxx/:date:recent');
+      final refNumberRoute = httpTestRoute(r'/xxx/:ref:ref');
+
+      final testRoutes = [
+        intRoute, doubleRoute, frenchZipRoute, frenchPhoneRoute, altDateRoute, refNumberRoute
+      ];
+
+      expect(routes(match('/xxx/abc', testRoutes)), isEmpty);
+      expect(routes(match('/xxx/123', testRoutes)), [ intRoute, doubleRoute ]);
+      expect(routes(match('/xxx/123.456', testRoutes)), [ doubleRoute ]);
+      expect(routes(match('/xxx/01.02.03', testRoutes)), isEmpty);
+      expect(routes(match('/xxx/9-11-89', testRoutes)), isEmpty);
+      expect(routes(match('/xxx/14-7-1789', testRoutes)), isEmpty);
+      expect(routes(match('/xxx/abc%2F123', testRoutes)), isEmpty);
+      expect(routes(match('/xxx/ab%2F1234', testRoutes)), isEmpty);
+
+      expect(routes(match('/xxx/75001', testRoutes)), [ intRoute, doubleRoute, frenchZipRoute ]);
+      expect(routes(match('/xxx/01.02.03.04.05', testRoutes)), [ frenchPhoneRoute ]);
+      expect(routes(match('/xxx/01.02.03.04.05', testRoutes)), [ frenchPhoneRoute ]);
+      expect(routes(match('/xxx/9-11-1989', testRoutes)), [ altDateRoute ]);
+      expect(routes(match('/xxx/ab%2F123', testRoutes)), [ refNumberRoute ]);
+    } finally {
+      HttpRouteParam.paramTypes.remove(refNumber);
+      HttpRouteParam.paramTypes.remove(recentDate);
+      HttpRouteParam.paramTypes.remove(frPhone);
+      HttpRouteParam.paramTypes.remove(frZip);
+    }
+  });
+
   test('it should match wildcards', () {
     final testRoutes = [
       httpTestRoute('*'),
@@ -171,8 +225,11 @@ void main() {
 
     var matches = match('/xxx/2021/02/32', testRoutes);
     expect(routes(matches), isEmpty);
+    expect(params(matches), isEmpty);
+
     matches = match('/xxx/2021/13/01', testRoutes);
     expect(routes(matches), isEmpty);
+    expect(params(matches), isEmpty);
 
     matches = match('/xxx/2021/08/23', testRoutes);
     expect(routes(matches), 
@@ -234,6 +291,82 @@ void main() {
     matches = match('/xxx/text', testRoutes);
     expect(routes(matches), [ alphaRoute ]);
     expect(params(matches), [ { 'value': 'text' } ]);
+  });
+
+  test('it should extract the route params correctly - custom typed parameters', () {
+    final frZip = FrenchPostalCodeTypeParameter();
+    final frPhone = FrenchPhoneNumberTypeParameter();
+    final recentDate = RecentDateTypeParameter();
+    final refNumber = RefNumberTypeParameter();
+
+    HttpRouteParam.paramTypes.add(frZip);
+    HttpRouteParam.paramTypes.add(frPhone);
+    HttpRouteParam.paramTypes.add(recentDate);
+    HttpRouteParam.paramTypes.add(refNumber);
+    try {
+      final intRoute = httpTestRoute(r'/xxx/:number:int');
+      final doubleRoute = httpTestRoute(r'/xxx/:number:double');
+      final frenchZipRoute = httpTestRoute(r'/xxx/:zip:zip-fr');
+      final frenchPhoneRoute = httpTestRoute(r'/xxx/:phone:phone-fr');
+      final altDateRoute = httpTestRoute(r'/xxx/:date:recent');
+      final refNumberRoute = httpTestRoute(r'/xxx/:ref:ref');
+
+      final testRoutes = [
+        intRoute, doubleRoute, frenchZipRoute, frenchPhoneRoute, altDateRoute, refNumberRoute
+      ];
+
+      var matches = match('/xxx/abc', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/123', testRoutes);
+      expect(routes(matches), [ intRoute, doubleRoute ]);
+      expect(params(matches), [ { 'number': 123 }, { 'number': 123.0 } ]);
+
+      matches = match('/xxx/123.456', testRoutes);
+      expect(routes(matches), [ doubleRoute ]);
+      expect(params(matches), [ { 'number': 123.456 } ]);
+
+      matches = match('/xxx/01.02.03', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/9-11-89', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/14-7-1789', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/abc%2F123', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/ab%2F1234', testRoutes);
+      expect(routes(matches), isEmpty);
+      expect(params(matches), isEmpty);
+
+      matches = match('/xxx/75001', testRoutes);
+      expect(routes(matches), [ intRoute, doubleRoute, frenchZipRoute ]);
+      expect(params(matches), [ { 'number': 75001 }, { 'number': 75001.0 }, { 'zip': 75001 } ]);
+
+      matches = match('/xxx/01.02.03.04.05', testRoutes);
+      expect(routes(matches), [ frenchPhoneRoute ]);
+      expect(params(matches), [ { 'phone': '01.02.03.04.05' } ]);
+
+      matches = match('/xxx/9-11-1989', testRoutes);
+      expect(routes(matches), [ altDateRoute ]);
+      expect(params(matches), [ { 'date': DateTime(1989, 11, 9) } ]);
+
+      matches = match('/xxx/ab%2F123', testRoutes);
+      expect(routes(matches), [ refNumberRoute ]);
+      expect(params(matches), [ { 'ref': 'AB/123' } ]);
+    } finally {
+      HttpRouteParam.paramTypes.remove(recentDate);
+      HttpRouteParam.paramTypes.remove(frPhone);
+      HttpRouteParam.paramTypes.remove(frZip);
+    }
   });
 
   test('it should correctly match routes that have a partial match', () {
@@ -358,3 +491,60 @@ List<Map<String, dynamic>> params(Iterable<HttpRouteMatch> matches) =>
 
 Future Function(HttpRequest, HttpResponse) get _callback =>
     (req, res) async {};
+
+class FrenchPostalCodeTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'zip-fr';
+
+  @override
+  final String pattern = r'\d{5}';
+
+  @override
+  int parse(String value) {
+    return int.parse(value);
+  }
+}
+
+class FrenchPhoneNumberTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'phone-fr';
+
+  @override
+  final String pattern = r'\d{2}\.\d{2}\.\d{2}\.\d{2}\.\d{2}';
+
+  @override
+  String parse(String value) {
+    return value;
+  }
+}
+
+class RecentDateTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'recent';
+
+  @override
+  final String pattern = r'\d{1,2}-\d{1,2}-(?:19|20)\d{2}';
+
+  @override
+  DateTime parse(String value) {
+    // day-month-year
+    final parts = value.split('-');
+    return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+  }
+}
+
+class RefNumberTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'ref';
+
+  // to match a value containing a / in a single segment,
+  // / must be URI-encoded (= %2F) in the reg exp
+  @override
+  final String pattern = r'[a-z]{2}%2F\d{3}';
+
+  @override
+  String parse(String value) {
+    return value.toUpperCase();
+  }
+}
+
