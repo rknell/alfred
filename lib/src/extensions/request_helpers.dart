@@ -30,13 +30,16 @@ extension RequestHelpers on HttpRequest {
 
   /// Get params
   ///
-  Map<String, String> get params =>
-      store.getOrSet<Map<String, String>>('_internal_params',
-        () => RouteMatcher.getParams(route, uri.path));
+  Map<String, dynamic> get params =>
+      store.tryGet<HttpRouteMatch>('_internal_match')?.params ?? <String, dynamic>{};
+
+  /// Get the matched route URI of the current request
+  ///
+  String get route => store.tryGet<HttpRouteMatch>('_internal_match')?.route.route ?? '';
 
   /// Get the matched route of the current request
   ///
-  String get route => store.tryGet<String>('_internal_route') ?? '';
+  HttpRouteMatch? get match => store.tryGet<HttpRouteMatch>('_internal_match');
 
   /// Get Alfred instance which is associated with this request
   ///

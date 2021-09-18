@@ -4,49 +4,54 @@ import 'alfred.dart';
 import 'http_route.dart';
 
 class RouteMatcher {
-  static Iterable<HttpRoute> match(
+  static Iterable<HttpRouteMatch> match(
       String input, List<HttpRoute> options, Method method) sync* {
-    final inputPath = Uri.parse(input).path.normalizePath;
+    // decode URL path before matching except for "/"
+    final inputPath = Uri.parse(input).path.normalizePath.decodeUri(DecodeMode.AllButSlash);
 
     for (final option in options) {
-      /// Check if http method matches
+      // Check if http method matches
       if (option.method != method && option.method != Method.all) {
         continue;
       }
 
-      if (option.matcher.hasMatch(inputPath)) {
-        yield option;
-      }
-    }
-  }
-
-  static Map<String, String> getParams(String route, String input) {
-    final routeParts = route.split('/')..remove('');
-    final inputParts = input.split('/')..remove('');
-
-    if (inputParts.length != routeParts.length) {
-      throw NotMatchingRouteException();
-    }
-
-    final output = <String, String>{};
-
-    for (var i = 0; i < routeParts.length; i++) {
-      final routePart = routeParts[i];
-      final inputPart = inputParts[i];
-
-      if (routePart.contains(':')) {
-        final routeParams = routePart.split(':')..remove('');
-
-        for (var item in routeParams) {
-          output[item] = Uri.decodeComponent(inputPart);
+      // Match against route RegExp and capture params if valid
+      final match = option.matcher.firstMatch(inputPath);
+      if (match != null) {
+        final routeMatch = HttpRouteMatch.tryParse(option, match);
+        if (routeMatch != null) {
+          yield routeMatch;
         }
       }
     }
-    return output;
   }
 }
 
-/// Throws when trying to extract params and the route you are extracting from
-/// does not match the supplied pattern
+/// Retains the matched route and parameter values extracted
+/// from the Uri
 ///
-class NotMatchingRouteException implements Exception {}
+class HttpRouteMatch {
+  HttpRouteMatch._(this.route, this.params);
+
+  static HttpRouteMatch? tryParse(HttpRoute route, RegExpMatch match) {
+    try {
+      final params = <String, dynamic>{};
+      for (var param in route.params) {
+        var value = match.namedGroup(param.name);
+        if (value == null) {
+          if (param.pattern != '*') {
+            return null;
+          }
+          value = '';
+        }
+        params[param.name] = param.getValue(value);
+      }
+      return HttpRouteMatch._(route, params);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  final HttpRoute route;
+  final Map<String, dynamic> params;
+}

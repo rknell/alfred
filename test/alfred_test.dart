@@ -165,8 +165,8 @@ void main() {
     /// TODO: Need to find a way to send an options request. The HTTP library doesn't
     /// seem to support it.
     ///
-    // final response = await http.head(Uri.parse("http://localhost:$port/test"));
-    // expect(response.body, "test string");
+    // final response = await http.options(Uri.parse('http://localhost:$port/test'));
+    // expect(response.body, 'test string');
   });
 
   test('it handles a HEAD request', () async {
@@ -422,6 +422,63 @@ void main() {
     expect(response.body, '15');
   });
 
+  test('it handles typed params', () async {
+    app.get('/blog/:year:int', (req, res) => 'Blog Entries for year ${req.params['year']}');
+    app.get('/blog/:date:date', (req, res) => 'Blog Entries for ${req.params['date']}');
+    app.get('/blog/:date:date/:id:uint/:title:.*', (req, res) => 'Blog Entry #${req.params['id']} - ${req.params['date']} - ${req.params['title']}');
+    var response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/03/27/1/Initial%20Commit'));
+    expect(response.body, 'Blog Entry #1 - ${DateTime.utc(2021, 3, 27)} - Initial Commit');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20/59/Merged%20commit%20c391fcc'));
+    expect(response.body, 'Blog Entry #59 - ${DateTime.utc(2021, 8, 20)} - Merged commit c391fcc');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021'));
+    expect(response.body, 'Blog Entries for year 2021');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20'));
+    expect(response.body, 'Blog Entries for ${DateTime.utc(2021, 8, 20)}');
+  });
+
+  test('it handles custom typed params', () async {
+    final recentDate = RecentDateTypeParameter();
+    final refNumber = RefNumberTypeParameter();
+
+    HttpRouteParam.paramTypes.add(recentDate);
+    HttpRouteParam.paramTypes.add(refNumber);
+    try {
+      app.get('/catalog/:ref:ref', (req, res) => 'Catalog Item ${req.params['ref']}');
+      app.get('/history/:date:recent/:event:.*', (req, res) => '${req.params['date']}: ${req.params['event']}');
+
+      var response =
+          await http.get(Uri.parse('http://localhost:$port/catalog/ab%2F123'));
+      expect(response.body, 'Catalog Item AB/123');
+      response =
+          await http.get(Uri.parse('http://localhost:$port/catalog/ab/123'));
+      expect(response.statusCode, 404);
+
+      response =
+          await http.get(Uri.parse('http://localhost:$port/history/9-11-1989/Fall%20of%20the%20Berlin%20Wall'));
+      expect(response.body, '${DateTime(1989, 11, 9)}: Fall of the Berlin Wall');
+      response =
+          await http.get(Uri.parse('http://localhost:$port/history/14-7-1789/Bastille%20Day'));
+      expect(response.statusCode, 404);
+    } finally {
+      HttpRouteParam.paramTypes.remove(refNumber);
+      HttpRouteParam.paramTypes.remove(recentDate);
+    }
+  });
+
+  test('it handles params in routes with wildcards', () async {
+    app.get('/test/*/:id', (req, res) => req.params['id']);
+    var response =
+        await http.get(Uri.parse('http://localhost:$port/test/onelevel/15'));
+    expect(response.body, '15');
+    response =
+        await http.get(Uri.parse('http://localhost:$port/test/two/levels/15'));
+    expect(response.body, '15');
+  });
+
   test('it should implement cors correctly', () async {
     app.all('*', cors(origin: 'test-origin'));
 
@@ -469,3 +526,34 @@ void main() {
 }
 
 class _UnknownType {}
+
+class RecentDateTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'recent';
+
+  @override
+  final String pattern = r'\d{1,2}-\d{1,2}-(?:19|20)\d{2}';
+
+  @override
+  DateTime parse(String value) {
+    // day-month-year
+    final parts = value.split('-');
+    return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+  }
+}
+
+class RefNumberTypeParameter implements HttpRouteParamType {
+  @override
+  final String name = 'ref';
+
+  // to match a value containing a / in a single segment,
+  // / must be URI-encoded (= %2F) in the reg exp
+  @override
+  final String pattern = r'[a-z]{2}%2F\d{3}';
+
+  @override
+  String parse(String value) {
+    return value.toUpperCase();
+  }
+}
+

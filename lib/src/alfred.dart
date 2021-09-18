@@ -3,6 +3,14 @@ import 'dart:io';
 
 import 'package:alfred/src/extensions/request_helpers.dart';
 import 'package:alfred/src/plugins/store_plugin.dart';
+import 'package:alfred/src/route_param_types/alpha_param_type.dart';
+import 'package:alfred/src/route_param_types/date_param_type.dart';
+import 'package:alfred/src/route_param_types/double_param_type.dart';
+import 'package:alfred/src/route_param_types/hex_param_type.dart';
+import 'package:alfred/src/route_param_types/int_param_type.dart';
+import 'package:alfred/src/route_param_types/timestamp_param_type.dart';
+import 'package:alfred/src/route_param_types/uint_param_type.dart';
+import 'package:alfred/src/route_param_types/uuid_param_type.dart';
 import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
 import 'package:alfred/src/type_handlers/directory_type_handler.dart';
 import 'package:alfred/src/type_handlers/file_type_handler.dart';
@@ -119,6 +127,7 @@ class Alfred {
     LogType logLevel = LogType.info,
     int simultaneousProcessing = 50,
   }) : requestQueue = Queue(parallel: simultaneousProcessing) {
+    _registerDefaultParamTypes();
     _registerDefaultTypeHandlers();
     _registerPluginListeners();
     _registerDefaultLogWriter(logLevel);
@@ -147,6 +156,19 @@ class Alfred {
       directoryTypeHandler,
       websocketTypeHandler,
       serializableTypeHandler
+    ]);
+  }
+
+  void _registerDefaultParamTypes() {
+    HttpRouteParam.paramTypes.addAll([
+      IntParamType(),
+      UintParamType(),
+      DoubleParamType(),
+      DateParamType(),
+      TimestampParamType(),
+      HexParamType(),
+      AlphaParamType(),
+      UuidParamType()
     ]);
   }
 
@@ -267,7 +289,7 @@ class Alfred {
     }));
 
     // Work out all the routes we need to process
-    final effectiveRoutes = RouteMatcher.match(
+    final effectiveMatches = RouteMatcher.match(
         request.uri.toString(),
         routes,
         EnumToString.fromString<Method>(Method.values, request.method) ??
@@ -277,7 +299,7 @@ class Alfred {
       // If there are no effective routes, that means we need to throw a 404
       // or see if there are any static routes to fall back to, otherwise
       // continue and process the routes
-      if (effectiveRoutes.isEmpty) {
+      if (effectiveMatches.isEmpty) {
         logWriter(() => 'No matching route found.', LogType.debug);
         await _respondNotFound(request, isDone);
       } else {
@@ -285,18 +307,17 @@ class Alfred {
         var nonWildcardRouteMatch = false;
 
         // Loop through the routes in the order they are in the routes list
-        for (var route in effectiveRoutes) {
+        for (var match in effectiveMatches) {
           if (isDone) {
             break;
           }
-          logWriter(() => 'Match route: ${route.route}', LogType.debug);
-          request.store.unset('_internal_params');
-          request.store.set('_internal_route', route.route);
+          logWriter(() => 'Match route: ${match.route.route}', LogType.debug);
+          request.store.set('_internal_match', match);
           nonWildcardRouteMatch =
-              !route.usesWildcardMatcher || nonWildcardRouteMatch;
+              !match.route.usesWildcardMatcher || nonWildcardRouteMatch;
 
           /// Loop through any middleware
-          for (var middleware in route.middleware) {
+          for (var middleware in match.route.middleware) {
             // If the request has already completed, exit early.
             if (isDone) {
               break;
@@ -314,7 +335,7 @@ class Alfred {
           }
           logWriter(() => 'Execute route callback function', LogType.debug);
           await _handleResponse(
-              await route.callback(request, request.response), request);
+              await match.route.callback(request, request.response), request);
         }
 
         /// If you got here and isDone is still false, you forgot to close
