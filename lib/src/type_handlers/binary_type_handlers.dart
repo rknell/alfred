@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:alfred/src/type_handlers/type_handler.dart';
+import 'type_handler.dart';
 
 FutureOr _binaryTypeHandler(
     HttpRequest req, HttpResponse res, List<int> val) async {

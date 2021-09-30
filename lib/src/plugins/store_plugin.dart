@@ -1,4 +1,4 @@
-import 'package:alfred/alfred.dart';
+import 'dart:io';
 
 /// Data structure to keep all request-related data
 final storePluginData = <HttpRequest, RequestStore>{};
@@ -33,7 +33,8 @@ class RequestStore {
   /// ```
   T? tryGet<T>(String key) {
     dynamic data = _data[key];
-    assert(data == null || data is T, 'Store value for key $key does not match type $T');
+    assert(data == null || data is T,
+        'Store value for key $key does not match type $T');
     return data as T?;
   }
 

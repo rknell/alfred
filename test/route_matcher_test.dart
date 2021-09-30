@@ -3,7 +3,6 @@ import 'package:alfred/src/route_matcher.dart';
 import 'package:test/test.dart';
 
 void main() {
-
   setUp(() {
     // used to register default param types
     Alfred();
@@ -23,26 +22,18 @@ void main() {
       httpTestRoute('/[a-z]/yep'),
     ];
 
-    expect(patterns(match('/a/123/go/a', testRoutes)),
-        isEmpty);
-    expect(patterns(match('/a', testRoutes)),
-        ['/a']);
-    expect(patterns(match('/%61', testRoutes)),
-        ['/a']);
-    expect(patterns(match('/a?query=true', testRoutes)),
-        ['/a']);
-    expect(patterns(match('/a/123/go', testRoutes)),
-        ['/a/:id/go']);
+    expect(patterns(match('/a/123/go/a', testRoutes)), isEmpty);
+    expect(patterns(match('/a', testRoutes)), ['/a']);
+    expect(patterns(match('/%61', testRoutes)), ['/a']);
+    expect(patterns(match('/a?query=true', testRoutes)), ['/a']);
+    expect(patterns(match('/a/123/go', testRoutes)), ['/a/:id/go']);
     expect(patterns(match('/b/a/adskfjasjklf/another', testRoutes)),
         ['/b/a/:input/another']);
     expect(patterns(match('/b/a/adskf%2Fjasjklf/another', testRoutes)),
         ['/b/a/:input/another']);
-    expect(patterns(match('/b/a/adskfjasj', testRoutes)),
-        ['/b/a/:input']);
-    expect(patterns(match('/d/yep', testRoutes)),
-        ['/[a-z]/yep']);
-    expect(patterns(match('/b/B/yep', testRoutes)),
-        ['/b/B/:input']);
+    expect(patterns(match('/b/a/adskfjasj', testRoutes)), ['/b/a/:input']);
+    expect(patterns(match('/d/yep', testRoutes)), ['/[a-z]/yep']);
+    expect(patterns(match('/b/B/yep', testRoutes)), ['/b/B/:input']);
   });
 
   test('it should match routes correctly - typed parameters', () {
@@ -58,45 +49,64 @@ void main() {
     final genericRoute = httpTestRoute(r'/xxx/:value1/:value2');
 
     final testRoutes = [
-      patternRoute, intRoute, uintRoute,
-      doubleRoute, dateRoute, tsRoute,
-      uuidRoute, alphaRoute, hexRoute,
+      patternRoute,
+      intRoute,
+      uintRoute,
+      doubleRoute,
+      dateRoute,
+      tsRoute,
+      uuidRoute,
+      alphaRoute,
+      hexRoute,
       genericRoute
     ];
 
-    expect(routes(match('/xxx/123/test', testRoutes)),
-        [ patternRoute, intRoute, uintRoute,
-          doubleRoute, tsRoute, alphaRoute,
-          hexRoute, genericRoute ]);
+    expect(routes(match('/xxx/123/test', testRoutes)), [
+      patternRoute,
+      intRoute,
+      uintRoute,
+      doubleRoute,
+      tsRoute,
+      alphaRoute,
+      hexRoute,
+      genericRoute
+    ]);
     expect(routes(match('/xxx/%3123/test', testRoutes)), // %31 is character "1"
-        [ patternRoute, intRoute, uintRoute,
-          doubleRoute, tsRoute, alphaRoute,
-          hexRoute, genericRoute ]);
+        [
+          patternRoute,
+          intRoute,
+          uintRoute,
+          doubleRoute,
+          tsRoute,
+          alphaRoute,
+          hexRoute,
+          genericRoute
+        ]);
     expect(routes(match('/xxx/-123/test', testRoutes)),
-        [ intRoute, doubleRoute,
-          tsRoute, genericRoute ]);
+        [intRoute, doubleRoute, tsRoute, genericRoute]);
     expect(routes(match('/xxx/123.4/test', testRoutes)),
-        [ doubleRoute, genericRoute ]);
+        [doubleRoute, genericRoute]);
     expect(routes(match('/xxx/-123.4/test', testRoutes)),
-        [ doubleRoute, genericRoute ]);
-    expect(routes(match('/xxx/2021/08/23/test', testRoutes)),
-        [ dateRoute ]);
-    expect(routes(match('/xxx/-52/08/23/test', testRoutes)),
-        [ dateRoute ]);
-    expect(routes(match('/xxx/01234567-0123-4567-89ab-cdef01234567/test', testRoutes)),
-        [ uuidRoute, genericRoute ]);
+        [doubleRoute, genericRoute]);
+    expect(routes(match('/xxx/2021/08/23/test', testRoutes)), [dateRoute]);
+    expect(routes(match('/xxx/-52/08/23/test', testRoutes)), [dateRoute]);
+    expect(
+        routes(match(
+            '/xxx/01234567-0123-4567-89ab-cdef01234567/test', testRoutes)),
+        [uuidRoute, genericRoute]);
     expect(routes(match('/xxx/cafe/test', testRoutes)),
-        [ alphaRoute, hexRoute, genericRoute ]);
+        [alphaRoute, hexRoute, genericRoute]);
     expect(routes(match('/xxx/CAFE/test', testRoutes)),
-        [ alphaRoute, hexRoute, genericRoute ]);
-    expect(routes(match('/xxx/c%61fe/test', testRoutes)), // %61 is character "a"
-        [ alphaRoute, hexRoute, genericRoute ]);
+        [alphaRoute, hexRoute, genericRoute]);
+    expect(
+        routes(match('/xxx/c%61fe/test', testRoutes)), // %61 is character "a"
+        [alphaRoute, hexRoute, genericRoute]);
     expect(routes(match('/xxx/Name/test', testRoutes)),
-        [ alphaRoute, genericRoute ]);
-    expect(routes(match('/xxx/N%61me/test', testRoutes)), // %61 is character "a"
-        [ alphaRoute, genericRoute ]);
-    expect(routes(match('/xxx/Some%20text/test', testRoutes)),
-        [ genericRoute ]);
+        [alphaRoute, genericRoute]);
+    expect(
+        routes(match('/xxx/N%61me/test', testRoutes)), // %61 is character "a"
+        [alphaRoute, genericRoute]);
+    expect(routes(match('/xxx/Some%20text/test', testRoutes)), [genericRoute]);
   });
 
   test('it should match routes correctly - custom typed parameters', () {
@@ -118,23 +128,31 @@ void main() {
       final refNumberRoute = httpTestRoute(r'/xxx/:ref:ref');
 
       final testRoutes = [
-        intRoute, doubleRoute, frenchZipRoute, frenchPhoneRoute, altDateRoute, refNumberRoute
+        intRoute,
+        doubleRoute,
+        frenchZipRoute,
+        frenchPhoneRoute,
+        altDateRoute,
+        refNumberRoute
       ];
 
       expect(routes(match('/xxx/abc', testRoutes)), isEmpty);
-      expect(routes(match('/xxx/123', testRoutes)), [ intRoute, doubleRoute ]);
-      expect(routes(match('/xxx/123.456', testRoutes)), [ doubleRoute ]);
+      expect(routes(match('/xxx/123', testRoutes)), [intRoute, doubleRoute]);
+      expect(routes(match('/xxx/123.456', testRoutes)), [doubleRoute]);
       expect(routes(match('/xxx/01.02.03', testRoutes)), isEmpty);
       expect(routes(match('/xxx/9-11-89', testRoutes)), isEmpty);
       expect(routes(match('/xxx/14-7-1789', testRoutes)), isEmpty);
       expect(routes(match('/xxx/abc%2F123', testRoutes)), isEmpty);
       expect(routes(match('/xxx/ab%2F1234', testRoutes)), isEmpty);
 
-      expect(routes(match('/xxx/75001', testRoutes)), [ intRoute, doubleRoute, frenchZipRoute ]);
-      expect(routes(match('/xxx/01.02.03.04.05', testRoutes)), [ frenchPhoneRoute ]);
-      expect(routes(match('/xxx/01.02.03.04.05', testRoutes)), [ frenchPhoneRoute ]);
-      expect(routes(match('/xxx/9-11-1989', testRoutes)), [ altDateRoute ]);
-      expect(routes(match('/xxx/ab%2F123', testRoutes)), [ refNumberRoute ]);
+      expect(routes(match('/xxx/75001', testRoutes)),
+          [intRoute, doubleRoute, frenchZipRoute]);
+      expect(
+          routes(match('/xxx/01.02.03.04.05', testRoutes)), [frenchPhoneRoute]);
+      expect(
+          routes(match('/xxx/01.02.03.04.05', testRoutes)), [frenchPhoneRoute]);
+      expect(routes(match('/xxx/9-11-1989', testRoutes)), [altDateRoute]);
+      expect(routes(match('/xxx/ab%2F123', testRoutes)), [refNumberRoute]);
     } finally {
       HttpRouteParam.paramTypes.remove(refNumber);
       HttpRouteParam.paramTypes.remove(recentDate);
@@ -150,8 +168,7 @@ void main() {
       httpTestRoute('/b'),
     ];
 
-    expect(patterns(match('/a', testRoutes)),
-        ['*', '/a']);
+    expect(patterns(match('/a', testRoutes)), ['*', '/a']);
   });
 
   test('it should generously match wildcards for sub-paths', () {
@@ -168,8 +185,7 @@ void main() {
         ['/some/path/*', '/some/path*']);
     expect(patterns(match('/some/path', testRoutes)),
         ['/some/path/*', '/some/path*']);
-    expect(patterns(match('/some/pathological', testRoutes)),
-        ['/some/path*']);
+    expect(patterns(match('/some/pathological', testRoutes)), ['/some/path*']);
   });
 
   test('it should respect the route method', () {
@@ -179,32 +195,25 @@ void main() {
       httpTestRoute('/b', Method.get),
     ];
 
-    expect(patterns(match('/a', testRoutes)),
-        ['/a']);
+    expect(patterns(match('/a', testRoutes)), ['/a']);
   });
 
   test('it should extract the route params correctly', () {
     final paramRoute = httpTestRoute('/xxx/:value/:value2');
 
-    var matches = match('/xxx/input/%31%20Item%20inventory%20summary', [ paramRoute ]);
-    expect(routes(matches),
-        [ paramRoute ]);
-    expect(params(matches),
-        [ {
-            'value': 'input',
-            'value2': '1 Item inventory summary'
-        } ]
-    );
+    var matches =
+        match('/xxx/input/%31%20Item%20inventory%20summary', [paramRoute]);
+    expect(routes(matches), [paramRoute]);
+    expect(params(matches), [
+      {'value': 'input', 'value2': '1 Item inventory summary'}
+    ]);
 
-    matches = match('/xxx/input/%31%20%2F%20Item%20inventory%20summary', [ paramRoute ]);
-    expect(routes(matches),
-        [ paramRoute ]);
-    expect(params(matches),
-        [ {
-            'value': 'input',
-            'value2': '1 / Item inventory summary'
-        } ]
-    );
+    matches = match(
+        '/xxx/input/%31%20%2F%20Item%20inventory%20summary', [paramRoute]);
+    expect(routes(matches), [paramRoute]);
+    expect(params(matches), [
+      {'value': 'input', 'value2': '1 / Item inventory summary'}
+    ]);
   });
 
   test('it should extract the route params correctly - typed parameters', () {
@@ -217,10 +226,15 @@ void main() {
     final alphaRoute = httpTestRoute('/xxx/:value:alpha');
     final hexRoute = httpTestRoute('/xxx/:value:hex');
 
-    final testRoutes = [ 
-        dateRoute, intRoute, uintRoute,
-        uuidRoute, doubleRoute, tsRoute,
-        alphaRoute, hexRoute
+    final testRoutes = [
+      dateRoute,
+      intRoute,
+      uintRoute,
+      uuidRoute,
+      doubleRoute,
+      tsRoute,
+      alphaRoute,
+      hexRoute
     ];
 
     var matches = match('/xxx/2021/02/32', testRoutes);
@@ -232,68 +246,89 @@ void main() {
     expect(params(matches), isEmpty);
 
     matches = match('/xxx/2021/08/23', testRoutes);
-    expect(routes(matches), 
-        [ dateRoute ]);
-    expect(params(matches), 
-        [ { 'value': DateTime.utc(2021, DateTime.august, 23) } ]);
+    expect(routes(matches), [dateRoute]);
+    expect(params(matches), [
+      {'value': DateTime.utc(2021, DateTime.august, 23)}
+    ]);
 
     matches = match('/xxx/2021/02/31', testRoutes);
-    expect(routes(matches), 
-        [ dateRoute ]);
-    expect(params(matches),
-        [ { 'value': DateTime.utc(2021, DateTime.march, 3) } ]);
+    expect(routes(matches), [dateRoute]);
+    expect(params(matches), [
+      {'value': DateTime.utc(2021, DateTime.march, 3)}
+    ]);
 
     matches = match('/xxx/-52/09/11', testRoutes);
-    expect(routes(matches), 
-        [ dateRoute ]);
-    expect(params(matches), 
-        [ { 'value': DateTime.utc(-52, DateTime.september, 11) } ]);
+    expect(routes(matches), [dateRoute]);
+    expect(params(matches), [
+      {'value': DateTime.utc(-52, DateTime.september, 11)}
+    ]);
 
     matches = match('/xxx/%312345', testRoutes);
-    expect(routes(matches), 
-        [ intRoute,  uintRoute, doubleRoute, tsRoute, alphaRoute, hexRoute ]);
-    expect(params(matches), 
-        [ { 'value': 12345 }, { 'value': 12345 }, { 'value': 12345.0 },
-          { 'value': DateTime.fromMillisecondsSinceEpoch(12345) },
-          { 'value': '12345' }, { 'value': '12345' }, ]);
+    expect(routes(matches),
+        [intRoute, uintRoute, doubleRoute, tsRoute, alphaRoute, hexRoute]);
+    expect(params(matches), [
+      {'value': 12345},
+      {'value': 12345},
+      {'value': 12345.0},
+      {'value': DateTime.fromMillisecondsSinceEpoch(12345)},
+      {'value': '12345'},
+      {'value': '12345'},
+    ]);
 
     matches = match('/xxx/12345', testRoutes);
-    expect(routes(matches), 
-        [ intRoute,  uintRoute, doubleRoute, tsRoute, alphaRoute, hexRoute ]);
-    expect(params(matches), 
-        [ { 'value': 12345 }, { 'value': 12345 }, { 'value': 12345.0 },
-          { 'value': DateTime.fromMillisecondsSinceEpoch(12345) },
-          { 'value': '12345' }, { 'value': '12345' }, ]);
+    expect(routes(matches),
+        [intRoute, uintRoute, doubleRoute, tsRoute, alphaRoute, hexRoute]);
+    expect(params(matches), [
+      {'value': 12345},
+      {'value': 12345},
+      {'value': 12345.0},
+      {'value': DateTime.fromMillisecondsSinceEpoch(12345)},
+      {'value': '12345'},
+      {'value': '12345'},
+    ]);
 
     matches = match('/xxx/-12345', testRoutes);
-    expect(routes(matches),
-        [ intRoute, doubleRoute, tsRoute ]);
-    expect(params(matches),
-        [ { 'value': -12345 }, { 'value': -12345.0 },
-          { 'value': DateTime.fromMillisecondsSinceEpoch(-12345) } ]);
+    expect(routes(matches), [intRoute, doubleRoute, tsRoute]);
+    expect(params(matches), [
+      {'value': -12345},
+      {'value': -12345.0},
+      {'value': DateTime.fromMillisecondsSinceEpoch(-12345)}
+    ]);
 
     matches = match('/xxx/12345.34', testRoutes);
-    expect(routes(matches), [ doubleRoute ]);
-    expect(params(matches), [ { 'value': 12345.34 } ]);
+    expect(routes(matches), [doubleRoute]);
+    expect(params(matches), [
+      {'value': 12345.34}
+    ]);
 
     matches = match('/xxx/-12345.34', testRoutes);
-    expect(routes(matches), [ doubleRoute ]);
-    expect(params(matches), [ { 'value': -12345.34 } ]);
+    expect(routes(matches), [doubleRoute]);
+    expect(params(matches), [
+      {'value': -12345.34}
+    ]);
 
     matches = match('/xxx/01234567-89ab-cdef-0123-456789abcdef', testRoutes);
-    expect(routes(matches), [ uuidRoute ]);
-    expect(params(matches), [ { 'value': '01234567-89ab-cdef-0123-456789abcdef' } ]);
+    expect(routes(matches), [uuidRoute]);
+    expect(params(matches), [
+      {'value': '01234567-89ab-cdef-0123-456789abcdef'}
+    ]);
 
     matches = match('/xxx/cafe', testRoutes);
-    expect(routes(matches), [ alphaRoute, hexRoute ]);
-    expect(params(matches), [ { 'value': 'cafe' }, { 'value': 'cafe' } ]);
+    expect(routes(matches), [alphaRoute, hexRoute]);
+    expect(params(matches), [
+      {'value': 'cafe'},
+      {'value': 'cafe'}
+    ]);
 
     matches = match('/xxx/text', testRoutes);
-    expect(routes(matches), [ alphaRoute ]);
-    expect(params(matches), [ { 'value': 'text' } ]);
+    expect(routes(matches), [alphaRoute]);
+    expect(params(matches), [
+      {'value': 'text'}
+    ]);
   });
 
-  test('it should extract the route params correctly - custom typed parameters', () {
+  test('it should extract the route params correctly - custom typed parameters',
+      () {
     final frZip = FrenchPostalCodeTypeParameter();
     final frPhone = FrenchPhoneNumberTypeParameter();
     final recentDate = RecentDateTypeParameter();
@@ -312,7 +347,12 @@ void main() {
       final refNumberRoute = httpTestRoute(r'/xxx/:ref:ref');
 
       final testRoutes = [
-        intRoute, doubleRoute, frenchZipRoute, frenchPhoneRoute, altDateRoute, refNumberRoute
+        intRoute,
+        doubleRoute,
+        frenchZipRoute,
+        frenchPhoneRoute,
+        altDateRoute,
+        refNumberRoute
       ];
 
       var matches = match('/xxx/abc', testRoutes);
@@ -320,12 +360,17 @@ void main() {
       expect(params(matches), isEmpty);
 
       matches = match('/xxx/123', testRoutes);
-      expect(routes(matches), [ intRoute, doubleRoute ]);
-      expect(params(matches), [ { 'number': 123 }, { 'number': 123.0 } ]);
+      expect(routes(matches), [intRoute, doubleRoute]);
+      expect(params(matches), [
+        {'number': 123},
+        {'number': 123.0}
+      ]);
 
       matches = match('/xxx/123.456', testRoutes);
-      expect(routes(matches), [ doubleRoute ]);
-      expect(params(matches), [ { 'number': 123.456 } ]);
+      expect(routes(matches), [doubleRoute]);
+      expect(params(matches), [
+        {'number': 123.456}
+      ]);
 
       matches = match('/xxx/01.02.03', testRoutes);
       expect(routes(matches), isEmpty);
@@ -348,20 +393,30 @@ void main() {
       expect(params(matches), isEmpty);
 
       matches = match('/xxx/75001', testRoutes);
-      expect(routes(matches), [ intRoute, doubleRoute, frenchZipRoute ]);
-      expect(params(matches), [ { 'number': 75001 }, { 'number': 75001.0 }, { 'zip': 75001 } ]);
+      expect(routes(matches), [intRoute, doubleRoute, frenchZipRoute]);
+      expect(params(matches), [
+        {'number': 75001},
+        {'number': 75001.0},
+        {'zip': 75001}
+      ]);
 
       matches = match('/xxx/01.02.03.04.05', testRoutes);
-      expect(routes(matches), [ frenchPhoneRoute ]);
-      expect(params(matches), [ { 'phone': '01.02.03.04.05' } ]);
+      expect(routes(matches), [frenchPhoneRoute]);
+      expect(params(matches), [
+        {'phone': '01.02.03.04.05'}
+      ]);
 
       matches = match('/xxx/9-11-1989', testRoutes);
-      expect(routes(matches), [ altDateRoute ]);
-      expect(params(matches), [ { 'date': DateTime(1989, 11, 9) } ]);
+      expect(routes(matches), [altDateRoute]);
+      expect(params(matches), [
+        {'date': DateTime(1989, 11, 9)}
+      ]);
 
       matches = match('/xxx/ab%2F123', testRoutes);
-      expect(routes(matches), [ refNumberRoute ]);
-      expect(params(matches), [ { 'ref': 'AB/123' } ]);
+      expect(routes(matches), [refNumberRoute]);
+      expect(params(matches), [
+        {'ref': 'AB/123'}
+      ]);
     } finally {
       HttpRouteParam.paramTypes.remove(recentDate);
       HttpRouteParam.paramTypes.remove(frPhone);
@@ -370,27 +425,21 @@ void main() {
   });
 
   test('it should correctly match routes that have a partial match', () {
-    final testRoutes = [
-      httpTestRoute('/image'),
-      httpTestRoute('/imageSource')
-    ];
+    final testRoutes = [httpTestRoute('/image'), httpTestRoute('/imageSource')];
 
-    expect(patterns(match('/imagesource', testRoutes)),
-        ['/imageSource']);
+    expect(patterns(match('/imagesource', testRoutes)), ['/imageSource']);
   });
 
   test('it should ignore a trailing slash', () {
     final testRoute = httpTestRoute('/b/');
 
-    expect(routes(match('/b?qs=true', [ testRoute ])),
-        [ testRoute ]);
+    expect(routes(match('/b?qs=true', [testRoute])), [testRoute]);
   });
 
   test('it should ignore a trailing slash in reverse', () {
     final testRoute = httpTestRoute('/b');
 
-    expect(routes(match('/b/?qs=true', [ testRoute ])),
-        [ testRoute ]);
+    expect(routes(match('/b/?qs=true', [testRoute])), [testRoute]);
   });
 
   test('it should hit a wildcard route halfway through the uri', () {
@@ -410,11 +459,10 @@ void main() {
       httpTestRoute('/route/test'),
     ];
 
-    expect(patterns(match('/route', testRoutes)),
-        ['/route*', '/route']);
+    expect(patterns(match('/route', testRoutes)), ['/route*', '/route']);
 
-    expect(patterns(match('/route/test', testRoutes)),
-        ['/route*', '/route/test']);
+    expect(
+        patterns(match('/route/test', testRoutes)), ['/route*', '/route/test']);
   });
 
   test('it should match wildcards in the middle', () {
@@ -423,25 +471,19 @@ void main() {
       httpTestRoute('/a/*/*/b'),
     ];
 
-    expect(match('/a', testRoutes),
-        isEmpty);
-    expect(patterns(match('/a/x/b', testRoutes)),
-        ['/a/*/b']);
-    expect(patterns(match('/a/x/y/b', testRoutes)),
-        ['/a/*/b', '/a/*/*/b']);
+    expect(match('/a', testRoutes), isEmpty);
+    expect(patterns(match('/a/x/b', testRoutes)), ['/a/*/b']);
+    expect(patterns(match('/a/x/y/b', testRoutes)), ['/a/*/b', '/a/*/*/b']);
   });
 
   test('it should match wildcards at the beginning', () {
     final jpgRoute = httpTestRoute('*.jpg');
 
-    final testRoutes = [ jpgRoute ];
+    final testRoutes = [jpgRoute];
 
-    expect(match('xjpg', testRoutes),
-        isEmpty);
-    expect(routes(match('.jpg', testRoutes)),
-        [ jpgRoute ]);
-    expect(routes(match('path/to/picture.jpg', testRoutes)), 
-        [ jpgRoute ]);
+    expect(match('xjpg', testRoutes), isEmpty);
+    expect(routes(match('.jpg', testRoutes)), [jpgRoute]);
+    expect(routes(match('path/to/picture.jpg', testRoutes)), [jpgRoute]);
   });
 
   test('it should match regex expressions within segments', () {
@@ -451,30 +493,20 @@ void main() {
       httpTestRoute('(a|b)/c'),
     ];
 
-    expect(match('a/b', testRoutes),
-        isEmpty);
-    expect(match('3/a', testRoutes),
-        isEmpty);
-    expect(match('abc', testRoutes),
-        isEmpty);
-    expect(match('abc42', testRoutes),
-        isEmpty);
-    expect(patterns(match('x/323', testRoutes)), 
-        ['[a-z]+/[0-9]+']);
-    expect(patterns(match('answer/42', testRoutes)),
-        ['[a-z]+/[0-9]+']);
-    expect(patterns(match('abcde', testRoutes)),
-        ['[a-z]{5}']);
-    expect(patterns(match('final', testRoutes)), 
-        ['[a-z]{5}']);
-    expect(patterns(match('a/c', testRoutes)), 
-        ['(a|b)/c']);
-    expect(patterns(match('b/c', testRoutes)), 
-        ['(a|b)/c']);
+    expect(match('a/b', testRoutes), isEmpty);
+    expect(match('3/a', testRoutes), isEmpty);
+    expect(match('abc', testRoutes), isEmpty);
+    expect(match('abc42', testRoutes), isEmpty);
+    expect(patterns(match('x/323', testRoutes)), ['[a-z]+/[0-9]+']);
+    expect(patterns(match('answer/42', testRoutes)), ['[a-z]+/[0-9]+']);
+    expect(patterns(match('abcde', testRoutes)), ['[a-z]{5}']);
+    expect(patterns(match('final', testRoutes)), ['[a-z]{5}']);
+    expect(patterns(match('a/c', testRoutes)), ['(a|b)/c']);
+    expect(patterns(match('b/c', testRoutes)), ['(a|b)/c']);
   });
 }
 
-HttpRoute httpTestRoute(String route, [ Method method = Method.get ]) =>
+HttpRoute httpTestRoute(String route, [Method method = Method.get]) =>
     HttpRoute(route, _callback, method);
 
 List<HttpRouteMatch> match(String input, List<HttpRoute> routes) =>
@@ -489,8 +521,7 @@ List<String> patterns(Iterable<HttpRouteMatch> matches) =>
 List<Map<String, dynamic>> params(Iterable<HttpRouteMatch> matches) =>
     matches.map((e) => e.params).toList();
 
-Future Function(HttpRequest, HttpResponse) get _callback =>
-    (req, res) async {};
+Future Function(HttpRequest, HttpResponse) get _callback => (req, res) async {};
 
 class FrenchPostalCodeTypeParameter implements HttpRouteParamType {
   @override
@@ -529,7 +560,8 @@ class RecentDateTypeParameter implements HttpRouteParamType {
   DateTime parse(String value) {
     // day-month-year
     final parts = value.split('-');
-    return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+    return DateTime(
+        int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
   }
 }
 
@@ -547,4 +579,3 @@ class RefNumberTypeParameter implements HttpRouteParamType {
     return value.toUpperCase();
   }
 }
-

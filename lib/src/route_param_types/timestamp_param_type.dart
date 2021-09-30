@@ -1,7 +1,6 @@
 import 'http_route_param_type.dart';
 
 class TimestampParamType implements HttpRouteParamType {
-
   @override
   final String name = 'timestamp';
 
@@ -9,5 +8,6 @@ class TimestampParamType implements HttpRouteParamType {
   final String pattern = r'-?\d+';
 
   @override
-  DateTime parse(String value) => DateTime.fromMillisecondsSinceEpoch(int.parse(value));
+  DateTime parse(String value) =>
+      DateTime.fromMillisecondsSinceEpoch(int.parse(value));
 }

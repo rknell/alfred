@@ -1,26 +1,27 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alfred/src/extensions/request_helpers.dart';
-import 'package:alfred/src/plugins/store_plugin.dart';
-import 'package:alfred/src/route_param_types/alpha_param_type.dart';
-import 'package:alfred/src/route_param_types/date_param_type.dart';
-import 'package:alfred/src/route_param_types/double_param_type.dart';
-import 'package:alfred/src/route_param_types/hex_param_type.dart';
-import 'package:alfred/src/route_param_types/int_param_type.dart';
-import 'package:alfred/src/route_param_types/timestamp_param_type.dart';
-import 'package:alfred/src/route_param_types/uint_param_type.dart';
-import 'package:alfred/src/route_param_types/uuid_param_type.dart';
-import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
-import 'package:alfred/src/type_handlers/directory_type_handler.dart';
-import 'package:alfred/src/type_handlers/file_type_handler.dart';
-import 'package:alfred/src/type_handlers/json_type_handlers.dart';
-import 'package:alfred/src/type_handlers/serializable_type_handler.dart';
-import 'package:alfred/src/type_handlers/string_type_handler.dart';
-import 'package:alfred/src/type_handlers/type_handler.dart';
-import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:queue/queue.dart';
+
+import 'extensions/request_helpers.dart';
+import 'plugins/store_plugin.dart';
+import 'route_param_types/alpha_param_type.dart';
+import 'route_param_types/date_param_type.dart';
+import 'route_param_types/double_param_type.dart';
+import 'route_param_types/hex_param_type.dart';
+import 'route_param_types/int_param_type.dart';
+import 'route_param_types/timestamp_param_type.dart';
+import 'route_param_types/uint_param_type.dart';
+import 'route_param_types/uuid_param_type.dart';
+import 'type_handlers/binary_type_handlers.dart';
+import 'type_handlers/directory_type_handler.dart';
+import 'type_handlers/file_type_handler.dart';
+import 'type_handlers/json_type_handlers.dart';
+import 'type_handlers/serializable_type_handler.dart';
+import 'type_handlers/string_type_handler.dart';
+import 'type_handlers/type_handler.dart';
+import 'type_handlers/websocket_type_handler.dart';
 
 import 'alfred_exception.dart';
 import 'http_route.dart';
@@ -152,6 +153,8 @@ class Alfred {
       binaryStreamTypeHandler,
       jsonListTypeHandler,
       jsonMapTypeHandler,
+      jsonNumberTypeHandler,
+      jsonBooleanTypeHandler,
       fileTypeHandler,
       directoryTypeHandler,
       websocketTypeHandler,
@@ -364,6 +367,7 @@ class Alfred {
       logWriter(() => s, LogType.error);
       if (onInternalError != null) {
         // Handle the error with a custom response
+        request.store.set('_internal_exception', e);
         final dynamic result =
             await onInternalError!(request, request.response);
         if (result != null && !isDone) {

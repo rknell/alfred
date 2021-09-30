@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:alfred/alfred.dart';
-
+import '../alfred.dart';
 import '../body_parser/http_body.dart';
 import '../extensions/request_helpers.dart';
 import '../extensions/response_helpers.dart';

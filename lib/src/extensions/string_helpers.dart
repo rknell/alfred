@@ -1,7 +1,4 @@
-enum DecodeMode {
-  AllButSlash,
-  SlashOnly
-}
+enum DecodeMode { AllButSlash, SlashOnly }
 
 extension PathNormalizer on String {
   /// Trims all slashes at the start and end
@@ -25,10 +22,16 @@ extension PathNormalizer on String {
   static final int _LOWER_F = 'f'.codeUnitAt(0);
 
   int _decodeHex(int codeUnit) {
-    if (_ZERO <= codeUnit && codeUnit <= _NINE) return codeUnit - _ZERO;
-    if (_LOWER_A <= codeUnit && codeUnit <= _LOWER_F) return 10 + codeUnit - _LOWER_A;
-    if (_UPPER_A <= codeUnit && codeUnit <= _UPPER_F) return 10 + codeUnit - _UPPER_A;
-    return -1;
+    if (_ZERO <= codeUnit && codeUnit <= _NINE) {
+      return codeUnit - _ZERO;
+    }
+    if (_LOWER_A <= codeUnit && codeUnit <= _LOWER_F) {
+      return 10 + codeUnit - _LOWER_A;
+    } else if (_UPPER_A <= codeUnit && codeUnit <= _UPPER_F) {
+      return 10 + codeUnit - _UPPER_A;
+    } else {
+      return -1;
+    }
   }
 
   int? _getCodeUnit(int hex1, int hex2) {
@@ -37,11 +40,13 @@ extension PathNormalizer on String {
     return 16 * hex1 + hex2;
   }
 
-  bool _decode(int? value, DecodeMode mode) {
-    if (value == null) return false;
+  bool _decode(int? codeUnit, DecodeMode mode) {
+    if (codeUnit == null) return false;
     switch (mode) {
-      case DecodeMode.AllButSlash: return value != _SLASH;
-      case DecodeMode.SlashOnly: return value == _SLASH;
+      case DecodeMode.AllButSlash:
+        return codeUnit != _SLASH;
+      case DecodeMode.SlashOnly:
+        return codeUnit == _SLASH;
     }
   }
 
@@ -55,14 +60,14 @@ extension PathNormalizer on String {
         if (pos + 2 >= length) break;
         final hex1 = _decodeHex(codes[pos + 1]);
         final hex2 = _decodeHex(codes[pos + 2]);
-        final value = _getCodeUnit(hex1, hex2);
-        if (_decode(value, mode)) {
+        final codeUnit = _getCodeUnit(hex1, hex2);
+        if (_decode(codeUnit, mode)) {
           if (!changed) {
             // make a copy
             codes = codes.toList();
             changed = true;
           }
-          codes[pos] = value!;
+          codes[pos] = codeUnit!;
           codes.removeRange(pos + 1, pos + 3);
         }
       }

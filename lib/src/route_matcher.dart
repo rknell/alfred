@@ -7,7 +7,8 @@ class RouteMatcher {
   static Iterable<HttpRouteMatch> match(
       String input, List<HttpRoute> options, Method method) sync* {
     // decode URL path before matching except for "/"
-    final inputPath = Uri.parse(input).path.normalizePath.decodeUri(DecodeMode.AllButSlash);
+    final inputPath =
+        Uri.parse(input).path.normalizePath.decodeUri(DecodeMode.AllButSlash);
 
     for (final option in options) {
       // Check if http method matches

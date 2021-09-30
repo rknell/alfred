@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alfred/alfred.dart';
-
 /// CORS Middlware.
 ///
 /// Has some sensible defaults. You probably want to change the origin

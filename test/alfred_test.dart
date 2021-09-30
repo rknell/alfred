@@ -423,17 +423,23 @@ void main() {
   });
 
   test('it handles typed params', () async {
-    app.get('/blog/:year:int', (req, res) => 'Blog Entries for year ${req.params['year']}');
-    app.get('/blog/:date:date', (req, res) => 'Blog Entries for ${req.params['date']}');
-    app.get('/blog/:date:date/:id:uint/:title:.*', (req, res) => 'Blog Entry #${req.params['id']} - ${req.params['date']} - ${req.params['title']}');
-    var response =
-        await http.get(Uri.parse('http://localhost:$port/blog/2021/03/27/1/Initial%20Commit'));
-    expect(response.body, 'Blog Entry #1 - ${DateTime.utc(2021, 3, 27)} - Initial Commit');
-    response =
-        await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20/59/Merged%20commit%20c391fcc'));
-    expect(response.body, 'Blog Entry #59 - ${DateTime.utc(2021, 8, 20)} - Merged commit c391fcc');
-    response =
-        await http.get(Uri.parse('http://localhost:$port/blog/2021'));
+    app.get('/blog/:year:int',
+        (req, res) => 'Blog Entries for year ${req.params['year']}');
+    app.get('/blog/:date:date',
+        (req, res) => 'Blog Entries for ${req.params['date']}');
+    app.get(
+        '/blog/:date:date/:id:uint/:title:.*',
+        (req, res) =>
+            'Blog Entry #${req.params['id']} - ${req.params['date']} - ${req.params['title']}');
+    var response = await http.get(
+        Uri.parse('http://localhost:$port/blog/2021/03/27/1/Initial%20Commit'));
+    expect(response.body,
+        'Blog Entry #1 - ${DateTime.utc(2021, 3, 27)} - Initial Commit');
+    response = await http.get(Uri.parse(
+        'http://localhost:$port/blog/2021/08/20/59/Merged%20commit%20c391fcc'));
+    expect(response.body,
+        'Blog Entry #59 - ${DateTime.utc(2021, 8, 20)} - Merged commit c391fcc');
+    response = await http.get(Uri.parse('http://localhost:$port/blog/2021'));
     expect(response.body, 'Blog Entries for year 2021');
     response =
         await http.get(Uri.parse('http://localhost:$port/blog/2021/08/20'));
@@ -447,8 +453,10 @@ void main() {
     HttpRouteParam.paramTypes.add(recentDate);
     HttpRouteParam.paramTypes.add(refNumber);
     try {
-      app.get('/catalog/:ref:ref', (req, res) => 'Catalog Item ${req.params['ref']}');
-      app.get('/history/:date:recent/:event:.*', (req, res) => '${req.params['date']}: ${req.params['event']}');
+      app.get('/catalog/:ref:ref',
+          (req, res) => 'Catalog Item ${req.params['ref']}');
+      app.get('/history/:date:recent/:event:.*',
+          (req, res) => '${req.params['date']}: ${req.params['event']}');
 
       var response =
           await http.get(Uri.parse('http://localhost:$port/catalog/ab%2F123'));
@@ -457,11 +465,12 @@ void main() {
           await http.get(Uri.parse('http://localhost:$port/catalog/ab/123'));
       expect(response.statusCode, 404);
 
-      response =
-          await http.get(Uri.parse('http://localhost:$port/history/9-11-1989/Fall%20of%20the%20Berlin%20Wall'));
-      expect(response.body, '${DateTime(1989, 11, 9)}: Fall of the Berlin Wall');
-      response =
-          await http.get(Uri.parse('http://localhost:$port/history/14-7-1789/Bastille%20Day'));
+      response = await http.get(Uri.parse(
+          'http://localhost:$port/history/9-11-1989/Fall%20of%20the%20Berlin%20Wall'));
+      expect(
+          response.body, '${DateTime(1989, 11, 9)}: Fall of the Berlin Wall');
+      response = await http.get(
+          Uri.parse('http://localhost:$port/history/14-7-1789/Bastille%20Day'));
       expect(response.statusCode, 404);
     } finally {
       HttpRouteParam.paramTypes.remove(refNumber);
@@ -538,7 +547,8 @@ class RecentDateTypeParameter implements HttpRouteParamType {
   DateTime parse(String value) {
     // day-month-year
     final parts = value.split('-');
-    return DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+    return DateTime(
+        int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
   }
 }
 
@@ -556,4 +566,3 @@ class RefNumberTypeParameter implements HttpRouteParamType {
     return value.toUpperCase();
   }
 }
-

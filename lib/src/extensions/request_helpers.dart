@@ -1,8 +1,7 @@
 import 'dart:io';
 
-import 'package:alfred/src/body_parser/http_body.dart';
-
 import '../../alfred.dart';
+import '../body_parser/http_body.dart';
 import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
 
@@ -31,15 +30,21 @@ extension RequestHelpers on HttpRequest {
   /// Get params
   ///
   Map<String, dynamic> get params =>
-      store.tryGet<HttpRouteMatch>('_internal_match')?.params ?? <String, dynamic>{};
+      store.tryGet<HttpRouteMatch>('_internal_match')?.params ??
+      <String, dynamic>{};
 
   /// Get the matched route URI of the current request
   ///
-  String get route => store.tryGet<HttpRouteMatch>('_internal_match')?.route.route ?? '';
+  String get route =>
+      store.tryGet<HttpRouteMatch>('_internal_match')?.route.route ?? '';
 
   /// Get the matched route of the current request
   ///
   HttpRouteMatch? get match => store.tryGet<HttpRouteMatch>('_internal_match');
+
+  /// Get the intercepted exception
+  ///
+  dynamic get exception => store.tryGet<dynamic>('_internal_exception');
 
   /// Get Alfred instance which is associated with this request
   ///

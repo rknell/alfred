@@ -1,7 +1,6 @@
 import 'http_route_param_type.dart';
 
 class UintParamType implements HttpRouteParamType {
-
   @override
   final String name = 'uint';
 

@@ -24,9 +24,9 @@ class HttpRoute {
 
   Iterable<HttpRouteParam> get params => _params.values;
 
-  HttpRoute(this.route, this.callback, this.method, {this.middleware = const []})
-    : usesWildcardMatcher = route.contains('*')
-  {
+  HttpRoute(this.route, this.callback, this.method,
+      {this.middleware = const []})
+      : usesWildcardMatcher = route.contains('*') {
     // Split route path into segments
     final segments = Uri.parse(route.normalizePath).pathSegments;
 
@@ -48,7 +48,9 @@ class HttpRoute {
       // parse parameter if any
       final param = HttpRouteParam.tryParse(segment);
       if (param != null) {
-        if (_params.containsKey(param.name)) throw DuplicateParameterException(param.name);
+        if (_params.containsKey(param.name)) {
+          throw DuplicateParameterException(param.name);
+        }
         _params[param.name] = param;
         segment = r'(?<' + param.name + r'>' + param.pattern + ')';
       } else {
@@ -107,7 +109,9 @@ class HttpRouteParam {
       pattern = name.substring(idx + 1);
       name = name.substring(0, idx);
       final typeName = pattern.toLowerCase();
-      type = paramTypes.cast<HttpRouteParamType?>().firstWhere((t) => t!.name == typeName, orElse: () => null);
+      type = paramTypes
+          .cast<HttpRouteParamType?>()
+          .firstWhere((t) => t!.name == typeName, orElse: () => null);
       if (type != null) {
         // the pattern matches a param type name
         pattern = type.pattern;

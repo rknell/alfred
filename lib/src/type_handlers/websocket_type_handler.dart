@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alfred/src/type_handlers/type_handler.dart';
+import 'type_handler.dart';
 
 TypeHandler<WebSocketSession> get websocketTypeHandler =>
     TypeHandler<WebSocketSession>(
