@@ -532,6 +532,21 @@ void main() {
     app.head('/test', (req, res) => 'response');
     app.printRoutes();
   });
+
+  test('it handles cyrillic bodies', () async {
+    app.post('/ctr', (req, res) async {
+      // complex tender request
+      var data = await req.body;
+      // print(req.contentType); //application/json; charset=utf-8
+      // print('data: $data'); //data: {selected_region: [Республика Адыгея]}
+      // print(data.runtimeType); //_InternalLinkedHashMap<String, dynamic>
+      await res.json({'data': 'ok'});
+    });
+
+    await http.post(Uri.parse('http://localhost:$port/ctr'),
+        body: '{"selected_region": ["Республика Адыгея"]}',
+        headers: {'Content-Type': 'application/json'});
+  });
 }
 
 class _UnknownType {}
