@@ -5,7 +5,7 @@ void main() {
 
   Directory('tool/templates/documentation').listSync().forEach((file) {
     if (file.path.endsWith('.md')) {
-      var name = file.path.split('/').last;
+      var name = file.path.split(Platform.pathSeparator).last;
       process(file as File, File('documentation/$name'));
     }
   });

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:alfred/src/type_handlers/type_handler.dart';
+import 'type_handler.dart';
 
 TypeHandler<dynamic> get serializableTypeHandler =>
     TypeHandler<dynamic>((HttpRequest req, HttpResponse res, dynamic value) {

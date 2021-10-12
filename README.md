@@ -107,7 +107,7 @@ The big difference you will see is the option to not call `res.send` or `res.jso
 Each route accepts a Future as response. Currently you can pass back the following and it will be sent appropriately:
 
 | Return Dart Type | Returning REST type |
-| ----------------- | ------------------ |
+| ---------------- | ------------------ |
 | `List<dynamic>` | JSON |
 | `Map<String, Object?>` | JSON |
 | Serializable object (Object.toJSON or Object.toJson) * see note | JSON |
@@ -151,7 +151,34 @@ more detail: https://medium.com/@iapicca/alfred-an-express-like-server-framework
 Routing follows a similar pattern to the more basic ExpressJS routes. While there is some regex
 matching, mostly just stick with the route name and param syntax from Express:
 
-"/path/to/:id/property" etc
+* `/path/to/:id/property` etc
+
+The Express syntax has been extended to support parameter patterns and types. To enforce parameter
+validation, a regular expression or a type specifier should be provided after the parameter name, using
+another `:` as a separator:
+
+* `/path/to/:id:\d+/property` will ensure "id" is a string consisting of decimal digits
+* `/path/to/:id:[0-9a-f]+/property` will ensure "id" is a string consisting of hexadecimal digits
+* `/path/to/:word:[a-z]+/property` will ensure "word" is a string consisting of letters only
+* `/path/to/:id:uuid/property` will ensure "id" is a string representing an UUID
+
+Available type specifiers are:
+
+* `int`: a decimal integer
+* `uint`: a positive decimal integer
+* `double`: a double (decimal form); note that scientific notation is not supported
+* `date`: a UTC date in the form of "year/month/day"; note how this type "absorbs" multiple segments of the URI
+* `timestamp`: a UTC date expressed in number of milliseconds since Epoch
+* `uuid`: a string resembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); note that no effort is made to ensure this is a valid UUID
+
+| Type Specifier | Regular Expression | Dart type |
+| -------------- | ------------------ | --------- |
+| `int` | `-?\d+` | `int` |
+| `uint` | `\d+` | `int` |
+| `double` | `-?\d+(?:\.\d+)` | `double` |
+| `date` | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
+| `timestamp` | `-?\d+` | `DateTime` |
+| `uuid` |  `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
 
 So for example:
 
@@ -160,9 +187,20 @@ import 'package:alfred/alfred.dart';
 
 void main() async {
   final app = Alfred();
+  app.all('/example/:id:int/:name', (req, res) {
+    req.params['id'] != null;
+    req.params['id'] is int;
+    req.params['name'] != null;
+  });
   app.all('/example/:id/:name', (req, res) {
     req.params['id'] != null;
     req.params['name'] != null;
+  });
+  app.get('/blog/:date:date/:id:int', (req, res) {
+    req.params['date'] != null;
+    req.params['date'] is DateTime;
+    req.params['id'] != null;
+    req.params['id'] is int;
   });
   await app.listen();
 }
@@ -418,8 +456,8 @@ class Chicken {
 void main() {
   final app = Alfred();
 
-  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
-    res.write((val as Chicken).response);
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, Chicken val) async {
+    res.write(val.response);
     await res.close();
   }));
 
@@ -602,7 +640,7 @@ from the dart:io package. All helpers are just extension methods to:
 - HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
 - HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
 
-So you can compose and write any content you can imagine there. If there is something you wan't to do
+So you can compose and write any content you can imagine there. If there is something you want to do
 that isn't expressly listed by the library, you will be able to do it with a minimum of research into
 underlying libraries. A core part of the architecture is to not build you into a wall.
 

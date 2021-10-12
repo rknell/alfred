@@ -90,6 +90,7 @@ void main() {
 
     final response =
         await http.delete(Uri.parse('http://localhost:$port/test/tmp.jpg'));
+    expect(response.statusCode, 200);
     expect(fileToDelete.existsSync(), false);
   });
 
