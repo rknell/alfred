@@ -547,6 +547,15 @@ void main() {
         body: '{"selected_region": ["Республика Адыгея"]}',
         headers: {'Content-Type': 'application/json'});
   });
+
+  test('it doesnt overwrite content types', () async {
+    app.get('/test', (req, res) {
+      res.headers.contentType = ContentType.parse('application/javascript');
+      return File('test/files/dummy.js');
+    });
+    final response = await http.get(Uri.parse('http://localhost:$port/test'));
+    expect(response.headers['content-type'], 'application/javascript');
+  });
 }
 
 class _UnknownType {}
