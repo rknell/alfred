@@ -1,3 +1,9 @@
+## 0.1.5
+
+- Been a while since the last published update... lots of little changes but very few bugs. However thanks to @d-markey the routing logic has been completely rewritten though non api breaking, allowing far more complex matching of route parameters.
+- Fixed a bug that would overwrite the file content type if you manually specified it
+- Thanks to @d-markey for some other efficiency improvements as well
+
 ## 0.1.4+5
 
 - Fixing incorrect mime type recognition 
