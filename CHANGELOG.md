@@ -1,3 +1,7 @@
+## 0.1.5+1
+
+- Updating description to be easier to be found by pub.dev search
+
 ## 0.1.5
 
 - Been a while since the last published update... lots of little changes but very few bugs. However thanks to @d-markey the routing logic has been completely rewritten though non api breaking, allowing far more complex matching of route parameters.
