@@ -1,6 +1,6 @@
 # Alfred
 
-A performant, expressjs like server framework thats easy to use and has all the bits in one place.
+A performant, expressjs like web server / rest api framework thats easy to use and has all the bits in one place.
 
 [![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
 
