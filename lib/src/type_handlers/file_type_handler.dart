@@ -38,6 +38,12 @@ TypeHandler get fileTypeHandler =>
               return res.close();
             }
 
+            if (item.end >= totalFileSize) {
+              res.setContentTypeFromFile(file);
+              await res.addStream(file.openRead());
+              return res.close();
+            }
+
             // Ensure it's within range.
             if (item.start >= totalFileSize || item.end >= totalFileSize) {
               res.statusCode = 416;
