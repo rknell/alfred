@@ -11,8 +11,17 @@ import '../route_matcher.dart';
 extension RequestHelpers on HttpRequest {
   /// Parse the body automatically and return the result
   ///
-  Future<Object?> get body async =>
-      (await HttpBodyHandler.processRequest(this)).body;
+  Future<Object?> get body async {
+    const cachedBodyKey = '_cachedBodyResponse';
+    final cachedBody = store.tryGet<Object?>(cachedBodyKey);
+    if (cachedBody != null) {
+      return cachedBody;
+    } else {
+      final dynamic body = (await HttpBodyHandler.processRequest(this)).body;
+      store.set(cachedBodyKey, body);
+      return body;
+    }
+  }
 
   /// Parse the body, and convert it to a json map
   ///

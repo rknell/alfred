@@ -556,6 +556,19 @@ void main() {
     final response = await http.get(Uri.parse('http://localhost:$port/test'));
     expect(response.headers['content-type'], 'application/javascript');
   });
+
+  test('it can parse the body twice and not freak out', () async {
+    app.post('/test', (req, res) async {
+      await req.body;
+    }, middleware: [
+      (req, res) async {
+        await req.body;
+      }
+    ]);
+    final response = await http
+        .post(Uri.parse('http://localhost:$port/test'), body: {'test': 'true'});
+    expect(response.statusCode, 200);
+  });
 }
 
 class _UnknownType {}

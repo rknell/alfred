@@ -1,3 +1,7 @@
+## 0.1.5+2
+
+- Fixing bug that would try and listen to the stream from the body parser twice. Alfred now caches the body in the request store;
+
 ## 0.1.5+1
 
 - Updating description to be easier to be found by pub.dev search
