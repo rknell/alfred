@@ -422,6 +422,12 @@ void main() {
     expect(response.body, '15');
   });
 
+  test('it handles params on the root', () async {
+    app.get('/:id', (req, res) => req.params['id']);
+    final response = await http.get(Uri.parse('http://localhost:$port/15'));
+    expect(response.body, '15');
+  });
+
   test('it handles typed params', () async {
     app.get('/blog/:year:int',
         (req, res) => 'Blog Entries for year ${req.params['year']}');
@@ -568,6 +574,15 @@ void main() {
     final response = await http
         .post(Uri.parse('http://localhost:$port/test'), body: {'test': 'true'});
     expect(response.statusCode, 200);
+  });
+
+  test('it handles invalid json input', () async {
+    app.post('/test', (req, res) async {
+      await req.body;
+    });
+    final response = await http.post(Uri.parse('http://localhost:$port/test'),
+        body: ' ', headers: {'Content-Type': 'application/json'});
+    expect(response.statusCode, 400);
   });
 }
 

@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import '../alfred.dart';
-import 'extensions/string_helpers.dart';
 import 'alfred.dart';
+import 'extensions/string_helpers.dart';
 import 'route_param_types/http_route_param_type.dart';
 
 class HttpRoute {
@@ -28,7 +28,8 @@ class HttpRoute {
       {this.middleware = const []})
       : usesWildcardMatcher = route.contains('*') {
     // Split route path into segments
-    final segments = Uri.parse(route.normalizePath).pathSegments;
+    final segments = Uri.tryParse(route.normalizePath)?.pathSegments ??
+        [route.normalizePath];
 
     var pattern = '^';
     for (var segment in segments) {
