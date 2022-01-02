@@ -1,10 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import '../alfred.dart';
-import 'alfred.dart';
-import 'extensions/string_helpers.dart';
-import 'route_param_types/http_route_param_type.dart';
 
 class HttpRoute {
   final Method method;

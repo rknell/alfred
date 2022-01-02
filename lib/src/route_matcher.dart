@@ -1,7 +1,4 @@
 import '../alfred.dart';
-import 'extensions/string_helpers.dart';
-import 'alfred.dart';
-import 'http_route.dart';
 
 class RouteMatcher {
   static Iterable<HttpRouteMatch> match(

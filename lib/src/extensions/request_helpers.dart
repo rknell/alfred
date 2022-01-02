@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import '../../alfred.dart';
-import '../body_parser/http_body.dart';
-import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
 
 /// Some convenience methods on the [HttpRequest] object to make the api
