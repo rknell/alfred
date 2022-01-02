@@ -1,8 +1,7 @@
 language: dart
-before_script: dartfmt -n lib/src
+before_script: dart format --set-exit-if-changed .
 dart:
   - stable
 dart_task:
   - test: --platform vm
   - dartanalyzer: --fatal-warnings .
-  - dartfmt: true
