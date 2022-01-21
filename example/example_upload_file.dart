@@ -12,7 +12,7 @@ Future<void> main() async {
   /// Example of handling a multipart/form-data file upload
   app.post(
       '/upload',
-      (req, res) => (HttpRequest req, HttpResponse res) async {
+      (req, res) async {
             final body = await req.bodyAsJsonMap;
 
             // Create the upload directory if it doesn't exist
