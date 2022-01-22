@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:queue/queue.dart';
 
 import 'extensions/request_helpers.dart';
@@ -138,7 +137,7 @@ class Alfred {
     logWriter = (dynamic Function() messageFn, type) {
       if (type.index >= logLevel.index) {
         var timestamp = DateTime.now();
-        var logType = EnumToString.convertToString(type);
+        var logType = type.name;
         var message = messageFn().toString();
         print('$timestamp - $logType - $message');
       }
@@ -297,10 +296,10 @@ class Alfred {
 
     // Work out all the routes we need to process
     final effectiveMatches = RouteMatcher.match(
-        request.uri.toString(),
-        routes,
-        EnumToString.fromString<Method>(Method.values, request.method) ??
-            Method.get);
+      request.uri.toString(),
+      routes,
+      Method.values.byName(request.method.toLowerCase()),
+    );
 
     try {
       // If there are no effective routes, that means we need to throw a 404
