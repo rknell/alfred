@@ -294,11 +294,20 @@ class Alfred {
       logWriter(() => 'Response sent to client', LogType.debug);
     }));
 
+    /// Parse request to Method enum value.
+    Method _parseMethod(HttpRequest request) {
+      try {
+        return Method.values.byName(request.method.toLowerCase());
+      } on ArgumentError {
+        return Method.get;
+      }
+    }
+
     // Work out all the routes we need to process
     final effectiveMatches = RouteMatcher.match(
       request.uri.toString(),
       routes,
-      Method.values.byName(request.method.toLowerCase()),
+      _parseMethod(request),
     );
 
     try {
