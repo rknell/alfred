@@ -105,6 +105,50 @@ void main() {
     expect(response.statusCode, 404);
   });
 
+  test('Invalid ssl chain & key - file', () async {
+    await app.close();
+    app = Alfred();
+
+    try {
+      var context = SecurityContext();
+      context.useCertificateChain('');
+      context.usePrivateKey('');
+
+      await app.listenSecurity(
+        port: port,
+        securityContext: context,
+      );
+      fail('was not for this server to have started');
+    } catch (e) {
+      expect(
+        e.toString(),
+        contains('FileSystemException: Cannot open file, path'),
+      );
+    }
+  });
+
+  test('Invalid ssl chain & key - bytes', () async {
+    await app.close();
+    app = Alfred();
+
+    try {
+      var context = SecurityContext();
+      context.useCertificateChainBytes([]);
+      context.usePrivateKeyBytes([]);
+
+      await app.listenSecurity(
+        port: port,
+        securityContext: context,
+      );
+      fail('was not for this server to have started');
+    } catch (e) {
+      expect(
+        e.toString(),
+        contains('TlsException: Failure in useCertificateChainBytes'),
+      );
+    }
+  });
+
   test('not found with middleware', () async {
     app.all('*', cors());
     app.get('resource2', (req, res) {});
