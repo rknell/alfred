@@ -118,7 +118,7 @@ void main() {
         port: port,
         securityContext: context,
       );
-      fail('was not for this server to have started');
+      fail('Was not for this server to have started.');
     } catch (e) {
       expect(
         e.toString(),
@@ -140,7 +140,7 @@ void main() {
         port: port,
         securityContext: context,
       );
-      fail('was not for this server to have started');
+      fail('Was not for this server to have started.');
     } catch (e) {
       expect(
         e.toString(),
