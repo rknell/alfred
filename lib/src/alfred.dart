@@ -255,13 +255,47 @@ class Alfred {
 
   /// Call this function to fire off the server.
   ///
-  Future<HttpServer> listen(
-      [int port = 3000,
-      dynamic bindIp = '0.0.0.0',
-      bool shared = true,
-      int backlog = 0]) async {
-    final _server =
-        await HttpServer.bind(bindIp, port, shared: shared, backlog: backlog);
+  ///
+  ///
+  Future<HttpServer> listen([
+    int port = 3000,
+    dynamic bindIp = '0.0.0.0',
+    bool shared = true,
+    int backlog = 0,
+  ]) async {
+    final _server = await HttpServer.bind(
+      bindIp,
+      port,
+      backlog: backlog,
+      shared: shared,
+    );
+
+    _server.idleTimeout = Duration(seconds: 1);
+
+    _server.listen((HttpRequest request) {
+      requestQueue.add(() => _incomingRequest(request));
+    });
+
+    logWriter(
+        () => 'HTTP Server listening on port ${_server.port}', LogType.info);
+    return server = _server;
+  }
+
+  Future<HttpServer> listenSecure({
+    required SecurityContext securityContext,
+    int port = 3000,
+    dynamic bindIp = '0.0.0.0',
+    bool shared = true,
+    int backlog = 0,
+  }) async {
+    final _server = await HttpServer.bindSecure(
+      bindIp,
+      port,
+      securityContext,
+      backlog: backlog,
+      shared: shared,
+    );
+
     _server.idleTimeout = Duration(seconds: 1);
 
     _server.listen((HttpRequest request) {
