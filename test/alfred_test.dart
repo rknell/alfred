@@ -114,7 +114,7 @@ void main() {
       context.useCertificateChain('');
       context.usePrivateKey('');
 
-      await app.listenSecurity(
+      await app.listenSecure(
         port: port,
         securityContext: context,
       );
@@ -136,7 +136,7 @@ void main() {
       context.useCertificateChainBytes([]);
       context.usePrivateKeyBytes([]);
 
-      await app.listenSecurity(
+      await app.listenSecure(
         port: port,
         securityContext: context,
       );

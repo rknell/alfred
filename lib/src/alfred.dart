@@ -281,7 +281,7 @@ class Alfred {
     return server = _server;
   }
 
-  Future<HttpServer> listenSecurity({
+  Future<HttpServer> listenSecure({
     required SecurityContext securityContext,
     int port = 3000,
     dynamic bindIp = '0.0.0.0',

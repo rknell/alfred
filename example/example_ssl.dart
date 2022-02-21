@@ -17,7 +17,7 @@ void main() async {
   context.useCertificateChain(chain);
   context.usePrivateKey(key);
 
-  await app.listenSecurity(
+  await app.listenSecure(
     port: 3000,
     securityContext: context,
   );
