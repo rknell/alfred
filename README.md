@@ -18,6 +18,8 @@ void main() async {
 }
 ```
 
+There is also a 6 part video series that walks you through creating a web server using Alfred from start to deployment, including databases and authentication. You can find that here: https://www.youtube.com/playlist?list=PLkEq83S97rEWsgFEzwBW2pxB7pRYb9wAB
+
 # Index
 - [Core principles](#core-principles)
 - [Usage overview](#usage-overview)
