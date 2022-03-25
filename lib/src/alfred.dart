@@ -26,6 +26,7 @@ import 'type_handlers/websocket_type_handler.dart';
 import 'alfred_exception.dart';
 import 'http_route.dart';
 import 'route_matcher.dart';
+import 'router.dart';
 
 enum Method {
   get,
@@ -53,7 +54,7 @@ enum LogType { debug, info, warn, error }
 ///
 /// This is the core of the server application. Generally you would create one
 /// for each app.
-class Alfred {
+class Alfred with Router {
   /// List of routes
   ///
   /// Generally you don't want to manipulate this array directly, instead add
@@ -179,69 +180,7 @@ class Alfred {
     registerOnDoneListener(storePluginOnDoneHandler);
   }
 
-  /// Create a get route
-  ///
-  HttpRoute get(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.head, path, callback, middleware);
-
-  /// Create a head route
-  ///
-  HttpRoute head(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.head, path, callback, middleware);
-
-  /// Create a post route
-  ///
-  HttpRoute post(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.post, path, callback, middleware);
-
-  /// Create a put route
-  HttpRoute put(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.put, path, callback, middleware);
-
-  /// Create a delete route
-  ///
-  HttpRoute delete(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.delete, path, callback, middleware);
-
-  /// Create a patch route
-  ///
-  HttpRoute patch(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.patch, path, callback, middleware);
-
-  /// Create an options route
-  ///
-  HttpRoute options(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.options, path, callback, middleware);
-
-  /// Create a route that listens on all methods
-  ///
-  HttpRoute all(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      createRoute(Method.all, path, callback, middleware);
-
+  @override
   HttpRoute createRoute(Method method, String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
       [List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
