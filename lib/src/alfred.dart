@@ -185,7 +185,7 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.get, middleware);
+      createRoute(Method.head, path, callback, middleware);
 
   /// Create a head route
   ///
@@ -193,7 +193,7 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.head, middleware);
+      createRoute(Method.head, path, callback, middleware);
 
   /// Create a post route
   ///
@@ -201,14 +201,14 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.post, middleware);
+      createRoute(Method.post, path, callback, middleware);
 
   /// Create a put route
   HttpRoute put(String path,
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.put, middleware);
+      createRoute(Method.put, path, callback, middleware);
 
   /// Create a delete route
   ///
@@ -216,7 +216,7 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.delete, middleware);
+      createRoute(Method.delete, path, callback, middleware);
 
   /// Create a patch route
   ///
@@ -224,7 +224,7 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.patch, middleware);
+      createRoute(Method.patch, path, callback, middleware);
 
   /// Create an options route
   ///
@@ -232,7 +232,7 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.options, middleware);
+      createRoute(Method.options, path, callback, middleware);
 
   /// Create a route that listens on all methods
   ///
@@ -240,12 +240,10 @@ class Alfred {
           FutureOr Function(HttpRequest req, HttpResponse res) callback,
           {List<FutureOr Function(HttpRequest req, HttpResponse res)>
               middleware = const []}) =>
-      _createRoute(path, callback, Method.all, middleware);
+      createRoute(Method.all, path, callback, middleware);
 
-  HttpRoute _createRoute(
-      String path,
+  HttpRoute createRoute(Method method, String path,
       FutureOr Function(HttpRequest req, HttpResponse res) callback,
-      Method method,
       [List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
           const []]) {
     final route = HttpRoute(path, callback, method, middleware: middleware);
