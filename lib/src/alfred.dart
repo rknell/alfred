@@ -72,6 +72,14 @@ class Alfred with Router {
   /// ```
   late void Function(dynamic Function() messageFn, LogType type) logWriter;
 
+  @override
+  Alfred get app => this;
+
+  /// Optional path prefix to apply to all routes and route groups
+  ///
+  @override
+  final String pathPrefix;
+
   /// Optional handler for when a route is not found
   ///
   FutureOr Function(HttpRequest req, HttpResponse res)? onNotFound;
@@ -124,6 +132,7 @@ class Alfred with Router {
   /// time. If the amount of unprocessed incoming requests exceed this number,
   /// the requests will be queued.
   Alfred({
+    this.pathPrefix = '',
     this.onNotFound,
     this.onInternalError,
     LogType logLevel = LogType.info,
@@ -180,14 +189,8 @@ class Alfred with Router {
     registerOnDoneListener(storePluginOnDoneHandler);
   }
 
-  @override
-  HttpRoute createRoute(Method method, String path,
-      FutureOr Function(HttpRequest req, HttpResponse res) callback,
-      [List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
-          const []]) {
-    final route = HttpRoute(path, callback, method, middleware: middleware);
+  void addRoute(HttpRoute route) {
     routes.add(route);
-    return route;
   }
 
   /// Call this function to fire off the server.
