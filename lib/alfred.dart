@@ -3,7 +3,6 @@ export 'dart:io' show HttpRequest, HttpResponse;
 export 'src/alfred.dart';
 export 'src/alfred_exception.dart';
 export 'src/router.dart';
-export 'src/route_group.dart';
 export 'src/body_parser/http_body.dart';
 export 'src/extensions/file_helpers.dart';
 export 'src/extensions/nested_route.dart';
