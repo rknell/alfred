@@ -112,7 +112,7 @@ class HttpBodyHandler
   /// The returned [HttpRequestBody] contains a `response` field for accessing
   /// the [HttpResponse].
   ///
-  /// See [new HttpBodyHandler] for more info on [defaultEncoding].
+  /// See [HttpBodyHandler] for more info on [defaultEncoding].
   static Future<HttpRequestBody> processRequest(HttpRequest request,
       {Encoding defaultEncoding = utf8}) async {
     try {
@@ -128,7 +128,7 @@ class HttpBodyHandler
 
   /// Process and parse an incoming [HttpClientResponse].
   ///
-  /// See [new HttpBodyHandler] for more info on [defaultEncoding].
+  /// See [HttpBodyHandler] for more info on [defaultEncoding].
   static Future<HttpClientResponseBody> processResponse(
       HttpClientResponse response,
       {Encoding defaultEncoding = utf8}) async {
