@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,6 +30,12 @@ void main() {
     final response = await http.get(Uri.parse('http://localhost:$port/test'));
     expect(response.headers['content-type'], 'application/json; charset=utf-8');
     expect(response.body, '{"test":true}');
+  });
+  test('With Mixin: it should return json', () async {
+    app.get('/test', _CallableRequest() );
+    final response = await http.get(Uri.parse('http://localhost:$port/test'));
+    expect(response.headers['content-type'], 'application/json; charset=utf-8');
+    expect(response.body, '{"ok":true,"msg":"callable class"}');
   });
 
   test('it should return an image', () async {
@@ -258,6 +265,12 @@ void main() {
         return 'hit middleware';
       }
     ]);
+    final response = await http.get(Uri.parse('http://localhost:$port/test'));
+    expect(response.body, 'hit middleware');
+  });
+
+  test('With Mixin: it executes middleware, but handles it and stops executing', () async {
+    app.get('/test', (req, res) => 'test route', middleware: [_TestHitMiddleware()]);
     final response = await http.get(Uri.parse('http://localhost:$port/test'));
     expect(response.body, 'hit middleware');
   });
@@ -659,5 +672,19 @@ class RefNumberTypeParameter implements HttpRouteParamType {
   @override
   String parse(String value) {
     return value.toUpperCase();
+  }
+}
+
+class _CallableRequest with CallableRequestMixin{
+  @override
+  FutureOr call(HttpRequest req, HttpResponse res) {
+    return res.json({'ok':true,'msg':'callable class'});
+  }
+}
+
+class _TestHitMiddleware with CallableRequestMixin{
+  @override
+  FutureOr call(HttpRequest req, HttpResponse res) {
+    return 'hit middleware';
   }
 }
