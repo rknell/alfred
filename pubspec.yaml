@@ -11,6 +11,7 @@ dependencies:
   mime_type: ^1.0.0
   enum_to_string: ^2.0.1
   queue: ^3.1.0
+  jinja: ^0.4.0-dev.40
 
 dev_dependencies:
   test: ^1.14.4

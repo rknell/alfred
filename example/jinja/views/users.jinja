@@ -1,0 +1,11 @@
+{% extends "layouts/layout.jinja" %}
+{% block title %}users{% endblock %}
+
+{% block content %}
+    {% for user in users %}
+        <p>{{ user.fullname }}, email: {{ user.email }}</p>
+    {% else %}
+        No users
+    {% endfor %}
+
+{% endblock %}
