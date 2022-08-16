@@ -25,7 +25,7 @@ TypeHandler get directoryTypeHandler =>
         final filePath =
             '${directory.path}/${Uri.decodeComponent(virtualPath!)}';
 
-        _preventTraversal(filePath, directory):
+        _preventTraversal(filePath, directory);
 
         req.log(() => 'Resolve virtual path: $virtualPath');
 
@@ -50,13 +50,20 @@ TypeHandler get directoryTypeHandler =>
 
         if (body is Map && body['file'] is HttpBodyFileUpload) {
           if (virtualPath != null) {
-            directory = Directory('${directory.path}/$virtualPath');
+            _preventTraversal('${directory.path}/$virtualPath', directory);
+            directory = Directory('${directory.path}/$virtualPath').absolute;
           }
           if (await directory.exists() == false) {
             await directory.create(recursive: true);
           }
           final fileName = (body['file'] as HttpBodyFileUpload).filename;
-          await File('${directory.path}/$fileName').writeAsBytes(
+          
+          final fileToWrite =
+              File('${directory.path}/$fileName');
+
+          _preventTraversal(fileToWrite.path, directory);
+
+          await fileToWrite.writeAsBytes(
               (body['file'] as HttpBodyFileUpload).content as List<int>);
           final publicPath =
               "${req.requestedUri.toString() + (virtualPath != null ? '/$virtualPath' : '')}/$fileName";
@@ -68,6 +75,8 @@ TypeHandler get directoryTypeHandler =>
       if (req.method == 'DELETE') {
         final fileToDelete =
             File('${directory.path}/${Uri.decodeComponent(virtualPath!)}');
+
+        _preventTraversal(fileToDelete.path, directory);
 
         if (await fileToDelete.exists()) {
           await fileToDelete.delete();
