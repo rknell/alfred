@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import '../alfred.dart';
+import '../alfred_exception.dart';
 import '../body_parser/http_body.dart';
 import '../extensions/request_helpers.dart';
 import '../extensions/response_helpers.dart';
@@ -9,17 +10,12 @@ import 'type_handler.dart';
 
 TypeHandler get directoryTypeHandler =>
     TypeHandler<Directory>((req, res, Directory directory) async {
+      directory = directory.absolute;
       final usedRoute = req.route;
       String? virtualPath;
       if (usedRoute.contains('*')) {
         virtualPath = req.uri.path
             .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
-      }
-
-      final check = File('${directory.path}/${Uri.decodeComponent(virtualPath!)}').absolute;
-      if (!check.path.startsWith(directory.absolute.path)) {
-         req.log(() => 'Server directory traversal attempt: ${check.path}');
-         throw AlfredException(403, '403 forbidden');
       }
  
       if (req.method == 'GET' || req.method == 'HEAD') {
@@ -28,6 +24,8 @@ TypeHandler get directoryTypeHandler =>
 
         final filePath =
             '${directory.path}/${Uri.decodeComponent(virtualPath!)}';
+
+        _preventTraversal(filePath, directory):
 
         req.log(() => 'Resolve virtual path: $virtualPath');
 
@@ -80,6 +78,14 @@ TypeHandler get directoryTypeHandler =>
         }
       }
     });
+
+void _preventTraversal(String filePath, Directory absDir) {
+  final check = File(filePath).absolute;
+  if (!check.path.startsWith(absDir.path)) {
+    req.log(() => 'Server directory traversal attempt: ${check.path}');
+    throw AlfredException(403, '403 forbidden');
+  }
+}
 
 Future _respondWithFile(HttpResponse res, File file,
     {bool headerOnly = false}) async {
