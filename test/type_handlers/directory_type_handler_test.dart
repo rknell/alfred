@@ -105,7 +105,7 @@ void main() {
   test('it refuses to serve a file not under the base directory', () async {
     app.get('/test/*', (req, res) => Directory.current);
     final response =
-        await http.get(Uri.parse('http://localhost:$port/test/..%2frandomname.png'));
+        await http.get(Uri.parse('http://localhost:$port/test/..%2f/randomname.png'));
     expect(response.statusCode, 403);
   });
 }
