@@ -16,6 +16,12 @@ TypeHandler get directoryTypeHandler =>
             .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
       }
 
+      final check = File('${directory.path}/${Uri.decodeComponent(virtualPath!)}').absolute;
+      if (!check.path.startsWith(directory.absolute.path)) {
+         req.log(() => 'Server directory traversal attempt: ${check.path}');
+         throw AlfredException(403, '403 forbidden');
+      }
+ 
       if (req.method == 'GET' || req.method == 'HEAD') {
         assert(usedRoute.contains('*'),
             'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute');
