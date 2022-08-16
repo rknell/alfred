@@ -25,7 +25,7 @@ TypeHandler get directoryTypeHandler =>
         final filePath =
             '${directory.path}/${Uri.decodeComponent(virtualPath!)}';
 
-        _preventTraversal(filePath, directory);
+        req.preventTraversal(filePath, directory);
 
         req.log(() => 'Resolve virtual path: $virtualPath');
 
@@ -50,7 +50,7 @@ TypeHandler get directoryTypeHandler =>
 
         if (body is Map && body['file'] is HttpBodyFileUpload) {
           if (virtualPath != null) {
-            _preventTraversal('${directory.path}/$virtualPath', directory);
+            req.preventTraversal('${directory.path}/$virtualPath', directory);
             directory = Directory('${directory.path}/$virtualPath').absolute;
           }
           if (await directory.exists() == false) {
@@ -61,7 +61,7 @@ TypeHandler get directoryTypeHandler =>
           final fileToWrite =
               File('${directory.path}/$fileName');
 
-          _preventTraversal(fileToWrite.path, directory);
+          req.preventTraversal(fileToWrite.path, directory);
 
           await fileToWrite.writeAsBytes(
               (body['file'] as HttpBodyFileUpload).content as List<int>);
@@ -76,7 +76,7 @@ TypeHandler get directoryTypeHandler =>
         final fileToDelete =
             File('${directory.path}/${Uri.decodeComponent(virtualPath!)}');
 
-        _preventTraversal(fileToDelete.path, directory);
+        req.preventTraversal(fileToDelete.path, directory);
 
         if (await fileToDelete.exists()) {
           await fileToDelete.delete();
@@ -87,14 +87,6 @@ TypeHandler get directoryTypeHandler =>
         }
       }
     });
-
-void _preventTraversal(String filePath, Directory absDir) {
-  final check = File(filePath).absolute;
-  if (!check.path.startsWith(absDir.path)) {
-    req.log(() => 'Server directory traversal attempt: ${check.path}');
-    throw AlfredException(403, '403 forbidden');
-  }
-}
 
 Future _respondWithFile(HttpResponse res, File file,
     {bool headerOnly = false}) async {
@@ -110,4 +102,12 @@ Future _respondWithFile(HttpResponse res, File file,
 extension _Logger on HttpRequest {
   void log(String Function() msgFn) =>
       alfred.logWriter(() => 'DirectoryTypeHandler: ${msgFn()}', LogType.debug);
+
+  void preventTraversal(String filePath, Directory absDir) {
+    final check = File(filePath).absolute;
+    if (!check.path.startsWith(absDir.path)) {
+      log(() => 'Server directory traversal attempt: ${check.path}');
+      throw AlfredException(403, '403 forbidden');
+    }
+  }
 }
