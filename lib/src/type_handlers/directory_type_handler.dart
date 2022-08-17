@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:path/path.dart' as p;
+
 import '../alfred.dart';
 import '../alfred_exception.dart';
 import '../body_parser/http_body.dart';
@@ -105,7 +107,8 @@ extension _Logger on HttpRequest {
 
   void preventTraversal(String filePath, Directory absDir) {
     final check = File(filePath).absolute;
-    if (!check.path.startsWith(absDir.path)) {
+    final absDirPath = p.canonicalize(absDir.path);
+    if (!p.canonicalize(check.path).startsWith(absDirPath)) {
       log(() => 'Server directory traversal attempt: ${check.path}');
       throw AlfredException(403, '403 forbidden');
     }
