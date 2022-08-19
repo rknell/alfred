@@ -1,3 +1,8 @@
+## 0.1.7
+
+- Updating the CORS headers to also allow Access-Control-Expose-Headers thanks @Donk3ys
+
+
 ## 0.1.6+1
 
 - Fixing a directory traversal vulnerability. Highly recommended upgrade to this version. Thanks @d-markey & @seceba for this one.
