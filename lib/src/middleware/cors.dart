@@ -13,6 +13,7 @@ FutureOr Function(HttpRequest, HttpResponse) cors(
     res.headers.set('Access-Control-Allow-Origin', origin);
     res.headers.set('Access-Control-Allow-Methods', methods);
     res.headers.set('Access-Control-Allow-Headers', headers);
+    res.headers.set('Access-Control-Expose-Headers', headers);
     res.headers.set('Access-Control-Max-Age', age);
     if (req.method == 'OPTIONS') {
       res.close();
