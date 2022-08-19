@@ -628,6 +628,19 @@ void main() {
     expect(response.statusCode, 400);
   });
 
+  test('it handles invalid method type by defaulting to get', () async {
+    app.get('/test', (req, res) async {
+      return "success";
+    });
+
+    final response = await http.Response.fromStream(await http.Request(
+            "aaklsjdajklsdf", Uri.parse('http://localhost:$port/test'))
+        .send());
+
+    expect(response.statusCode, 200);
+    expect(response.body, 'success');
+  });
+
   test(
       'it handles a failed body parser wrapped in a try catch block with an alfred exception',
       () async {
