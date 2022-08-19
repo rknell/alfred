@@ -3,8 +3,11 @@ import 'dart:io';
 
 import 'package:queue/queue.dart';
 
+import 'alfred_exception.dart';
 import 'extensions/request_helpers.dart';
+import 'http_route.dart';
 import 'plugins/store_plugin.dart';
+import 'route_matcher.dart';
 import 'route_param_types/alpha_param_type.dart';
 import 'route_param_types/date_param_type.dart';
 import 'route_param_types/double_param_type.dart';
@@ -21,10 +24,6 @@ import 'type_handlers/serializable_type_handler.dart';
 import 'type_handlers/string_type_handler.dart';
 import 'type_handlers/type_handler.dart';
 import 'type_handlers/websocket_type_handler.dart';
-
-import 'alfred_exception.dart';
-import 'http_route.dart';
-import 'route_matcher.dart';
 
 enum Method {
   get,
@@ -399,8 +398,18 @@ class Alfred {
       }
     } on AlfredException catch (e) {
       // The user threw a handle HTTP Exception
-      request.response.statusCode = e.statusCode;
-      await _handleResponse(e.response, request);
+      try {
+        request.response.statusCode = e.statusCode;
+        await _handleResponse(e.response, request);
+      } on StateError catch (e, s) {
+        // It can hit this block if you try to write a header when one is already been raised
+        logWriter(() => e, LogType.error);
+        logWriter(() => s, LogType.error);
+      } catch (e, s) {
+        // Catch all other errors, this block may be able to be removed in the future
+        logWriter(() => e, LogType.error);
+        logWriter(() => s, LogType.error);
+      }
     } on NotFoundError catch (_) {
       await _respondNotFound(request, isDone);
     } catch (e, s) {
@@ -422,7 +431,10 @@ class Alfred {
           request.response.statusCode = 500;
           request.response.write(e);
           await request.response.close();
-        } catch (_) {}
+        } catch (e, s) {
+          logWriter(() => e, LogType.error);
+          logWriter(() => s, LogType.error);
+        }
       }
     }
   }
