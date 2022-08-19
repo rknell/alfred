@@ -1,6 +1,6 @@
 ## 0.1.6+1
 
-- Fixing a directory traversal vulnerability. Highly recommended upgrade to this version.
+- Fixing a directory traversal vulnerability. Highly recommended upgrade to this version. Thanks @d-markey & @seceba for this one.
 
 ## 0.1.6
 
