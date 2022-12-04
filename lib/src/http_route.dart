@@ -24,7 +24,7 @@ class HttpRoute {
       {this.middleware = const []})
       : usesWildcardMatcher = route.contains('*') {
     // Split route path into segments
-    final segments = Uri.tryParse(route.normalizePath)?.pathSegments ??
+    final segments = Uri.tryParse('/${route.normalizePath}')?.pathSegments ??
         [route.normalizePath];
 
     var pattern = '^';
