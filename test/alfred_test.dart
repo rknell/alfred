@@ -627,6 +627,39 @@ void main() {
         body: ' ', headers: {'Content-Type': 'application/json'});
     expect(response.statusCode, 400);
   });
+
+  test(
+      'it handles a failed body parser wrapped in a try catch block with an alfred exception',
+      () async {
+    app.post('/test', (req, res) async {
+      try {
+        await req.body;
+      } catch (e) {
+        throw AlfredException(500, {'test': 'response'});
+      }
+    });
+    final response = await http.post(Uri.parse('http://localhost:$port/test'),
+        body: '{ "email": "test@test.com",}',
+        headers: {'Content-Type': 'application/json'});
+    expect(response.statusCode, 400);
+  });
+
+  test(
+      'it handles a failed body parser wrapped in a try catch block with a manual return (setting the header twice)',
+      () async {
+    app.post('/test', (req, res) async {
+      try {
+        await req.body;
+      } catch (e) {
+        res.statusCode = 500;
+        return {'error': true};
+      }
+    });
+    final response = await http.post(Uri.parse('http://localhost:$port/test'),
+        body: '{ "email": "test@test.com",}',
+        headers: {'Content-Type': 'application/json'});
+    expect(response.statusCode, 400);
+  });
 }
 
 class _UnknownType {}

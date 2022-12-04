@@ -1,6 +1,6 @@
 name: alfred
 description: A performant, expressjs like web server / rest api framework thats easy to use and has all the bits in one place.
-version: 0.1.5+3
+version: 1.0.0
 repository: https://github.com/rknell/alfred
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   mime_type: ^1.0.0
   enum_to_string: ^2.0.1
   queue: ^3.1.0
-  meta: ^1.7.0
+  path: ^1.8.2
 
 dev_dependencies:
   test: ^1.14.4
