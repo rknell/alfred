@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:queue/queue.dart';
 
 import 'alfred_exception.dart';
@@ -42,7 +41,12 @@ enum Method {
   unlock,
   propfind,
   view,
-  all
+  all;
+
+    Method methodFromString(String str) => Method.values.firstWhere(
+      (method) => method.name == str,
+      orElse: () => this,
+    );
 }
 
 /// Indicates the severity of logged message
@@ -137,7 +141,7 @@ class Alfred {
     logWriter = (dynamic Function() messageFn, type) {
       if (type.index >= logLevel.index) {
         var timestamp = DateTime.now();
-        var logType = EnumToString.convertToString(type);
+        var logType = type.name;
         var message = messageFn().toString();
         print('$timestamp - $logType - $message');
       }
@@ -332,8 +336,8 @@ class Alfred {
     final effectiveMatches = RouteMatcher.match(
         request.uri.toString(),
         routes,
-        EnumToString.fromString<Method>(Method.values, request.method) ??
-            Method.get);
+        Method.get.methodFromString(request.method.toLowerCase())
+        );
 
     try {
       // If there are no effective routes, that means we need to throw a 404

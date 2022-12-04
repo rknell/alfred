@@ -18,5 +18,6 @@ extension FileHelpers on File {
     } else {
       return null;
     }
+    return null;
   }
 }
