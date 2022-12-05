@@ -3,7 +3,7 @@
 - Moving to dart v2.17.x (thanks @NathanDraco22)
 - Fixing bug which prevent correct route parsing (thanks @jodinathan)
 - Adding modular routes with path prefixes and RouteGroups (thanks @scroff)
-- 
+- Removing outdated dependencies and moving to new linter (thansk @aadarshadhakalg)
 
 ## 0.1.7
 

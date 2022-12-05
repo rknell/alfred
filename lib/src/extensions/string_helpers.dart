@@ -1,3 +1,4 @@
+// ignore: constant_identifier_names
 enum DecodeMode { AllButSlash, SlashOnly }
 
 extension PathNormalizer on String {
@@ -12,23 +13,23 @@ extension PathNormalizer on String {
     return this;
   }
 
-  static final int _PERCENT = '%'.codeUnitAt(0);
-  static final int _SLASH = '/'.codeUnitAt(0);
-  static final int _ZERO = '0'.codeUnitAt(0);
-  static final int _NINE = '9'.codeUnitAt(0);
-  static final int _UPPER_A = 'A'.codeUnitAt(0);
-  static final int _UPPER_F = 'F'.codeUnitAt(0);
-  static final int _LOWER_A = 'a'.codeUnitAt(0);
-  static final int _LOWER_F = 'f'.codeUnitAt(0);
+  static final int _percent = '%'.codeUnitAt(0);
+  static final int _slash = '/'.codeUnitAt(0);
+  static final int _zero = '0'.codeUnitAt(0);
+  static final int _nine = '9'.codeUnitAt(0);
+  static final int _upperA = 'A'.codeUnitAt(0);
+  static final int _upperF = 'F'.codeUnitAt(0);
+  static final int _lowerA = 'a'.codeUnitAt(0);
+  static final int _lowerF = 'f'.codeUnitAt(0);
 
   int _decodeHex(int codeUnit) {
-    if (_ZERO <= codeUnit && codeUnit <= _NINE) {
-      return codeUnit - _ZERO;
+    if (_zero <= codeUnit && codeUnit <= _nine) {
+      return codeUnit - _zero;
     }
-    if (_LOWER_A <= codeUnit && codeUnit <= _LOWER_F) {
-      return 10 + codeUnit - _LOWER_A;
-    } else if (_UPPER_A <= codeUnit && codeUnit <= _UPPER_F) {
-      return 10 + codeUnit - _UPPER_A;
+    if (_lowerA <= codeUnit && codeUnit <= _lowerF) {
+      return 10 + codeUnit - _lowerA;
+    } else if (_upperA <= codeUnit && codeUnit <= _upperF) {
+      return 10 + codeUnit - _upperA;
     } else {
       return -1;
     }
@@ -44,9 +45,9 @@ extension PathNormalizer on String {
     if (codeUnit == null) return false;
     switch (mode) {
       case DecodeMode.AllButSlash:
-        return codeUnit != _SLASH;
+        return codeUnit != _slash;
       case DecodeMode.SlashOnly:
-        return codeUnit == _SLASH;
+        return codeUnit == _slash;
     }
   }
 
@@ -56,7 +57,7 @@ extension PathNormalizer on String {
     var pos = 0;
     while (pos < codes.length) {
       final char = codes[pos];
-      if (char == _PERCENT) {
+      if (char == _percent) {
         if (pos + 2 >= length) break;
         final hex1 = _decodeHex(codes[pos + 1]);
         final hex2 = _decodeHex(codes[pos + 2]);

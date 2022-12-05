@@ -497,7 +497,7 @@ class Alfred with Router {
 
 /// Function to prevent linting errors.
 ///
-void _unawaited(Future<Null> then) {}
+void _unawaited(Future<void> then) {}
 
 /// Error thrown when a type handler cannot be found for a returned item
 ///
