@@ -24,8 +24,16 @@ class HttpRoute {
       {this.middleware = const []})
       : usesWildcardMatcher = route.contains('*') {
     // Split route path into segments
-    final segments = Uri.tryParse('/${route.normalizePath}')?.pathSegments ??
-        [route.normalizePath];
+
+    /// Because in dart 2.18 uri parsing is more permissive, using a \ in regex
+    /// is being counted as a /, so we need to add an r and join them together
+    /// VERY happy for a more elegant solution here than some random escape
+    /// sequence.
+    const escapeChar = '@@@^';
+    var escapedPath = route.normalizePath.replaceAll('\\', escapeChar);
+    var segments =
+        Uri.tryParse('/${escapedPath}')?.pathSegments ?? [route.normalizePath];
+    segments = segments.map((e) => e.replaceAll(escapeChar, '\\')).toList();
 
     var pattern = '^';
     for (var segment in segments) {
