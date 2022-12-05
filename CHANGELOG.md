@@ -1,3 +1,7 @@
+## 1.0.0+1
+
+- Just a bump to update the readme
+
 ## 1.0.0
 
 - Moving to dart v2.17.x (thanks @NathanDraco22)
