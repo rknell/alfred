@@ -1,3 +1,10 @@
+## 1.0.0
+
+- Moving to dart v2.17.x (thanks @NathanDraco22)
+- Fixing bug which prevent correct route parsing (thanks @jodinathan)
+- Adding modular routes with path prefixes and RouteGroups (thanks @scroff)
+- 
+
 ## 0.1.7
 
 - Updating the CORS headers to also allow Access-Control-Expose-Headers thanks @Donk3ys
