@@ -4,6 +4,7 @@
 - Fixing bug which prevent correct route parsing (thanks @jodinathan)
 - Adding modular routes with path prefixes and RouteGroups (thanks @scroff)
 - Removing outdated dependencies and moving to new linter (thansk @aadarshadhakalg)
+- Fixed a bug on dart 2.18 where regex typed routes wouldn't parse correctly.
 
 ## 0.1.7
 
