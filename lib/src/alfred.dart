@@ -72,7 +72,6 @@ class Alfred with Router {
   /// Writer to handle internal logging.
   ///
   /// It can optionally exchanged with your own logging solution.
-  /// ```
   late void Function(dynamic Function() messageFn, LogType type) logWriter;
 
   @override
