@@ -104,8 +104,8 @@ void main() {
 
   test('it refuses to serve a file not under the base directory', () async {
     app.get('/test/*', (req, res) => Directory('test/files'));
-    final response =
-        await http.get(Uri.parse('http://localhost:$port/test/..%2f/common.dart'));
+    final response = await http
+        .get(Uri.parse('http://localhost:$port/test/..%2f/common.dart'));
     expect(response.statusCode, 403);
   });
 }

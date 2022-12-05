@@ -112,7 +112,7 @@ String _composePath(String first, String second) {
   if (first.endsWith('/') && second.startsWith('/')) {
     return first + second.substring(1);
   } else if (!first.endsWith('/') && !second.startsWith('/')) {
-    return first + '/' + second;
+    return '$first/$second';
   }
   return first + second;
 }

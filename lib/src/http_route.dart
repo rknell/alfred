@@ -49,6 +49,7 @@ class HttpRoute {
           throw DuplicateParameterException(param.name);
         }
         _params[param.name] = param;
+        // ignore: prefer_interpolation_to_compose_strings
         segment = r'(?<' + param.name + r'>' + param.pattern + ')';
       } else {
         // escape period character

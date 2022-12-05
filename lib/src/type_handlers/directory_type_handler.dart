@@ -19,7 +19,7 @@ TypeHandler get directoryTypeHandler =>
         virtualPath = req.uri.path
             .substring(min(req.uri.path.length, usedRoute.indexOf('*')));
       }
- 
+
       if (req.method == 'GET' || req.method == 'HEAD') {
         assert(usedRoute.contains('*'),
             'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute');
@@ -59,9 +59,8 @@ TypeHandler get directoryTypeHandler =>
             await directory.create(recursive: true);
           }
           final fileName = (body['file'] as HttpBodyFileUpload).filename;
-          
-          final fileToWrite =
-              File('${directory.path}/$fileName');
+
+          final fileToWrite = File('${directory.path}/$fileName');
 
           req.preventTraversal(fileToWrite.path, directory);
 

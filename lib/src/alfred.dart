@@ -42,7 +42,12 @@ enum Method {
   unlock,
   propfind,
   view,
-  all
+  all;
+
+  Method methodFromString(String str) => Method.values.firstWhere(
+        (method) => method.name == str,
+        orElse: () => this,
+      );
 }
 
 /// Indicates the severity of logged message
@@ -201,22 +206,22 @@ class Alfred with Router {
     bool shared = true,
     int backlog = 0,
   ]) async {
-    final _server = await HttpServer.bind(
+    final server = await HttpServer.bind(
       bindIp,
       port,
       backlog: backlog,
       shared: shared,
     );
 
-    _server.idleTimeout = Duration(seconds: 1);
+    server.idleTimeout = Duration(seconds: 1);
 
-    _server.listen((HttpRequest request) {
+    server.listen((HttpRequest request) {
       requestQueue.add(() => _incomingRequest(request));
     });
 
     logWriter(
-        () => 'HTTP Server listening on port ${_server.port}', LogType.info);
-    return server = _server;
+        () => 'HTTP Server listening on port ${server.port}', LogType.info);
+    return this.server = server;
   }
 
   Future<HttpServer> listenSecure({
@@ -226,7 +231,7 @@ class Alfred with Router {
     bool shared = true,
     int backlog = 0,
   }) async {
-    final _server = await HttpServer.bindSecure(
+    final server = await HttpServer.bindSecure(
       bindIp,
       port,
       securityContext,
@@ -234,15 +239,15 @@ class Alfred with Router {
       shared: shared,
     );
 
-    _server.idleTimeout = Duration(seconds: 1);
+    server.idleTimeout = Duration(seconds: 1);
 
-    _server.listen((HttpRequest request) {
+    server.listen((HttpRequest request) {
       requestQueue.add(() => _incomingRequest(request));
     });
 
     logWriter(
-        () => 'HTTP Server listening on port ${_server.port}', LogType.info);
-    return server = _server;
+        () => 'HTTP Server listening on port ${server.port}', LogType.info);
+    return this.server = server;
   }
 
   /// Handles and routes an incoming request
@@ -319,8 +324,19 @@ class Alfred with Router {
             break;
           }
           logWriter(() => 'Execute route callback function', LogType.debug);
+
+          /// Nested try catch because if you set the header twice it wasn't
+          /// catching an error. This fixes it and its in tests, so if you can
+          /// remove it and all the tests pass, cool beans.
+          // try {
           await _handleResponse(
               await match.route.callback(request, request.response), request);
+          // } catch (e, s) {
+          //   logWriter(() => match.route.toString(), LogType.error);
+          //   logWriter(() => e, LogType.error);
+          //   logWriter(() => s, LogType.error);
+          //
+          // }
         }
 
         /// If you got here and isDone is still false, you forgot to close
@@ -375,6 +391,7 @@ class Alfred with Router {
         } catch (e, s) {
           logWriter(() => e, LogType.error);
           logWriter(() => s, LogType.error);
+          await request.response.close();
         }
       }
     }

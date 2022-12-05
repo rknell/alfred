@@ -1,4 +1,4 @@
-dart tool/generate_documentation.dart
+#dart tool/generate_documentation.dart
 dart fix --apply
-dartanalyzer --fatal-warnings .
-dartfmt -w .
+dart analyze --fatal-warnings .
+dart format . --fix
