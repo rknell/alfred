@@ -1,8 +1,7 @@
 # Alfred
 
-A performant, expressjs like server framework thats easy to use and has all the bits in one place.
-
-[![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
+A performant, expressjs like web server / rest api framework thats easy to use and has all the bits in one place.
+[![Build Status](https://github.com/rknell/alfred/workflows/Dart/badge.svg)](https://github.com/rknell/alfred/actions)
 
 Quickstart:
 
@@ -17,6 +16,8 @@ void main() async {
   await app.listen();
 }
 ```
+
+There is also a 6 part video series that walks you through creating a web server using Alfred from start to deployment, including databases and authentication. You can find that here: https://www.youtube.com/playlist?list=PLkEq83S97rEWsgFEzwBW2pxB7pRYb9wAB
 
 # Index
 - [Core principles](#core-principles)
@@ -152,6 +153,33 @@ Routing follows a similar pattern to the more basic ExpressJS routes. While ther
 matching, mostly just stick with the route name and param syntax from Express:
 
 "/path/to/:id/property" etc
+
+The Express syntax has been extended to support parameter patterns and types. To enforce parameter
+validation, a regular expression or a type specifier should be provided after the parameter name, using
+another `:` as a separator:
+
+* `/path/to/:id:\d+/property` will ensure "id" is a string consisting of decimal digits
+* `/path/to/:id:[0-9a-f]+/property` will ensure "id" is a string consisting of hexadecimal digits
+* `/path/to/:word:[a-z]+/property` will ensure "word" is a string consisting of letters only
+* `/path/to/:id:uuid/property` will ensure "id" is a string representing an UUID
+
+Available type specifiers are:
+
+* `int`: a decimal integer
+* `uint`: a positive decimal integer
+* `double`: a double (decimal form); note that scientific notation is not supported
+* `date`: a UTC date in the form of "year/month/day"; note how this type "absorbs" multiple segments of the URI
+* `timestamp`: a UTC date expressed in number of milliseconds since Epoch
+* `uuid`: a string resembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); note that no effort is made to ensure this is a valid UUID
+
+| Type Specifier | Regular Expression | Dart type |
+| -------------- | ------------------ | --------- |
+| `int` | `-?\d+` | `int` |
+| `uint` | `\d+` | `int` |
+| `double` | `-?\d+(?:\.\d+)` | `double` |
+| `date` | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
+| `timestamp` | `-?\d+` | `DateTime` |
+| `uuid` |  `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
 
 So for example:
 
@@ -617,7 +645,7 @@ from the dart:io package. All helpers are just extension methods to:
 - HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
 - HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
 
-So you can compose and write any content you can imagine there. If there is something you wan't to do
+So you can compose and write any content you can imagine there. If there is something you want to do
 that isn't expressly listed by the library, you will be able to do it with a minimum of research into
 underlying libraries. A core part of the architecture is to not build you into a wall.
 
@@ -744,5 +772,7 @@ https://ryan-knell.medium.com/build-and-deploy-a-dart-server-using-alfred-docker
 # Contributions
 
 PRs are welcome and encouraged! This is a community project and as long as the PR keeps within the key principles listed it will probably be accepted. If you have an improvement you would like to to add but are not sure just reach out in the issues section.
+
+NB. The readme is generated from the file in tool/templates/README.md which pulls in the actual source code from the example dart files - this way we can be sure its no pseudocode! If you need to change anything in the documentation please edit it there.
 
 Before you submit your code, you can run the `ci_checks.sh` shell script that will do many of the tests the CI suite will perform.
