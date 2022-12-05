@@ -123,7 +123,7 @@ void main() {
     } catch (e) {
       expect(
         e.toString(),
-        contains('FileSystemException: Cannot open file, path'),
+        contains('Cannot open file'),
       );
     }
   });
