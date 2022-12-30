@@ -7,6 +7,7 @@ TypeHandler<dynamic> get serializableTypeHandler =>
     TypeHandler<dynamic>((HttpRequest req, HttpResponse res, dynamic value) {
       try {
         if (value.toJson != null) {
+          res.headers.contentType = ContentType.json;
           res.write(jsonEncode(value.toJson()));
           return res.close();
         }
@@ -18,6 +19,7 @@ TypeHandler<dynamic> get serializableTypeHandler =>
 
       try {
         if (value.toJSON != null) {
+          res.headers.contentType = ContentType.json;
           res.write(jsonEncode(value.toJSON()));
           return res.close();
         }
