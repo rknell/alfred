@@ -643,7 +643,19 @@ void main() {
     final response = await http.post(Uri.parse('http://localhost:$port/test'),
         body: '{ "email": "test@test.com",}',
         headers: {'Content-Type': 'application/json'});
+    expect(response.statusCode, 500);
+  });
+
+  test('it handles a failed body parser returning the default error', () async {
+    app.post('/test', (req, res) async {
+      await req.body;
+      return "Body parser successful";
+    });
+    final response = await http.post(Uri.parse('http://localhost:$port/test'),
+        body: '{ "email": "test@test.com",}',
+        headers: {'Content-Type': 'application/json'});
     expect(response.statusCode, 400);
+    expect(response.body, "Bad Request");
   });
 
   test(

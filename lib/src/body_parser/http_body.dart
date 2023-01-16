@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:alfred/alfred.dart';
 import 'package:mime/mime.dart';
 
 import 'http_multipart_form_data.dart';
@@ -118,11 +119,8 @@ class HttpBodyHandler
     try {
       var body = await _process(request, request.headers, defaultEncoding);
       return HttpRequestBody._(request, body);
-    } catch (e) {
-      // Try to send BAD_REQUEST response.
-      request.response.statusCode = HttpStatus.badRequest;
-      await request.response.close();
-      rethrow;
+    } catch (e, s) {
+      throw BodyParserException(exception: e, stacktrace: s);
     }
   }
 

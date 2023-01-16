@@ -1,3 +1,7 @@
+## 1.1.0
+
+- Small breaking change - when body parsing fails Alfred now throws a BodyParserException which can be caught and handled manually. This may affect you if you have a try catch block but expect it to not catch (which lets face it is unlikely!)
+
 ## 1.0.0+1
 
 - Just a bump to update the readme

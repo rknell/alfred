@@ -3,11 +3,28 @@
 class AlfredException implements Exception {
   /// The response to send to the client
   ///
-  final Object? response;
+  Object? response;
 
   /// The statusCode to send to the client
   ///
-  final int statusCode;
+  int statusCode;
 
   AlfredException(this.statusCode, this.response);
+}
+
+class BodyParserException implements AlfredException {
+  @override
+  Object? response;
+
+  @override
+  int statusCode;
+
+  final Object exception;
+  final StackTrace stacktrace;
+
+  BodyParserException(
+      {this.statusCode = 400,
+      this.response = 'Bad Request',
+      required this.exception,
+      required this.stacktrace});
 }
