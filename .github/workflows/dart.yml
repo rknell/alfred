@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        sdk: [ stable, beta, dev ]
+        sdk: [ stable, beta ]
 
     steps:
       - uses: actions/checkout@v2
