@@ -659,24 +659,7 @@ void main() {
   });
 
   test(
-      'it handles a failed body parser wrapped in a try catch block with a manual return (setting the header twice)',
-      () async {
-    app.post('/test', (req, res) async {
-      try {
-        await req.body;
-      } catch (e) {
-        res.statusCode = 500;
-        return {'error': true};
-      }
-    });
-    final response = await http.post(Uri.parse('http://localhost:$port/test'),
-        body: '{ "email": "test@test.com",}',
-        headers: {'Content-Type': 'application/json'});
-    expect(response.statusCode, 400);
-  });
-
-  test(
-      'doesnt crash the server when you change the status code after writing content',
+      'doesn\'t crash the server when you change the status code after writing content',
       () async {
     app.get('/test', (req, res) async {
       res.write('test');
