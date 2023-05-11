@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data' as typedData;
 
 import 'package:alfred/alfred.dart';
 import 'package:mime/mime.dart';
@@ -217,8 +218,8 @@ class HttpBodyFileUpload {
 Future<HttpBody> _process(Stream<List<int>> stream, HttpHeaders headers,
     Encoding defaultEncoding) async {
   Future<HttpBody> asBinary() async {
-    var builder = await stream.fold<BytesBuilder>(
-        BytesBuilder(), (builder, data) => builder..add(data));
+    var builder = await stream.fold<typedData.BytesBuilder>(
+        typedData.BytesBuilder(), (builder, data) => builder..add(data));
     return HttpBody._('binary', builder.takeBytes());
   }
 
@@ -251,8 +252,8 @@ Future<HttpBody> _process(Stream<List<int>> stream, HttpHeaders headers,
             StringBuffer(), (b, dynamic s) => b..write(s));
         data = buffer.toString();
       } else {
-        var buffer = await multipart.fold<BytesBuilder>(
-            BytesBuilder(), (b, dynamic d) => b..add(d as List<int>));
+        var buffer = await multipart.fold<typedData.BytesBuilder>(
+            typedData.BytesBuilder(), (b, dynamic d) => b..add(d as List<int>));
         data = buffer.takeBytes();
       }
       var filename = multipart.contentDisposition.parameters['filename'];
