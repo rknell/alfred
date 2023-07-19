@@ -215,7 +215,15 @@ class Alfred with Router {
     server.idleTimeout = Duration(seconds: 1);
 
     server.listen((HttpRequest request) {
-      requestQueue.add(() => _incomingRequest(request));
+      requestQueue.add(() async {
+        final result = await runZonedGuarded(() async {
+          return _incomingRequest(request);
+        }, (error, stack) {
+          logWriter(() => 'Unhandled Error: $error', LogType.error);
+          logWriter(() => '$stack', LogType.error);
+        });
+        return result;
+      });
     });
 
     logWriter(

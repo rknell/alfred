@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Adding additional crash protection
+
 ## 1.1.0+2
 
 - Testing and updating compatibility with dart 3.0.0
