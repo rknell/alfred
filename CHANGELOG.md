@@ -1,3 +1,67 @@
+## 1.1.1
+
+- Adding additional crash protection
+
+## 1.1.0+2
+
+- Testing and updating compatibility with dart 3.0.0
+
+## 1.1.0+1
+
+- Readme edit
+
+## 1.1.0+0
+
+- Small breaking change - when body parsing fails Alfred now throws a BodyParserException which can be caught and handled manually. This may affect you if you have a try catch block but expect it to not catch (which lets face it is unlikely!)
+
+## 1.0.0+1
+
+- Just a bump to update the readme
+
+## 1.0.0
+
+- Moving to dart v2.17.x (thanks @NathanDraco22)
+- Fixing bug which prevent correct route parsing (thanks @jodinathan)
+- Adding modular routes with path prefixes and RouteGroups (thanks @scroff)
+- Removing outdated dependencies and moving to new linter (thansk @aadarshadhakalg)
+- Fixed a bug on dart 2.18 where regex typed routes wouldn't parse correctly.
+
+## 0.1.7
+
+- Updating the CORS headers to also allow Access-Control-Expose-Headers thanks @Donk3ys
+
+
+## 0.1.6+1
+
+- Fixing a directory traversal vulnerability. Highly recommended upgrade to this version. Thanks @d-markey & @seceba for this one.
+
+## 0.1.6
+
+- Adding native support for SSL (thanks @BrunoMoraes-Z and @d-markey for QA)
+- Fixing crash when throwing an AlfredException after already setting a header
+
+## 0.1.5+3
+
+- Fixing route handling if you have a parameter on the route. ie /:id
+
+## 0.1.5+2
+
+- Fixing bug that would try and listen to the stream from the body parser twice. Alfred now caches the body in the request store;
+
+## 0.1.5+1
+
+- Updating description to be easier to be found by pub.dev search
+
+## 0.1.5
+
+- Been a while since the last published update... lots of little changes but very few bugs. However thanks to @d-markey the routing logic has been completely rewritten though non api breaking, allowing far more complex matching of route parameters.
+- Fixed a bug that would overwrite the file content type if you manually specified it
+- Thanks to @d-markey for some other efficiency improvements as well
+
+## 0.1.4+5
+
+- Fixing incorrect mime type recognition 
+
 ## 0.1.4+4
 
 - Updating readme with deployment info

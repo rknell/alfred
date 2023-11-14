@@ -1,5 +1,4 @@
 dart tool/generate_documentation.dart
 dart fix --apply
-dartanalyzer --fatal-warnings .
-dartfmt -w .
-sh generateCoverage.sh
+dart analyze --fatal-warnings .
+dart format . --set-exit-if-changed --output=none

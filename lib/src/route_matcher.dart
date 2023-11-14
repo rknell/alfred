@@ -1,97 +1,55 @@
 import '../alfred.dart';
-import 'alfred.dart';
-import 'http_route.dart';
 
 class RouteMatcher {
-  static List<HttpRoute> match(
-      String input, List<HttpRoute> options, Method method) {
-    final output = <HttpRoute>[];
-
-    final inputPath = Uri.parse(input).path.normalizePath;
+  static Iterable<HttpRouteMatch> match(
+      String input, List<HttpRoute> options, Method method) sync* {
+    // decode URL path before matching except for "/"
+    final inputPath =
+        Uri.parse(input).path.normalizePath.decodeUri(DecodeMode.AllButSlash);
 
     for (final option in options) {
-      /// Check if http method matches
+      // Check if http method matches
       if (option.method != method && option.method != Method.all) {
         continue;
       }
 
-      /// Split route path into segments
-      final segments = Uri.parse(option.route.normalizePath).pathSegments;
-
-      var matcher = '^';
-      for (var segment in segments) {
-        if (segment == '*' &&
-            segment != segments.first &&
-            segment == segments.last) {
-          /// Generously match path if last segment is wildcard (*)
-          /// Example: 'some/path/*' => should match 'some/path'
-          matcher += '/?.*';
-        } else if (segment != segments.first) {
-          /// Add path separators
-          matcher += '/';
-        }
-
-        /// escape period character
-        segment = segment.replaceAll('.', r'\.');
-
-        /// parameter (':something') to anything but slash
-        segment = segment.replaceAll(RegExp(':.+'), '[^/]+?');
-
-        /// wildcard ('*') to anything
-        segment = segment.replaceAll('*', '.*?');
-
-        matcher += segment;
-      }
-      matcher += r'$';
-
-      if (RegExp(matcher, caseSensitive: false).hasMatch(inputPath)) {
-        output.add(option);
-      }
-    }
-
-    return output;
-  }
-
-  static Map<String, String> getParams(String route, String input) {
-    final routeParts = route.split('/')..remove('');
-    final inputParts = input.split('/')..remove('');
-
-    if (inputParts.length != routeParts.length) {
-      throw NotMatchingRouteException();
-    }
-
-    final output = <String, String>{};
-
-    for (var i = 0; i < routeParts.length; i++) {
-      final routePart = routeParts[i];
-      final inputPart = inputParts[i];
-
-      if (routePart.contains(':')) {
-        final routeParams = routePart.split(':')..remove('');
-
-        for (var item in routeParams) {
-          output[item] = Uri.decodeComponent(inputPart);
+      // Match against route RegExp and capture params if valid
+      final match = option.matcher.firstMatch(inputPath);
+      if (match != null) {
+        final routeMatch = HttpRouteMatch.tryParse(option, match);
+        if (routeMatch != null) {
+          yield routeMatch;
         }
       }
     }
-    return output;
   }
 }
 
-extension _PathNormalizer on String {
-  /// Trims all slashes at the start and end
-  String get normalizePath {
-    if (startsWith('/')) {
-      return substring('/'.length).normalizePath;
-    }
-    if (endsWith('/')) {
-      return substring(0, length - '/'.length).normalizePath;
-    }
-    return this;
-  }
-}
-
-/// Throws when trying to extract params and the route you are extracting from
-/// does not match the supplied pattern
+/// Retains the matched route and parameter values extracted
+/// from the Uri
 ///
-class NotMatchingRouteException implements Exception {}
+class HttpRouteMatch {
+  HttpRouteMatch._(this.route, this.params);
+
+  static HttpRouteMatch? tryParse(HttpRoute route, RegExpMatch match) {
+    try {
+      final params = <String, dynamic>{};
+      for (var param in route.params) {
+        var value = match.namedGroup(param.name);
+        if (value == null) {
+          if (param.pattern != '*') {
+            return null;
+          }
+          value = '';
+        }
+        params[param.name] = param.getValue(value);
+      }
+      return HttpRouteMatch._(route, params);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  final HttpRoute route;
+  final Map<String, dynamic> params;
+}

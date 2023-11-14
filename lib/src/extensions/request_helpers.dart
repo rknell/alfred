@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:alfred/src/body_parser/http_body.dart';
-
 import '../../alfred.dart';
-import '../plugins/store_plugin.dart';
 import '../route_matcher.dart';
 
 /// Some convenience methods on the [HttpRequest] object to make the api
@@ -12,8 +9,17 @@ import '../route_matcher.dart';
 extension RequestHelpers on HttpRequest {
   /// Parse the body automatically and return the result
   ///
-  Future<Object?> get body async =>
-      (await HttpBodyHandler.processRequest(this)).body;
+  Future<Object?> get body async {
+    const cachedBodyKey = '_cachedBodyResponse';
+    final cachedBody = store.tryGet<Object?>(cachedBodyKey);
+    if (cachedBody != null) {
+      return cachedBody;
+    } else {
+      final dynamic body = (await HttpBodyHandler.processRequest(this)).body;
+      store.set(cachedBodyKey, body);
+      return body;
+    }
+  }
 
   /// Parse the body, and convert it to a json map
   ///
@@ -30,11 +36,22 @@ extension RequestHelpers on HttpRequest {
 
   /// Get params
   ///
-  Map<String, String> get params => RouteMatcher.getParams(route, uri.path);
+  Map<String, dynamic> get params =>
+      store.tryGet<HttpRouteMatch>('_internal_match')?.params ??
+      <String, dynamic>{};
+
+  /// Get the matched route URI of the current request
+  ///
+  String get route =>
+      store.tryGet<HttpRouteMatch>('_internal_match')?.route.route ?? '';
 
   /// Get the matched route of the current request
   ///
-  String get route => store.get<String?>('_internal_route') ?? '';
+  HttpRouteMatch? get match => store.tryGet<HttpRouteMatch>('_internal_match');
+
+  /// Get the intercepted exception
+  ///
+  dynamic get exception => store.tryGet<dynamic>('_internal_exception');
 
   /// Get Alfred instance which is associated with this request
   ///

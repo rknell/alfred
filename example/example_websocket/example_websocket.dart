@@ -27,10 +27,14 @@ Future<void> main() async {
       },
       onClose: (ws) {
         users.remove(ws);
-        users.forEach((user) => user.send('A user has left.'));
+        for (var user in users) {
+          user.send('A user has left.');
+        }
       },
       onMessage: (ws, dynamic data) async {
-        users.forEach((user) => user.send(data));
+        for (var user in users) {
+          user.send(data);
+        }
       },
     );
   });

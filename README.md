@@ -1,8 +1,7 @@
 # Alfred
 
-A performant, expressjs like server framework thats easy to use and has all the bits in one place.
-
-[![Build Status](https://travis-ci.org/rknell/alfred.svg?branch=master)](https://travis-ci.org/rknell/alfred)
+A performant, expressjs like web server / rest api framework thats easy to use and has all the bits in one place.
+[![Build Status](https://github.com/rknell/alfred/workflows/Dart/badge.svg)](https://github.com/rknell/alfred/actions)
 
 Quickstart:
 
@@ -17,6 +16,8 @@ void main() async {
   await app.listen();
 }
 ```
+
+There is also a 6 part video series that walks you through creating a web server using Alfred from start to deployment, including databases and authentication. You can find that here: https://www.youtube.com/playlist?list=PLkEq83S97rEWsgFEzwBW2pxB7pRYb9wAB
 
 # Index
 - [Core principles](#core-principles)
@@ -153,6 +154,33 @@ matching, mostly just stick with the route name and param syntax from Express:
 
 "/path/to/:id/property" etc
 
+The Express syntax has been extended to support parameter patterns and types. To enforce parameter
+validation, a regular expression or a type specifier should be provided after the parameter name, using
+another `:` as a separator:
+
+* `/path/to/:id:\d+/property` will ensure "id" is a string consisting of decimal digits
+* `/path/to/:id:[0-9a-f]+/property` will ensure "id" is a string consisting of hexadecimal digits
+* `/path/to/:word:[a-z]+/property` will ensure "word" is a string consisting of letters only
+* `/path/to/:id:uuid/property` will ensure "id" is a string representing an UUID
+
+Available type specifiers are:
+
+* `int`: a decimal integer
+* `uint`: a positive decimal integer
+* `double`: a double (decimal form); note that scientific notation is not supported
+* `date`: a UTC date in the form of "year/month/day"; note how this type "absorbs" multiple segments of the URI
+* `timestamp`: a UTC date expressed in number of milliseconds since Epoch
+* `uuid`: a string resembling a UUID (hexadecimal number formatted as `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`); note that no effort is made to ensure this is a valid UUID
+
+| Type Specifier | Regular Expression | Dart type |
+| -------------- | ------------------ | --------- |
+| `int` | `-?\d+` | `int` |
+| `uint` | `\d+` | `int` |
+| `double` | `-?\d+(?:\.\d+)` | `double` |
+| `date` | `-?\d{1,6}/(?:0[1-9]\|1[012])/(?:0[1-9]\|[12][0-9]\|3[01])` | `DateTime` |
+| `timestamp` | `-?\d+` | `DateTime` |
+| `uuid` |  `[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}` | `String` |
+
 So for example:
 
 ```dart
@@ -164,6 +192,17 @@ void main() async {
     req.params['id'] != null;
     req.params['name'] != null;
   });
+  app.all('/typed-example/:id:int/:name', (req, res) {
+    req.params['id'] != null;
+    req.params['id'] is int;
+    req.params['name'] != null;
+  });
+  app.get('/blog/:date:date/:id:int', (req, res) {
+    req.params['date'] != null;
+    req.params['date'] is DateTime;
+    req.params['id'] != null;
+    req.params['id'] is int;
+  });
   await app.listen();
 }
 ```
@@ -174,7 +213,6 @@ can do this:
 
 ```dart
 import 'dart:async';
-import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
@@ -208,6 +246,17 @@ void main() async {
   app.all('/example/:id/:name', (req, res) {
     req.params['id'] != null;
     req.params['name'] != null;
+  });
+  app.all('/typed-example/:id:int/:name', (req, res) {
+    req.params['id'] != null;
+    req.params['id'] is int;
+    req.params['name'] != null;
+  });
+  app.get('/blog/:date:date/:id:int', (req, res) {
+    req.params['date'] != null;
+    req.params['date'] is DateTime;
+    req.params['id'] != null;
+    req.params['id'] is int;
   });
   await app.listen();
 }
@@ -274,32 +323,29 @@ Future<void> main() async {
   app.get('/files/*', (req, res) => _uploadDirectory);
 
   /// Example of handling a multipart/form-data file upload
-  app.post(
-      '/upload',
-      (req, res) => (HttpRequest req, HttpResponse res) async {
-            final body = await req.bodyAsJsonMap;
+  app.post('/upload', (req, res) async {
+    final body = await req.bodyAsJsonMap;
 
-            // Create the upload directory if it doesn't exist
-            if (await _uploadDirectory.exists() == false) {
-              await _uploadDirectory.create();
-            }
+    // Create the upload directory if it doesn't exist
+    if (await _uploadDirectory.exists() == false) {
+      await _uploadDirectory.create();
+    }
 
-            // Get the uploaded file content
-            final uploadedFile = (body['file'] as HttpBodyFileUpload);
-            var fileBytes = (uploadedFile.content as List<int>);
+    // Get the uploaded file content
+    final uploadedFile = (body['file'] as HttpBodyFileUpload);
+    var fileBytes = (uploadedFile.content as List<int>);
 
-            // Create the local file name and save the file
-            await File('${_uploadDirectory.absolute}/${uploadedFile.filename}')
-                .writeAsBytes(fileBytes);
+    // Create the local file name and save the file
+    await File('${_uploadDirectory.absolute}/${uploadedFile.filename}')
+        .writeAsBytes(fileBytes);
 
-            /// Return the path to the user
-            ///
-            /// The path is served from the /files route above
-            return ({
-              'path':
-                  'https://${req.headers.host ?? ''}/files/${uploadedFile.filename}'
-            });
-          });
+    /// Return the path to the user
+    ///
+    /// The path is served from the /files route above
+    return ({
+      'path': 'https://${req.headers.host ?? ''}/files/${uploadedFile.filename}'
+    });
+  });
 
   await app.listen();
 }
@@ -316,7 +362,7 @@ void main() async {
   final app = Alfred();
   app.all('*', (req, res) {
     // Perform action
-    req.headers.add('x-custom-header', "Alfred isn't bad");
+    res.headers.set('x-custom-header', "Alfred isn't bad");
 
     /// No need to call next as we don't send a response.
     /// Alfred will find the next matching route
@@ -337,11 +383,10 @@ You can also add middleware to a route, this is great to enforce authentication 
 
 ```dart
 import 'dart:async';
-import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
-FutureOr exampleMiddlware(HttpRequest req, HttpResponse res) {
+FutureOr exampleMiddleware(HttpRequest req, HttpResponse res) {
   // Do work
   if (req.headers.value('Authorization') != 'apikey') {
     throw AlfredException(401, {'message': 'authentication failed'});
@@ -350,7 +395,7 @@ FutureOr exampleMiddlware(HttpRequest req, HttpResponse res) {
 
 void main() async {
   final app = Alfred();
-  app.all('/example/:id/:name', (req, res) {}, middleware: [exampleMiddlware]);
+  app.all('/example/:id/:name', (req, res) {}, middleware: [exampleMiddleware]);
 
   await app.listen(); //Listening on port 3000
 }
@@ -371,7 +416,6 @@ There is a cors middleware supplied for your convenience. Its also a great examp
 
 ```dart
 import 'package:alfred/alfred.dart';
-import 'package:alfred/src/middleware/cors.dart';
 
 void main() async {
   final app = Alfred();
@@ -418,8 +462,8 @@ class Chicken {
 void main() {
   final app = Alfred();
 
-  app.typeHandlers.add(TypeHandler<Chicken>((req, res, dynamic val) async {
-    res.write((val as Chicken).response);
+  app.typeHandlers.add(TypeHandler<Chicken>((req, res, Chicken val) async {
+    res.write(val.response);
     await res.close();
   }));
 
@@ -431,7 +475,7 @@ void main() {
 }
 ```
 
-### Static Files
+### Static Files, uploads and deleting
 
 This one is super easy - just pass in a public path and a dart Directory object and Alfred does
 the rest.
@@ -450,6 +494,54 @@ void main() async {
   await app.listen();
 }
 ```
+
+You can also pass in a directory and a POST or PUT command and upload files to a local directory if 
+you are using multipart/form encoding. Simply supply the field as `file`:
+
+```dart
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
+void main() async {
+  final app = Alfred();
+
+  app.post('/public', (req, res) => Directory('test/files'));
+
+  await app.listen();
+}
+```
+
+If you want to delete a file?
+
+```dart
+import 'dart:async';
+import 'dart:io';
+
+import 'package:alfred/alfred.dart';
+
+FutureOr isAuthenticatedMiddleware(HttpRequest req, HttpResponse res) {
+  if (req.headers.value('Authorization') != 'MYAPIKEY') {
+    throw AlfredException(
+        401, {'error': 'You are not authorized to perform this operation'});
+  }
+}
+
+void main() async {
+  final app = Alfred();
+
+  /// Note the wildcard (*) this is very important!!
+  ///
+  /// You almost certainly want to protect this endpoint with some middleware
+  /// to authenticate a user.
+  app.delete('/public/*', (req, res) => Directory('test/files'),
+      middleware: [isAuthenticatedMiddleware]);
+
+  await app.listen();
+}
+```
+
+Security? Build in a middleware function to authenticate a user etc. 
 
 ### File downloads
 
@@ -513,7 +605,6 @@ behaviour, but if you want to override it, simply handle it in the app declarati
 
 ```dart
 import 'dart:async';
-import 'dart:io';
 
 import 'package:alfred/alfred.dart';
 
@@ -554,7 +645,7 @@ from the dart:io package. All helpers are just extension methods to:
 - HttpRequest: https://api.dart.dev/stable/2.10.5/dart-io/HttpRequest-class.html
 - HttpResponse: https://api.dart.dev/stable/2.10.5/dart-io/HttpResponse-class.html
 
-So you can compose and write any content you can imagine there. If there is something you wan't to do
+So you can compose and write any content you can imagine there. If there is something you want to do
 that isn't expressly listed by the library, you will be able to do it with a minimum of research into
 underlying libraries. A core part of the architecture is to not build you into a wall.
 
@@ -594,10 +685,14 @@ Future<void> main() async {
       },
       onClose: (ws) {
         users.remove(ws);
-        users.forEach((user) => user.send('A user has left.'));
+        for (var user in users) {
+          user.send('A user has left.');
+        }
       },
       onMessage: (ws, dynamic data) async {
-        users.forEach((user) => user.send(data));
+        for (var user in users) {
+          user.send(data);
+        }
       },
     );
   });
@@ -677,5 +772,7 @@ https://ryan-knell.medium.com/build-and-deploy-a-dart-server-using-alfred-docker
 # Contributions
 
 PRs are welcome and encouraged! This is a community project and as long as the PR keeps within the key principles listed it will probably be accepted. If you have an improvement you would like to to add but are not sure just reach out in the issues section.
+
+NB. The readme is generated from the file in tool/templates/README.md which pulls in the actual source code from the example dart files - this way we can be sure its no pseudocode! If you need to change anything in the documentation please edit it there.
 
 Before you submit your code, you can run the `ci_checks.sh` shell script that will do many of the tests the CI suite will perform.

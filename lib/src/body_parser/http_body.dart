@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data' as typedData;
 
+import 'package:alfred/alfred.dart';
 import 'package:mime/mime.dart';
 
 import 'http_multipart_form_data.dart';
@@ -112,23 +114,20 @@ class HttpBodyHandler
   /// The returned [HttpRequestBody] contains a `response` field for accessing
   /// the [HttpResponse].
   ///
-  /// See [new HttpBodyHandler] for more info on [defaultEncoding].
+  /// See [HttpBodyHandler] for more info on [defaultEncoding].
   static Future<HttpRequestBody> processRequest(HttpRequest request,
       {Encoding defaultEncoding = utf8}) async {
     try {
       var body = await _process(request, request.headers, defaultEncoding);
       return HttpRequestBody._(request, body);
-    } catch (e) {
-      // Try to send BAD_REQUEST response.
-      request.response.statusCode = HttpStatus.badRequest;
-      await request.response.close();
-      rethrow;
+    } catch (e, s) {
+      throw BodyParserException(exception: e, stacktrace: s);
     }
   }
 
   /// Process and parse an incoming [HttpClientResponse].
   ///
-  /// See [new HttpBodyHandler] for more info on [defaultEncoding].
+  /// See [HttpBodyHandler] for more info on [defaultEncoding].
   static Future<HttpClientResponseBody> processResponse(
       HttpClientResponse response,
       {Encoding defaultEncoding = utf8}) async {
@@ -219,8 +218,8 @@ class HttpBodyFileUpload {
 Future<HttpBody> _process(Stream<List<int>> stream, HttpHeaders headers,
     Encoding defaultEncoding) async {
   Future<HttpBody> asBinary() async {
-    var builder = await stream.fold<BytesBuilder>(
-        BytesBuilder(), (builder, data) => builder..add(data));
+    var builder = await stream.fold<typedData.BytesBuilder>(
+        typedData.BytesBuilder(), (builder, data) => builder..add(data));
     return HttpBody._('binary', builder.takeBytes());
   }
 
@@ -253,8 +252,8 @@ Future<HttpBody> _process(Stream<List<int>> stream, HttpHeaders headers,
             StringBuffer(), (b, dynamic s) => b..write(s));
         data = buffer.toString();
       } else {
-        var buffer = await multipart.fold<BytesBuilder>(
-            BytesBuilder(), (b, dynamic d) => b..add(d as List<int>));
+        var buffer = await multipart.fold<typedData.BytesBuilder>(
+            typedData.BytesBuilder(), (b, dynamic d) => b..add(d as List<int>));
         data = buffer.takeBytes();
       }
       var filename = multipart.contentDisposition.parameters['filename'];

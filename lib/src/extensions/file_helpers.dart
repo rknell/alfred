@@ -15,6 +15,8 @@ extension FileHelpers on File {
     if (mimeType != null) {
       final split = mimeType.split('/');
       return ContentType(split[0], split[1]);
+    } else {
+      return null;
     }
   }
 }

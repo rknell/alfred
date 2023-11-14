@@ -51,6 +51,7 @@ void main() {
     app.get(
         '/ws',
         (req, res) => WebSocketSession(
+              // ignore: void_checks
               onOpen: (ws) {
                 throw 'Test';
               },

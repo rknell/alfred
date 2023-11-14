@@ -1,22 +1,30 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alfred/src/extensions/request_helpers.dart';
-import 'package:alfred/src/plugins/store_plugin.dart';
-import 'package:alfred/src/type_handlers/binary_type_handlers.dart';
-import 'package:alfred/src/type_handlers/directory_type_handler.dart';
-import 'package:alfred/src/type_handlers/file_type_handler.dart';
-import 'package:alfred/src/type_handlers/json_type_handlers.dart';
-import 'package:alfred/src/type_handlers/serializable_type_handler.dart';
-import 'package:alfred/src/type_handlers/string_type_handler.dart';
-import 'package:alfred/src/type_handlers/type_handler.dart';
-import 'package:alfred/src/type_handlers/websocket_type_handler.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:queue/queue.dart';
 
 import 'alfred_exception.dart';
+import 'extensions/request_helpers.dart';
 import 'http_route.dart';
+import 'plugins/store_plugin.dart';
 import 'route_matcher.dart';
+import 'route_param_types/alpha_param_type.dart';
+import 'route_param_types/date_param_type.dart';
+import 'route_param_types/double_param_type.dart';
+import 'route_param_types/hex_param_type.dart';
+import 'route_param_types/int_param_type.dart';
+import 'route_param_types/timestamp_param_type.dart';
+import 'route_param_types/uint_param_type.dart';
+import 'route_param_types/uuid_param_type.dart';
+import 'router.dart';
+import 'type_handlers/binary_type_handlers.dart';
+import 'type_handlers/directory_type_handler.dart';
+import 'type_handlers/file_type_handler.dart';
+import 'type_handlers/json_type_handlers.dart';
+import 'type_handlers/serializable_type_handler.dart';
+import 'type_handlers/string_type_handler.dart';
+import 'type_handlers/type_handler.dart';
+import 'type_handlers/websocket_type_handler.dart';
 
 enum Method {
   get,
@@ -34,7 +42,12 @@ enum Method {
   unlock,
   propfind,
   view,
-  all
+  all;
+
+  Method methodFromString(String str) => Method.values.firstWhere(
+        (method) => method.name == str,
+        orElse: () => this,
+      );
 }
 
 /// Indicates the severity of logged message
@@ -44,7 +57,7 @@ enum LogType { debug, info, warn, error }
 ///
 /// This is the core of the server application. Generally you would create one
 /// for each app.
-class Alfred {
+class Alfred with Router {
   /// List of routes
   ///
   /// Generally you don't want to manipulate this array directly, instead add
@@ -59,8 +72,15 @@ class Alfred {
   /// Writer to handle internal logging.
   ///
   /// It can optionally exchanged with your own logging solution.
-  /// ```
   late void Function(dynamic Function() messageFn, LogType type) logWriter;
+
+  @override
+  Alfred get app => this;
+
+  /// Optional path prefix to apply to all routes and route groups
+  ///
+  @override
+  final String pathPrefix;
 
   /// Optional handler for when a route is not found
   ///
@@ -114,11 +134,13 @@ class Alfred {
   /// time. If the amount of unprocessed incoming requests exceed this number,
   /// the requests will be queued.
   Alfred({
+    this.pathPrefix = '',
     this.onNotFound,
     this.onInternalError,
     LogType logLevel = LogType.info,
     int simultaneousProcessing = 50,
   }) : requestQueue = Queue(parallel: simultaneousProcessing) {
+    _registerDefaultParamTypes();
     _registerDefaultTypeHandlers();
     _registerPluginListeners();
     _registerDefaultLogWriter(logLevel);
@@ -128,7 +150,7 @@ class Alfred {
     logWriter = (dynamic Function() messageFn, type) {
       if (type.index >= logLevel.index) {
         var timestamp = DateTime.now();
-        var logType = EnumToString.convertToString(type);
+        var logType = type.name;
         var message = messageFn().toString();
         print('$timestamp - $logType - $message');
       }
@@ -143,6 +165,8 @@ class Alfred {
       binaryStreamTypeHandler,
       jsonListTypeHandler,
       jsonMapTypeHandler,
+      jsonNumberTypeHandler,
+      jsonBooleanTypeHandler,
       fileTypeHandler,
       directoryTypeHandler,
       websocketTypeHandler,
@@ -150,98 +174,87 @@ class Alfred {
     ]);
   }
 
+  void _registerDefaultParamTypes() {
+    HttpRouteParam.paramTypes.addAll([
+      IntParamType(),
+      UintParamType(),
+      DoubleParamType(),
+      DateParamType(),
+      TimestampParamType(),
+      HexParamType(),
+      AlphaParamType(),
+      UuidParamType()
+    ]);
+  }
+
   void _registerPluginListeners() {
     registerOnDoneListener(storePluginOnDoneHandler);
   }
 
-  /// Create a get route
-  ///
-  HttpRoute get(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.get, middleware);
-
-  /// Create a head route
-  ///
-  HttpRoute head(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.head, middleware);
-
-  /// Create a post route
-  ///
-  HttpRoute post(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.post, middleware);
-
-  /// Create a put route
-  HttpRoute put(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.put, middleware);
-
-  /// Create a delete route
-  ///
-  HttpRoute delete(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.delete, middleware);
-
-  /// Create a patch route
-  ///
-  HttpRoute patch(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.patch, middleware);
-
-  /// Create an options route
-  ///
-  HttpRoute options(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.options, middleware);
-
-  /// Create a route that listens on all methods
-  ///
-  HttpRoute all(String path,
-          FutureOr Function(HttpRequest req, HttpResponse res) callback,
-          {List<FutureOr Function(HttpRequest req, HttpResponse res)>
-              middleware = const []}) =>
-      _createRoute(path, callback, Method.all, middleware);
-
-  HttpRoute _createRoute(
-      String path,
-      FutureOr Function(HttpRequest req, HttpResponse res) callback,
-      Method method,
-      [List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware =
-          const []]) {
-    final route = HttpRoute(path, callback, method, middleware: middleware);
+  void addRoute(HttpRoute route) {
     routes.add(route);
-    return route;
   }
 
   /// Call this function to fire off the server.
   ///
-  Future<HttpServer> listen(
-      [int port = 3000, dynamic bindIp = '0.0.0.0', bool shared = true]) async {
-    final _server = await HttpServer.bind(bindIp, port, shared: shared);
-    _server.idleTimeout = Duration(seconds: 1);
+  ///
+  ///
+  Future<HttpServer> listen([
+    int port = 3000,
+    dynamic bindIp = '0.0.0.0',
+    bool shared = true,
+    int backlog = 0,
+  ]) async {
+    final server = await HttpServer.bind(
+      bindIp,
+      port,
+      backlog: backlog,
+      shared: shared,
+    );
 
-    _server.listen((HttpRequest request) {
+    server.idleTimeout = Duration(seconds: 1);
+
+    server.listen((HttpRequest request) {
+      requestQueue.add(() async {
+        final result = await runZonedGuarded(() async {
+          return _incomingRequest(request);
+        }, (error, stack) {
+          logWriter(() => 'Unhandled Error: $error', LogType.error);
+          logWriter(() => '$stack', LogType.error);
+        });
+        return result;
+      });
+    });
+
+    logWriter(
+        () => 'HTTP Server listening on port ${server.port}', LogType.info);
+    return this.server = server;
+  }
+
+  Future<HttpServer> listenSecure({
+    required SecurityContext securityContext,
+    int port = 3000,
+    dynamic bindIp = '0.0.0.0',
+    bool shared = true,
+    int backlog = 0,
+  }) async {
+    final server = await HttpServer.bindSecure(
+      bindIp,
+      port,
+      securityContext,
+      backlog: backlog,
+      shared: shared,
+    );
+
+    server.idleTimeout = Duration(seconds: 1);
+
+    server.listen((HttpRequest request) {
       requestQueue.add(() => _incomingRequest(request));
     });
 
     logWriter(
-        () => 'HTTP Server listening on port ${_server.port}', LogType.info);
-    return server = _server;
+        () => 'HTTP Server listening on port ${server.port}', LogType.info);
+    return this.server = server;
   }
 
   /// Handles and routes an incoming request
@@ -266,18 +279,24 @@ class Alfred {
       logWriter(() => 'Response sent to client', LogType.debug);
     }));
 
+    /// Parse request to Method enum value.
+    Method _parseMethod(HttpRequest request) {
+      try {
+        return Method.values.byName(request.method.toLowerCase());
+      } on ArgumentError {
+        return Method.get;
+      }
+    }
+
     // Work out all the routes we need to process
-    final effectiveRoutes = RouteMatcher.match(
-        request.uri.toString(),
-        routes,
-        EnumToString.fromString<Method>(Method.values, request.method) ??
-            Method.get);
+    final effectiveMatches = RouteMatcher.match(
+        request.uri.toString(), routes, _parseMethod(request));
 
     try {
       // If there are no effective routes, that means we need to throw a 404
       // or see if there are any static routes to fall back to, otherwise
       // continue and process the routes
-      if (effectiveRoutes.isEmpty) {
+      if (effectiveMatches.isEmpty) {
         logWriter(() => 'No matching route found.', LogType.debug);
         await _respondNotFound(request, isDone);
       } else {
@@ -285,17 +304,17 @@ class Alfred {
         var nonWildcardRouteMatch = false;
 
         // Loop through the routes in the order they are in the routes list
-        for (var route in effectiveRoutes) {
+        for (var match in effectiveMatches) {
           if (isDone) {
             break;
           }
-          logWriter(() => 'Match route: ${route.route}', LogType.debug);
-          request.store.set('_internal_route', route.route);
+          logWriter(() => 'Match route: ${match.route.route}', LogType.debug);
+          request.store.set('_internal_match', match);
           nonWildcardRouteMatch =
-              !route.usesWildcardMatcher || nonWildcardRouteMatch;
+              !match.route.usesWildcardMatcher || nonWildcardRouteMatch;
 
           /// Loop through any middleware
-          for (var middleware in route.middleware) {
+          for (var middleware in match.route.middleware) {
             // If the request has already completed, exit early.
             if (isDone) {
               break;
@@ -312,8 +331,19 @@ class Alfred {
             break;
           }
           logWriter(() => 'Execute route callback function', LogType.debug);
+
+          /// Nested try catch because if you set the header twice it wasn't
+          /// catching an error. This fixes it and its in tests, so if you can
+          /// remove it and all the tests pass, cool beans.
+          // try {
           await _handleResponse(
-              await route.callback(request, request.response), request);
+              await match.route.callback(request, request.response), request);
+          // } catch (e, s) {
+          //   logWriter(() => match.route.toString(), LogType.error);
+          //   logWriter(() => e, LogType.error);
+          //   logWriter(() => s, LogType.error);
+          //
+          // }
         }
 
         /// If you got here and isDone is still false, you forgot to close
@@ -332,8 +362,18 @@ class Alfred {
       }
     } on AlfredException catch (e) {
       // The user threw a handle HTTP Exception
-      request.response.statusCode = e.statusCode;
-      await _handleResponse(e.response, request);
+      try {
+        request.response.statusCode = e.statusCode;
+        await _handleResponse(e.response, request);
+      } on StateError catch (e, s) {
+        // It can hit this block if you try to write a header when one is already been raised
+        logWriter(() => e, LogType.error);
+        logWriter(() => s, LogType.error);
+      } catch (e, s) {
+        // Catch all other errors, this block may be able to be removed in the future
+        logWriter(() => e, LogType.error);
+        logWriter(() => s, LogType.error);
+      }
     } on NotFoundError catch (_) {
       await _respondNotFound(request, isDone);
     } catch (e, s) {
@@ -342,6 +382,7 @@ class Alfred {
       logWriter(() => s, LogType.error);
       if (onInternalError != null) {
         // Handle the error with a custom response
+        request.store.set('_internal_exception', e);
         final dynamic result =
             await onInternalError!(request, request.response);
         if (result != null && !isDone) {
@@ -354,7 +395,11 @@ class Alfred {
           request.response.statusCode = 500;
           request.response.write(e);
           await request.response.close();
-        } catch (_) {}
+        } catch (e, s) {
+          logWriter(() => e, LogType.error);
+          logWriter(() => s, LogType.error);
+          await request.response.close();
+        }
       }
     }
   }
@@ -476,7 +521,7 @@ class Alfred {
 
 /// Function to prevent linting errors.
 ///
-void _unawaited(Future<Null> then) {}
+void _unawaited(Future<void> then) {}
 
 /// Error thrown when a type handler cannot be found for a returned item
 ///

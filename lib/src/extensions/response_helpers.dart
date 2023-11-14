@@ -27,11 +27,21 @@ extension ResponseHelpers on HttpResponse {
   /// Set the content type given a file
   ///
   void setContentTypeFromFile(File file) {
-    if (headers.contentType == null ||
-        headers.contentType!.mimeType == 'text/plain') {
-      headers.contentType = file.contentType;
-    } else {
-      headers.contentType == ContentType.binary;
+    final setContentType = headers.contentType;
+
+    if (setContentType == null || setContentType.mimeType == 'text/plain') {
+      final fileContentType = file.contentType;
+      if (fileContentType != null) {
+        headers.contentType = file.contentType;
+      } else {
+        final extension = file.path.split('.').last;
+        final suggestedMime = mimeFromExtension(extension);
+        if (suggestedMime != null) {
+          setContentTypeFromExtension(extension);
+        } else {
+          headers.contentType = ContentType.binary;
+        }
+      }
     }
   }
 
