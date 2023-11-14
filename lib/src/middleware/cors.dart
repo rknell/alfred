@@ -5,7 +5,7 @@ import 'dart:io';
 ///
 /// Has some sensible defaults. You probably want to change the origin
 ///
-/// Multiple origin accept [String] [RegExp], [List<String>] and [Function]
+/// Omrigin accept [String], [RegExp], [List<String>] and [Function]
 ///
 ///  - [Function] must return true or false
 
@@ -24,7 +24,7 @@ FutureOr Function(HttpRequest, HttpResponse) cors({
       org = origin == host ? host! : origin;
     } else if (origin is RegExp) {
       org = RegExp(origin as String).hasMatch(host!) ? host : origin as String;
-    } else if (origin is List) {
+    } else if (origin is List<String>) {
       org = origin.contains(host) ? host! : origin as String;
     } else if (origin is Function) {
       org = origin.call() ? host! : origin as String;
