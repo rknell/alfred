@@ -8,9 +8,7 @@ import 'dart:io';
 /// Multiple origin accept [String] [RegExp], [List<String>] and [Function]
 ///
 ///  - [Function] must return true or false
-///
-/// Pass whatever you need and set the right [type].
-///
+
 FutureOr Function(HttpRequest, HttpResponse) cors({
   int age = 86400,
   String headers = '*',
