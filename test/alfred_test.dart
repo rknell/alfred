@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:alfred/alfred.dart';
 import 'package:http/http.dart' as http;
@@ -36,6 +37,132 @@ void main() {
     app.get('/test', (req, res) => File('test/files/image.jpg'));
     final response = await http.get(Uri.parse('http://localhost:$port/test'));
     expect(response.headers['content-type'], 'image/jpeg');
+    expect(response.bodyBytes.length, greaterThan(0));
+  });
+
+  test('it should support range requests for files', () async {
+    final file = File('test/files/image.jpg');
+    final totalSize = await file.length();
+
+    app.get('/test', (req, res) => file);
+
+    // Test that server advertises range support
+    final response = await http.get(Uri.parse('http://localhost:$port/test'));
+    expect(response.headers['accept-ranges'], 'bytes');
+    expect(response.statusCode, 200);
+    expect(response.bodyBytes.length, totalSize);
+
+    // Test partial content request
+    final rangeResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=0-9'},
+    );
+    expect(rangeResponse.statusCode, 206);
+    expect(rangeResponse.headers['content-range'], 'bytes 0-9/$totalSize');
+    expect(rangeResponse.headers['content-length'], '10');
+    expect(rangeResponse.bodyBytes.length, 10);
+
+    // Test multiple ranges request
+    final multiRangeResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=0-9,20-29,40-49'},
+    );
+    expect(multiRangeResponse.statusCode, 206);
+    expect(multiRangeResponse.headers['content-type'],
+        contains('multipart/byteranges'));
+
+    // Test If-Range with matching ETag
+    final etag = response.headers['etag'];
+    final ifRangeResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {
+        'Range': 'bytes=0-9',
+        'If-Range': etag ?? '',
+      },
+    );
+    expect(ifRangeResponse.statusCode, 206);
+
+    // Test If-Range with non-matching ETag (should return full file)
+    final ifRangeFullResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {
+        'Range': 'bytes=0-9',
+        'If-Range': '"non-matching-etag"',
+      },
+    );
+    expect(ifRangeFullResponse.statusCode, 200);
+    expect(ifRangeFullResponse.bodyBytes.length, totalSize);
+
+    // Test overlapping ranges
+    final overlapResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=0-10,5-15'},
+    );
+    expect(overlapResponse.statusCode, 206);
+    expect(overlapResponse.headers['content-type'],
+        contains('multipart/byteranges'));
+
+    // Test invalid range request
+    final invalidResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=10-5'},
+    );
+    expect(invalidResponse.statusCode, 416);
+    expect(invalidResponse.headers['content-range'], 'bytes */$totalSize');
+
+    // Test unsatisfiable range
+    final unsatisfiableResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=${totalSize + 1}-${totalSize + 10}'},
+    );
+    expect(unsatisfiableResponse.statusCode, 416);
+    expect(
+        unsatisfiableResponse.headers['content-range'], 'bytes */$totalSize');
+  });
+
+  test('it should handle end of file range requests', () async {
+    final file = File('test/files/image.jpg');
+    final totalSize = await file.length();
+
+    app.get('/test', (req, res) => file);
+
+    // Test range request for last 10 bytes
+    final response = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=${totalSize - 10}-${totalSize - 1}'},
+    );
+    expect(response.statusCode, 206);
+    expect(response.headers['content-range'],
+        'bytes ${totalSize - 10}-${totalSize - 1}/$totalSize');
+    expect(response.headers['content-length'], '10');
+    expect(response.bodyBytes.length, 10);
+
+    // Test suffix range request
+    final suffixResponse = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=-500'},
+    );
+    expect(suffixResponse.statusCode, 206);
+    final expectedLength = min(500, totalSize);
+    expect(suffixResponse.headers['content-length'], expectedLength.toString());
+  });
+
+  test('it should handle open-ended range requests', () async {
+    final file = File('test/files/image.jpg');
+    final totalSize = await file.length();
+
+    app.get('/test', (req, res) => file);
+
+    // Test range request from specific byte to end
+    final response = await http.get(
+      Uri.parse('http://localhost:$port/test'),
+      headers: {'Range': 'bytes=10-'},
+    );
+    expect(response.statusCode, 206);
+    expect(response.headers['content-range'],
+        'bytes 10-${totalSize - 1}/$totalSize');
+    expect(response.headers['content-length'], '${totalSize - 10}');
+    expect(response.bodyBytes.length, totalSize - 10);
   });
 
   test('it should return a pdf', () async {

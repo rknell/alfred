@@ -15,3 +15,5 @@ doc/api/
 coverage.lcov
 coverage
 bin
+
+.cursorrules
