@@ -236,6 +236,13 @@ However the browser will probably try to render it in browser, and not download 
 
 You can just set the right headers, but there is a handy little helper that will do it all for you.
 
+The file handler fully supports resumable downloads (RFC9110 compliant), including:
+- Range requests for partial content
+- Multiple range requests with multipart responses
+- Conditional requests using ETags and Last-Modified dates
+- Proper handling of If-Range header
+- Support for suffix ranges (e.g., last 500 bytes)
+
 See `res.setDownload` below.
 
 @code example/example_file_downloads.dart
