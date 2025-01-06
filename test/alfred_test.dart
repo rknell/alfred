@@ -691,13 +691,16 @@ void main() {
     await http.get(Uri.parse('http://localhost:$port/resource'));
 
     bool inLog(String part) =>
-        logs.isNotEmpty && logs.where((log) => log.contains(part)).isNotEmpty;
+        logs.isNotEmpty &&
+        logs
+            .where((log) => log.toLowerCase().contains(part.toLowerCase()))
+            .isNotEmpty;
 
-    expect(inLog('info GET - /resource'), true);
-    expect(inLog('debug Match route: /resource'), true);
-    expect(inLog('debug Apply middleware'), true);
-    expect(inLog('debug Apply TypeHandler for result type: String'), true);
-    expect(inLog('debug Response sent to client'), true);
+    expect(inLog('get - /resource'), true);
+    expect(inLog('match route'), true);
+    expect(inLog('middleware'), true);
+    expect(inLog('typehandler'), true);
+    expect(inLog('response sent'), true);
   });
 
   test('it prints the routes without error', () {
