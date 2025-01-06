@@ -271,13 +271,13 @@ class Alfred with Router {
 
     // We track if the response has been resolved in order to exit out early
     // the list of routes (ie the middleware returned)
-    _unawaited(request.response.done.then((dynamic _) {
+    var doneFuture = request.response.done.then((dynamic _) {
       isDone = true;
       for (var listener in _onDoneListeners) {
         listener(request, request.response);
       }
       logWriter(() => 'Response sent to client', LogType.debug);
-    }));
+    });
 
     /// Parse request to Method enum value.
     Method _parseMethod(HttpRequest request) {
@@ -402,6 +402,9 @@ class Alfred with Router {
         }
       }
     }
+
+    // Ensure done handlers are called before returning
+    await doneFuture;
   }
 
   /// Responds request with a NotFound response
