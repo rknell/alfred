@@ -71,7 +71,8 @@ void main() {
       hexRoute,
       genericRoute
     ]);
-    expect(routes(match('/xxx/%3123/test', testRoutes)), // %31 is character "1"
+    expect(
+        routes(match('/xxx/%3123/test', testRoutes)), // %31 is character "1"
         [
           patternRoute,
           intRoute,
@@ -206,6 +207,12 @@ void main() {
     expect(routes(matches), [paramRoute]);
     expect(params(matches), [
       {'value': 'input', 'value2': '1 Item inventory summary'}
+    ]);
+
+    matches = match('/xxx/input/%31%20%2F%20物品%20存货%20总结', [paramRoute]);
+    expect(routes(matches), [paramRoute]);
+    expect(params(matches), [
+      {'value': 'input', 'value2': '1 / 物品 存货 总结'}
     ]);
 
     matches = match(

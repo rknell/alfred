@@ -76,4 +76,11 @@ extension PathNormalizer on String {
     }
     return changed ? String.fromCharCodes(codes) : this;
   }
+
+  String decodeUriWithoutSlash() {
+    List<String> parts = split('%2F');
+    List<String> decodedParts =
+        parts.map((part) => Uri.decodeComponent(part)).toList();
+    return decodedParts.join('%2F');
+  }
 }
