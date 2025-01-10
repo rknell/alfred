@@ -1,3 +1,15 @@
+# Changelog
+
+## 1.1.2+1
+- Accidentally bundled some breaking code i was working on, reverted.
+
+## 1.1.2
+- Added support for resumable downloads (RFC9110 compliant)
+  - Implemented range requests with single and multiple ranges
+  - Added support for conditional requests with ETags and Last-Modified dates
+  - Added proper handling of If-Range header
+  - Added support for suffix ranges and multipart/byteranges responses
+
 ## 1.1.1
 
 - Adding additional crash protection
