@@ -1,10 +1,16 @@
 import 'dart:async';
 
+import 'package:alfred/src/alfred_openapi.dart';
+
 import '../alfred.dart';
 
 class HttpRoute {
   final Method method;
   final String route;
+
+  /// The OpenAPI documentation for this route
+  final OpenAPIDoc? openAPIDoc;
+  
   final FutureOr Function(HttpRequest req, HttpResponse res) callback;
   final List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware;
 
@@ -20,9 +26,13 @@ class HttpRoute {
 
   Iterable<HttpRouteParam> get params => _params.values;
 
-  HttpRoute(this.route, this.callback, this.method,
-      {this.middleware = const []})
-      : usesWildcardMatcher = route.contains('*') {
+  HttpRoute(
+    this.route,
+    this.callback,
+    this.method, {
+    this.middleware = const [],
+    this.openAPIDoc,
+  }) : usesWildcardMatcher = route.contains('*') {
     // Split route path into segments
 
     /// Because in dart 2.18 uri parsing is more permissive, using a \ in regex
