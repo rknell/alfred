@@ -1,5 +1,4 @@
 import 'package:alfred/alfred.dart';
-import 'package:alfred/src/alfred_openapi.dart';
 
 void main() async {
   final app = Alfred();
@@ -26,6 +25,28 @@ void main() async {
           ],
         ),
       ],
+    ),
+  );
+
+  app.patch(
+    '/path/:param2',
+    (req, res) {
+      res.json({'key': 'value'});
+    },
+    middleware: [],
+    openAPIDoc: OpenAPIDoc(
+      title: 'Title of the endpoint',
+      description: 'Description for the endpoint',
+      responses: [],
+      request: OpenAPIRequest(
+        schema: [
+          OpenAPIResponseContent(
+            key: 'key',
+            type: OpenAPIType.string,
+            example: 'value ABC',
+          ),
+        ],
+      ),
     ),
   );
 

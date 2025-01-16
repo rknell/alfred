@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:alfred/src/alfred_openapi.dart';
-
 import '../alfred.dart';
 
 class HttpRoute {
@@ -10,7 +8,7 @@ class HttpRoute {
 
   /// The OpenAPI documentation for this route
   final OpenAPIDoc? openAPIDoc;
-  
+
   final FutureOr Function(HttpRequest req, HttpResponse res) callback;
   final List<FutureOr Function(HttpRequest req, HttpResponse res)> middleware;
 

@@ -1,6 +1,7 @@
 import 'package:alfred/alfred.dart';
 import 'package:yaml_writer/yaml_writer.dart';
 
+/// Enum to define the OpenAPI types
 enum OpenAPIType {
   string,
   number,
@@ -14,6 +15,7 @@ enum OpenAPIType {
   }
 }
 
+/// Enum to define the OpenAPI content types
 enum OpenAPIContentType {
   object,
   array;
@@ -70,7 +72,33 @@ extension AlfredOpenAPI on Alfred {
                 '200': {
                   'description': 'Success',
                 }
-            }
+            },
+            if (route.openAPIDoc?.request != null)
+              'requestBody': {
+                'content': {
+                  route.openAPIDoc!.request!.contentType: {
+                    'schema': {
+                      'type': route.openAPIDoc!.request!.content.toJson(),
+                      if (route.openAPIDoc!.request!.content ==
+                          OpenAPIContentType.object)
+                        'properties': {
+                          for (var item in route.openAPIDoc!.request!.schema)
+                            ...item.toJson(),
+                        },
+                      if (route.openAPIDoc!.request!.content ==
+                          OpenAPIContentType.array)
+                        'items': {
+                          'type': route.openAPIDoc!.request!.schema.first.type
+                              .toJson(),
+                          if (route.openAPIDoc!.request!.schema.first.example !=
+                              null)
+                            'example':
+                                route.openAPIDoc!.request!.schema.first.example,
+                        },
+                    },
+                  },
+                },
+              },
           }
         }
       });
@@ -85,11 +113,26 @@ class OpenAPIDoc {
   final String title;
   final String? description;
   final List<OpenAPIResponse> responses;
+  final OpenAPIRequest? request;
 
   OpenAPIDoc({
     required this.title,
     this.description,
     required this.responses,
+    this.request,
+  });
+}
+
+/// Class to define the OpenAPI request
+class OpenAPIRequest {
+  final String contentType;
+  final OpenAPIContentType content;
+  final List<OpenAPIResponseContent> schema;
+
+  OpenAPIRequest({
+    this.contentType = 'application/json',
+    this.content = OpenAPIContentType.object,
+    required this.schema,
   });
 }
 
@@ -140,17 +183,20 @@ class OpenAPIResponseContent {
   final String key;
   final OpenAPIType type;
   final dynamic example;
+  final bool required;
 
   OpenAPIResponseContent({
     required this.key,
     required this.type,
     this.example,
+    this.required = true,
   });
 
   Map<String, dynamic> toJson() {
     return {
       key: {
         'type': type.toJson(),
+        // 'required': required,
         if (example != null) 'example': example,
       }
     };
