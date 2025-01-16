@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:alfred/src/route_group.dart';
 import 'package:meta/meta.dart';
 
 import 'alfred.dart';
-import 'alfred_openapi.dart';
 import 'http_route.dart';
+import 'openapi/schema.dart';
+import 'route_group.dart';
 
 mixin Router {
-  @visibleForOverriding
+  @protected
   Alfred get app;
 
   String get pathPrefix;
@@ -120,6 +120,7 @@ mixin Router {
     return route;
   }
 
+  /// Creates a route group with the given path prefix
   Router createRouteGroup(String path) {
     return RouteGroup(app, '${pathPrefix == '' ? '' : '$pathPrefix/'}$path');
   }

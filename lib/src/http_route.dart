@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import '../alfred.dart';
+import 'route_param_types/http_route_param_type.dart';
 
+/// A route in the Alfred app
 class HttpRoute {
   final Method method;
   final String route;
