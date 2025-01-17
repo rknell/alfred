@@ -358,6 +358,7 @@ class Alfred with Router {
             }
           }
           await request.response.close();
+          await _callOnDoneListeners(request);
         }
       }
     } on AlfredException catch (e) {
@@ -389,16 +390,19 @@ class Alfred with Router {
           await _handleResponse(result, request);
         }
         await request.response.close();
+        await _callOnDoneListeners(request);
       } else {
         //Otherwise fall back to a generic 500 error
         try {
           request.response.statusCode = 500;
           request.response.write(e);
           await request.response.close();
+          await _callOnDoneListeners(request);
         } catch (e, s) {
           logWriter(() => e, LogType.error);
           logWriter(() => s, LogType.error);
           await request.response.close();
+          await _callOnDoneListeners(request);
         }
       }
     }
@@ -414,11 +418,25 @@ class Alfred with Router {
         await _handleResponse(result, request);
       }
       await request.response.close();
+      await _callOnDoneListeners(request);
     } else {
       // Otherwise throw a generic 404;
       request.response.statusCode = 404;
       request.response.write('404 not found');
       await request.response.close();
+      await _callOnDoneListeners(request);
+    }
+  }
+
+  /// Helper method to call all onDone listeners
+  Future<void> _callOnDoneListeners(HttpRequest request) async {
+    for (var listener in _onDoneListeners) {
+      try {
+        listener(request, request.response);
+      } catch (e, s) {
+        logWriter(() => 'Error in onDone listener: $e', LogType.error);
+        logWriter(() => s, LogType.error);
+      }
     }
   }
 

@@ -50,6 +50,18 @@ jobs:
         with:
           file: coverage/lcov.info
 
+      - name: Verify no uncommitted formatting changes
+        run: |
+          dart format .
+          git diff --exit-code
+
+      - uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
   publish:
     needs: build
     if: startsWith(github.ref, 'refs/tags/v')
