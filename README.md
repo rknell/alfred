@@ -1,7 +1,7 @@
 # Alfred
 
 A performant, expressjs like web server / rest api framework thats easy to use and has all the bits in one place.
-[![Build Status](https://github.com/rknell/alfred/workflows/Dart/badge.svg)](https://github.com/rknell/alfred/actions)
+[![Build Status](https://github.com/rknell/alfred/workflows/Dart%20CI%2FCD/badge.svg)](https://github.com/rknell/alfred/actions)
 
 Quickstart:
 
