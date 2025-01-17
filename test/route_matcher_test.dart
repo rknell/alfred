@@ -71,7 +71,8 @@ void main() {
       hexRoute,
       genericRoute
     ]);
-    expect(routes(match('/xxx/%3123/test', testRoutes)), // %31 is character "1"
+    expect(
+        routes(match('/xxx/%3123/test', testRoutes)), // %31 is character "1"
         [
           patternRoute,
           intRoute,
