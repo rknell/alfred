@@ -25,13 +25,15 @@ TypeHandler get directoryTypeHandler => TypeHandler<Directory>((req, res, Direct
       'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute',
     );
 
-    final filePath = '${directory.path}${sep}${Uri.decodeComponent(virtualPath!)}';
+    var filePath = '${directory.path}${sep}${Uri.decodeComponent(virtualPath!)}';
+
+    filePath = filePath.replaceAll('/', Platform.pathSeparator);
 
     req.preventTraversal(filePath, directory);
 
     req.log(() => 'Resolve virtual path: $virtualPath');
 
-    final fileCandidates = <File>[File(filePath), File('$filePath${sep}index.html'), File('$filePath${sep}index.htm')];
+    final fileCandidates = <File>[File(filePath), File('${filePath}index.html'), File('${filePath}index.htm')];
 
     try {
       var match = fileCandidates.firstWhere((file) => file.existsSync());
