@@ -25,7 +25,7 @@ TypeHandler get directoryTypeHandler => TypeHandler<Directory>((req, res, Direct
       'TypeHandler of type Directory  GET request needs a route declaration that contains a wildcard (*). Found: $usedRoute',
     );
 
-    final filePath = '${directory.path}/${Uri.decodeComponent(virtualPath!)}';
+    final filePath = '${directory.path}${sep}${Uri.decodeComponent(virtualPath!)}';
 
     req.preventTraversal(filePath, directory);
 
