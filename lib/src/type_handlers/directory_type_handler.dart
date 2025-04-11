@@ -31,7 +31,7 @@ TypeHandler get directoryTypeHandler => TypeHandler<Directory>((req, res, Direct
 
     req.log(() => 'Resolve virtual path: $virtualPath');
 
-    final fileCandidates = <File>[File(filePath), File('$filePath${sep}.html'), File('$filePath${sep}index.htm')];
+    final fileCandidates = <File>[File(filePath), File('$filePath${sep}index.html'), File('$filePath${sep}index.htm')];
 
     try {
       var match = fileCandidates.firstWhere((file) => file.existsSync());
