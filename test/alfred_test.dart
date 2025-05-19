@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:async';
 
 import 'package:alfred/alfred.dart';
 import 'package:http/http.dart' as http;
@@ -339,6 +340,171 @@ void main() {
       ),
     );
     expect(response.body, "test string");
+  });
+
+  test('it handles OPTIONS request with CORS preflight', () async {
+    // Set up a regular endpoint
+    app.post('/api/data', (req, res) => 'post data');
+
+    // Set up OPTIONS handler with CORS headers
+    app.options('/api/data', (req, res) {
+      res.headers.set('Access-Control-Allow-Origin', '*');
+      res.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.headers
+          .set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.headers.set('Access-Control-Max-Age', '86400'); // 24 hours
+      return '';
+    });
+
+    // Send preflight OPTIONS request
+    final preflightRequest =
+        http.Request("OPTIONS", Uri.parse("http://localhost:$port/api/data"));
+    preflightRequest.headers.addAll({
+      'Origin': 'http://example.com',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'Content-Type, Authorization'
+    });
+
+    final preflightResponse = await Response.fromStream(
+      await http.Client().send(preflightRequest),
+    );
+
+    // Verify CORS headers
+    expect(preflightResponse.statusCode, 200);
+    expect(preflightResponse.headers['access-control-allow-origin'], '*');
+    expect(preflightResponse.headers['access-control-allow-methods'],
+        'POST, OPTIONS');
+    expect(preflightResponse.headers['access-control-allow-headers'],
+        'Content-Type, Authorization');
+    expect(preflightResponse.headers['access-control-max-age'], '86400');
+
+    // Verify that the actual POST request works
+    final postResponse = await http.post(
+        Uri.parse('http://localhost:$port/api/data'),
+        headers: {'Origin': 'http://example.com'});
+    expect(postResponse.statusCode, 200);
+    expect(postResponse.body, 'post data');
+  });
+
+  test('it handles OPTIONS requests with global CORS middleware', () async {
+    // Close the existing app and create a new one with middleware
+    await app.close();
+    app = Alfred();
+
+    // Create a CORS middleware function
+    FutureOr corsMiddleware(HttpRequest req, HttpResponse res) {
+      res.headers.set('Access-Control-Allow-Origin', '*');
+
+      // For preflight OPTIONS requests, add required headers and return empty response
+      if (req.method == 'OPTIONS') {
+        res.headers.set(
+            'Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.headers
+            .set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.headers.set('Access-Control-Max-Age', '86400');
+        return '';
+      }
+
+      // For non-OPTIONS requests, just continue processing
+    }
+
+    // Set up routes with middleware
+    app.all('*', corsMiddleware);
+    app.get('/api/data', (req, res) => 'get data');
+
+    port = await app.listenForTest();
+
+    // Test OPTIONS request
+    final preflightRequest =
+        http.Request("OPTIONS", Uri.parse("http://localhost:$port/api/data"));
+    preflightRequest.headers.addAll({
+      'Origin': 'http://example.com',
+      'Access-Control-Request-Method': 'GET',
+      'Access-Control-Request-Headers': 'Content-Type'
+    });
+
+    final preflightResponse = await Response.fromStream(
+      await http.Client().send(preflightRequest),
+    );
+
+    // Verify CORS headers for OPTIONS
+    expect(preflightResponse.statusCode, 200);
+    expect(preflightResponse.headers['access-control-allow-origin'], '*');
+    expect(preflightResponse.headers['access-control-allow-methods'],
+        'GET, POST, PUT, DELETE, OPTIONS');
+    expect(preflightResponse.headers['access-control-allow-headers'],
+        'Content-Type, Authorization');
+
+    // Test GET request with CORS headers
+    final getResponse = await http.get(
+        Uri.parse('http://localhost:$port/api/data'),
+        headers: {'Origin': 'http://example.com'});
+
+    // Verify regular response with CORS headers
+    expect(getResponse.statusCode, 200);
+    expect(getResponse.body, 'get data');
+    expect(getResponse.headers['access-control-allow-origin'], '*');
+  });
+
+  test('it handles OPTIONS requests with the built-in cors middleware',
+      () async {
+    // Close the existing app and create a new one
+    await app.close();
+    app = Alfred();
+
+    // Setup route with the built-in cors middleware
+    app.all(
+        '*',
+        cors(
+            origin: 'https://example.org',
+            methods: 'GET, POST, OPTIONS',
+            headers: 'Content-Type, Authorization, X-Custom-Header',
+            age: 3600));
+
+    app.get('/api/resource', (req, res) => 'resource data');
+
+    port = await app.listenForTest();
+
+    // Test OPTIONS request
+    final preflightRequest = http.Request(
+        "OPTIONS", Uri.parse("http://localhost:$port/api/resource"));
+    preflightRequest.headers.addAll({
+      'Origin': 'https://example.org',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'Content-Type, X-Custom-Header'
+    });
+
+    final preflightResponse = await Response.fromStream(
+      await http.Client().send(preflightRequest),
+    );
+
+    // Verify CORS headers for OPTIONS request
+    expect(preflightResponse.statusCode, 200);
+    expect(preflightResponse.body, ''); // Empty response for OPTIONS
+    expect(preflightResponse.headers['access-control-allow-origin'],
+        'https://example.org');
+    expect(preflightResponse.headers['access-control-allow-methods'],
+        'GET, POST, OPTIONS');
+    expect(preflightResponse.headers['access-control-allow-headers'],
+        'Content-Type, Authorization, X-Custom-Header');
+    expect(preflightResponse.headers['access-control-expose-headers'],
+        'Content-Type, Authorization, X-Custom-Header');
+    expect(preflightResponse.headers['access-control-max-age'], '3600');
+
+    // Test regular GET request with CORS headers
+    final getResponse = await http.get(
+        Uri.parse('http://localhost:$port/api/resource'),
+        headers: {'Origin': 'https://example.org'});
+
+    // Verify regular response with CORS headers
+    expect(getResponse.statusCode, 200);
+    expect(getResponse.body, 'resource data');
+    expect(getResponse.headers['access-control-allow-origin'],
+        'https://example.org');
+    expect(getResponse.headers['access-control-allow-methods'],
+        'GET, POST, OPTIONS');
+    expect(getResponse.headers['access-control-allow-headers'],
+        'Content-Type, Authorization, X-Custom-Header');
   });
 
   test('it handles a HEAD request', () async {

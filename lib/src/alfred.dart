@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:queue/queue.dart';
 
 import 'alfred_exception.dart';
-import 'extensions/request_helpers.dart';
 import 'http_route.dart';
 import 'plugins/store_plugin.dart';
 import 'route_matcher.dart';
@@ -170,7 +169,9 @@ class Alfred with Router {
       fileTypeHandler,
       directoryTypeHandler,
       websocketTypeHandler,
-      serializableTypeHandler
+      serializableTypeHandler,
+      futureVoidTypeHandler,
+      httpResponseTypeHandler,
     ]);
   }
 
@@ -394,6 +395,16 @@ class Alfred with Router {
       } else {
         //Otherwise fall back to a generic 500 error
         try {
+          // Log the route that caused the error
+          final String method = request.method;
+          final String path = request.uri.path;
+          final String queryString =
+              request.uri.query.isNotEmpty ? '?${request.uri.query}' : '';
+          final String fullPath = '$path$queryString';
+
+          logWriter(() => 'Internal server error (500) on $method $fullPath',
+              LogType.error);
+          logWriter(() => 'Exception details: $e', LogType.error);
           request.response.statusCode = 500;
           request.response.write(e);
           await request.response.close();
@@ -551,7 +562,7 @@ class NoTypeHandlerError extends Error {
 
   @override
   String toString() =>
-      'No type handler found for ${object.runtimeType} / ${object.toString()} \nRoute: ${request.route}\nIf the app is running in production mode, the type name may be minified. Run it in debug mode to resolve';
+      'No type handler found for ${object.runtimeType} / ${object.toString()} \nRoute: ${request.uri} method: ${request.method}\nIf the app is running in production mode, the type name may be minified. Run it in debug mode to resolve. Further information about custom type handlers can be found in the documentation.';
 }
 
 /// Error used by middleware, utils or type handler to elevate

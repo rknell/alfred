@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.3
+- Improved CORS middleware: now properly handles OPTIONS requests and returns correct headers
+- Added type handlers for Future<void> and HttpResponse (no-op, for advanced response handling)
+- Enhanced error logging: logs method and path on 500 errors
+- Expanded and improved tests for CORS and OPTIONS request handling
+
 ## 1.1.2+1
 - Accidentally bundled some breaking code i was working on, reverted.
 

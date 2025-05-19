@@ -11,3 +11,20 @@ class TypeHandler<T> {
 
   bool shouldHandle(dynamic item) => item is T;
 }
+
+/// TypeHandler for Future<void> (no-op, response already sent)
+TypeHandler<Future<void>> get futureVoidTypeHandler =>
+    TypeHandler<Future<void>>(
+        (HttpRequest req, HttpResponse res, Future<void> value) async {
+      // Await the future to ensure completion, but do nothing else.
+      await value;
+      return true; // Indicate handled
+    });
+
+/// TypeHandler for HttpResponse (no-op, response already sent)
+TypeHandler<HttpResponse> get httpResponseTypeHandler =>
+    TypeHandler<HttpResponse>(
+        (HttpRequest req, HttpResponse res, HttpResponse value) {
+      // Do nothing, response is already sent
+      return true; // Indicate handled
+    });

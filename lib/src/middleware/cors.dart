@@ -16,7 +16,7 @@ FutureOr Function(HttpRequest, HttpResponse) cors(
     res.headers.set('Access-Control-Expose-Headers', headers);
     res.headers.set('Access-Control-Max-Age', age);
     if (req.method == 'OPTIONS') {
-      res.close();
+      return res.close();
     }
   };
 }
