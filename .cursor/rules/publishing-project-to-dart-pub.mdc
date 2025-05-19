@@ -1,0 +1,17 @@
+---
+description: A checklist for publishing the project to dart pub
+globs: 
+alwaysApply: false
+---
+# Checklist for Publishing to Dart Pub
+
+1. Ensure all code changes are complete and tested.
+2. Bump the version in pubspec.yaml (follow semantic versioning).
+3. Update CHANGELOG.md (latest entry at the top, summarize changes).
+4. Stage and commit all changes (including pubspec.yaml and CHANGELOG.md) with a conventional commit message.
+5. Run `dart pub publish --dry-run` to verify package validity and clean git state.
+6. Fix any issues or warnings from the dry-run.
+7. Run all tests and ensure they pass.
+8. Push changes to the remote repository (if applicable).
+9. Run `dart pub publish` to publish the package.
+10. Verify the package is live on pub.dev.
